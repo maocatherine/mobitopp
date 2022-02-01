@@ -31,9 +31,10 @@ public class GraphFromVisumNetwork implements Graph {
 				mivConnectorValidation(carSystemFrom(visum)), LinkFromVisumLink::new,
 				NodeFromVisumNode::new, NodeFromVisumZone::new);
 	}
-	
+
+	// This is called from ValidateLinks.java line 29. Call the method in line 57.
 	GraphFromVisumNetwork(VisumRoadNetwork visum, VisumZoneNodeFactory zoneFactory) {
-		this(visum, mivLinkValidation(carSystemFrom(visum)),
+   		this(visum, mivLinkValidation(carSystemFrom(visum)),
 				mivConnectorValidation(carSystemFrom(visum)), LinkFromVisumLink::new,
 				NodeFromVisumNode::new, zoneFactory);
 	}
@@ -47,9 +48,12 @@ public class GraphFromVisumNetwork implements Graph {
 	}
 	
 	protected static VisumTransportSystem carSystemFrom(VisumRoadNetwork visum) {
-		return visum.getTransportSystem("P");
+		return visum.getTransportSystem("CAR");
 	}
 
+	/*
+	 * This class converts the visum file to graph.
+	 */
 	public GraphFromVisumNetwork(
 			VisumRoadNetwork network, Function<VisumOrientedLink, Boolean> linkValidation,
 			Function<VisumConnector, Boolean> connectorValidation, VisumLinkFactory linkFactory,
@@ -71,6 +75,7 @@ public class GraphFromVisumNetwork implements Graph {
 		allNodes = tmp.toArray(new Node[0]);
 	}
 
+	//Returns links in which car is available.
 	private static Function<VisumOrientedLink, Boolean> mivLinkValidation(
 			VisumTransportSystem carSystem) {
 		return link -> link.transportSystems.contains(carSystem) && link.attributes.capacityCar > 0.0f;
