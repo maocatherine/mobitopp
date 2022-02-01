@@ -40,7 +40,7 @@ public class CsvConverter implements TripConverter {
 		String destination = destinationId.getExternalId();
 		float distance = impedance.getDistance(originId, destinationId);
 
-		double distance_km = distance / 1000.0;
+		double distance_km = distance;
 
 		Household hh = person.household();
 
