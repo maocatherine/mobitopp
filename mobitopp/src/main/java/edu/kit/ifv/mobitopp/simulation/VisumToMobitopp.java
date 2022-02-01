@@ -11,9 +11,9 @@ import lombok.ToString;
 @NoArgsConstructor
 public class VisumToMobitopp {
 
-	private String carTransportSystemCode = "P";
-	private String ptTransportSystemCode = "PUTW";
-	private String individualWalkTransportSystemCode = "FUSS";
-	private String ptWalkTransportSystemCode = "F";
+	private String carTransportSystemCode = "CAR";
+	private String ptTransportSystemCode = "BUS";
+	private String individualWalkTransportSystemCode = "PED";
+	private String ptWalkTransportSystemCode = "PUTW";
 
 }
