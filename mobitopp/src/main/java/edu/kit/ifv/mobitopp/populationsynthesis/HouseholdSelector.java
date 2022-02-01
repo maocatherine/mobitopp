@@ -12,135 +12,132 @@ import edu.kit.ifv.mobitopp.util.panel.HouseholdOfPanelDataId;
 
 class HouseholdSelector implements HouseholdSelectorIfc {
 
-	private final Random randomizer;
+    private final Random randomizer;
 
-	public HouseholdSelector(long randomSeed) {
-		randomizer = new Random(randomSeed);
-	}
-
-
-	public List<HouseholdOfPanelDataId> selectHouseholds(
-		List<HouseholdOfPanelDataId> householdOfPanelDataIds,
-		int amount
-	) {
-		List<HouseholdOfPanelDataId> households = new ArrayList<HouseholdOfPanelDataId>();
-
-		Map<HouseholdOfPanelDataId, Double> weightedHH = rescaleWeightsList(householdOfPanelDataIds, amount);
-
-		int selected=0;
-
-		for (HouseholdOfPanelDataId hhId : weightedHH.keySet()) {
-
-			double weight = weightedHH.get(hhId);
-			int count = (int) Math.floor(weight);
-			double rest = weight-count;
-		
-			for (int i=0; i<count	; i++) {
-				households.add(hhId);
-				selected++;
-			}
-
-			hhId.set_weight(rest);
-		}
+    public HouseholdSelector(long randomSeed) {
+        randomizer = new Random(randomSeed);
+    }
 
 
-		SortedMap<Double, HouseholdOfPanelDataId> cumulativeWeightDistribution 
-					= createCumulativeWeightDistribution(householdOfPanelDataIds);
+    public List<HouseholdOfPanelDataId> selectHouseholds(
+            List<HouseholdOfPanelDataId> householdOfPanelDataIds,
+            int amount
+    ) {
+        List<HouseholdOfPanelDataId> households = new ArrayList<HouseholdOfPanelDataId>();
 
-		if (cumulativeWeightDistribution.size() > 0) {	
-			for (int i = 0; i < amount-selected; i++) {
+        Map<HouseholdOfPanelDataId, Double> weightedHH = rescaleWeightsList(householdOfPanelDataIds, amount);
 
-				HouseholdOfPanelDataId householdOfPanelData = pickHouseholdRandomly(cumulativeWeightDistribution);
-		
-				households.add(householdOfPanelData);
-			}
-		}
+        int selected = 0;
 
-		return households;
-	}
+        for (HouseholdOfPanelDataId hhId : weightedHH.keySet()) {
 
-	private double sumWeights(List<HouseholdOfPanelDataId> householdOfPanelDataIds) {
+            double weight = weightedHH.get(hhId);
+            int count = (int) Math.floor(weight);
+            double rest = weight - count;
 
-		double total_weight = 0.0;
+            for (int i = 0; i < count; i++) {
+                households.add(hhId);
+                selected++;
+            }
 
-		for (HouseholdOfPanelDataId aHouseholdId : householdOfPanelDataIds) {
+            hhId.set_weight(rest);
+        }
 
-			total_weight += aHouseholdId.get_weight();
-		}
+        SortedMap<Double, HouseholdOfPanelDataId> cumulativeWeightDistribution
+                = createCumulativeWeightDistribution(householdOfPanelDataIds);
 
-		return total_weight;
-	}
+        if (cumulativeWeightDistribution.size() > 0) {
+            for (int i = 0; i < amount - selected; i++) {
 
-	private Map<HouseholdOfPanelDataId, Double> rescaleWeightsList(
-		List<HouseholdOfPanelDataId> householdOfPanelDataIds,
-		int numberOfHouseholds
-	) {
+                HouseholdOfPanelDataId householdOfPanelData = pickHouseholdRandomly(cumulativeWeightDistribution);
 
-		double totalWeight = sumWeights(householdOfPanelDataIds);
-		double rescale = numberOfHouseholds/totalWeight;
+                households.add(householdOfPanelData);
+            }
+        }
 
-		Map<HouseholdOfPanelDataId, Double> result = new LinkedHashMap<HouseholdOfPanelDataId, Double>();
+        return households;
+    }
 
-		for (HouseholdOfPanelDataId aHouseholdId : householdOfPanelDataIds) {
+    private double sumWeights(List<HouseholdOfPanelDataId> householdOfPanelDataIds) {
 
-			double weight = aHouseholdId.get_weight() * rescale;
-			result.put(aHouseholdId,weight);
-		}
+        double total_weight = 0.0;
 
-		return result;
-	}
+        for (HouseholdOfPanelDataId aHouseholdId : householdOfPanelDataIds) {
 
+            total_weight += aHouseholdId.get_weight();
+        }
 
-	private SortedMap<Double, HouseholdOfPanelDataId> createCumulativeWeightDistribution(
-		List<HouseholdOfPanelDataId> householdIds_
-	) 
-	{
+        return total_weight;
+    }
 
-		SortedMap<Double, HouseholdOfPanelDataId> 
-			cumulativeDistribution = new TreeMap<Double, HouseholdOfPanelDataId>();
+    private Map<HouseholdOfPanelDataId, Double> rescaleWeightsList(
+            List<HouseholdOfPanelDataId> householdOfPanelDataIds,
+            int numberOfHouseholds
+    ) {
 
+        double totalWeight = sumWeights(householdOfPanelDataIds);
+        double rescale = numberOfHouseholds / totalWeight;
 
-		double total_weight = 0.0;
+        Map<HouseholdOfPanelDataId, Double> result = new LinkedHashMap<HouseholdOfPanelDataId, Double>();
 
-		for (HouseholdOfPanelDataId aHouseholdId : householdIds_) {
+        for (HouseholdOfPanelDataId aHouseholdId : householdOfPanelDataIds) {
 
-			total_weight += aHouseholdId.get_weight();
-		}
+            double weight = aHouseholdId.get_weight() * rescale;
+            result.put(aHouseholdId, weight);
+        }
 
-		double cumulative_weight = 0.0;
-		for (HouseholdOfPanelDataId aHouseholdId : householdIds_) {
-			cumulative_weight += aHouseholdId.get_weight()/total_weight;
-
-			if (aHouseholdId.get_weight() > 0.0) {
-				cumulativeDistribution.put(new Double(cumulative_weight), aHouseholdId);
-			}
-		}
-
-		return cumulativeDistribution;
-	}
+        return result;
+    }
 
 
+    private SortedMap<Double, HouseholdOfPanelDataId> createCumulativeWeightDistribution(
+            List<HouseholdOfPanelDataId> householdIds_
+    ) {
 
-	private HouseholdOfPanelDataId pickHouseholdRandomly(
-		SortedMap<Double, HouseholdOfPanelDataId> cumulativeWeightDistribution
-	) {
+        SortedMap<Double, HouseholdOfPanelDataId>
+                cumulativeDistribution = new TreeMap<Double, HouseholdOfPanelDataId>();
 
-		double index = this.randomizer.nextFloat();
 
-		SortedMap<Double, HouseholdOfPanelDataId> tail = cumulativeWeightDistribution.tailMap(index);
+        double total_weight = 0.0;
 
-		Double key;
-		HouseholdOfPanelDataId aHouseholdId;
+        for (HouseholdOfPanelDataId aHouseholdId : householdIds_) {
 
-		if (tail.size() > 0) {
-			key = tail.firstKey();
-			aHouseholdId = tail.get(new Double(key));
-		} else {
-			key = cumulativeWeightDistribution.lastKey();
-			aHouseholdId = cumulativeWeightDistribution.get(new Double(key));
-		}
+            total_weight += aHouseholdId.get_weight();
+        }
 
-		return aHouseholdId;
-	}
+        double cumulative_weight = 0.0;
+        for (HouseholdOfPanelDataId aHouseholdId : householdIds_) {
+            cumulative_weight += aHouseholdId.get_weight() / total_weight;
+
+            if (aHouseholdId.get_weight() > 0.0) {
+                cumulativeDistribution.put(new Double(cumulative_weight), aHouseholdId);
+            }
+        }
+
+        return cumulativeDistribution;
+    }
+
+
+    private HouseholdOfPanelDataId pickHouseholdRandomly(
+            SortedMap<Double, HouseholdOfPanelDataId> cumulativeWeightDistribution
+    ) {
+
+        double index = this.randomizer.nextFloat();
+
+        SortedMap<Double, HouseholdOfPanelDataId> tail = cumulativeWeightDistribution.tailMap(index);
+
+        Double key;
+        HouseholdOfPanelDataId aHouseholdId;
+
+        if (tail.size() > 0) {
+            key = tail.firstKey();
+            aHouseholdId = tail.get(new Double(key));
+        } else {
+            key = cumulativeWeightDistribution.lastKey();
+            aHouseholdId = cumulativeWeightDistribution.get(new Double(key));
+        }
+
+        return aHouseholdId;
+    }
 
 }

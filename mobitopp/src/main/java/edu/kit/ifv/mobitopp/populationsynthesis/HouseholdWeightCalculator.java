@@ -23,386 +23,382 @@ import edu.kit.ifv.mobitopp.util.panel.PersonOfPanelData;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-class HouseholdWeightCalculator 
-	implements HouseholdWeightCalculatorIfc
-{
+class HouseholdWeightCalculator
+        implements HouseholdWeightCalculatorIfc {
+
+    private Map<HouseholdOfPanelDataId, HouseholdOfPanelData> households;
+    private Map<HouseholdOfPanelDataId, List<PersonOfPanelData>> persons;
+
+    private Map<Integer, Set<HouseholdOfPanelDataId>> hh_male = new TreeMap<Integer, Set<HouseholdOfPanelDataId>>();
+    private Map<Integer, Set<HouseholdOfPanelDataId>> hh_female = new TreeMap<Integer, Set<HouseholdOfPanelDataId>>();
+    private Map<Integer, Set<HouseholdOfPanelDataId>> hh_emp = new TreeMap<Integer, Set<HouseholdOfPanelDataId>>();
+
+    private boolean hh_lists_initialized = false;
+
+    private Gender nextChildGender = Gender.MALE;
+
+    public List<HouseholdOfPanelDataId> calculateWeights(
+            RangeDistributionIfc hhDistribution,
+            EmploymentDistribution empDistribution,
+            RangeDistributionIfc maleAgeDistribution,
+            RangeDistributionIfc femaleAgeDistribution,
+            List<HouseholdOfPanelDataId> householdOfPanelDataIds,
+            Map<HouseholdOfPanelDataId, HouseholdOfPanelData> households,
+            Map<HouseholdOfPanelDataId, List<PersonOfPanelData>> persons
+    ) {
+
+        this.households = households;
+        this.persons = persons;
+
+        SortedMap<Integer, Double> maleDist = normalizedDistribution(maleAgeDistribution);
+        SortedMap<Integer, Double> femaleDist = normalizedDistribution(femaleAgeDistribution);
+        SortedMap<Integer, Double> empDist = normalizedDistribution(empDistribution);
+        SortedMap<Integer, Double> hhDist = normalizedDistribution(hhDistribution);
+
+
+        if (!this.hh_lists_initialized) {
+            initHHIdLists(maleDist, femaleDist, householdOfPanelDataIds);
+            this.hh_lists_initialized = true;
+        }
+
+        for (HouseholdOfPanelDataId hhId : householdOfPanelDataIds) {
+            hhId.set_weight(1.0);
+        }
+
+        for (int i = 0; i < 20; i++) {
 
-	private Map<HouseholdOfPanelDataId,HouseholdOfPanelData> households;
-	private Map<HouseholdOfPanelDataId,List<PersonOfPanelData>> persons;
-
-	private Map<Integer,Set<HouseholdOfPanelDataId>> hh_male = new TreeMap<Integer,Set<HouseholdOfPanelDataId>>();
-	private Map<Integer,Set<HouseholdOfPanelDataId>> hh_female = new TreeMap<Integer,Set<HouseholdOfPanelDataId>>();
-	private Map<Integer,Set<HouseholdOfPanelDataId>> hh_emp = new TreeMap<Integer,Set<HouseholdOfPanelDataId>>();
-
-	private boolean hh_lists_initialized = false;
+            Map<String, SortedMap<Integer, Double>> quotients
+                    = calculateWeightedDistributions(
+                    maleDist,
+                    femaleDist,
+                    empDist,
+                    hhDist,
+                    householdOfPanelDataIds
+            );
 
-	private Gender nextChildGender = Gender.MALE;
+            adjustHouseholdWeights(
+                    quotients.get("MALE"),
+                    quotients.get("FEMALE"),
+                    quotients.get("EMP")
+            );
 
+            normalizeHHWeights(householdOfPanelDataIds);
 
+        }
+
+        return new ArrayList<HouseholdOfPanelDataId>();
+    }
+
+    private void adjustHouseholdWeights(
+            SortedMap<Integer, Double> male,
+            SortedMap<Integer, Double> female,
+            SortedMap<Integer, Double> emp
+    ) {
 
-	public List<HouseholdOfPanelDataId> calculateWeights(
-		RangeDistributionIfc hhDistribution,
-		EmploymentDistribution empDistribution,
-		RangeDistributionIfc maleAgeDistribution,
-		RangeDistributionIfc femaleAgeDistribution,
-		List<HouseholdOfPanelDataId> householdOfPanelDataIds,
-		Map<HouseholdOfPanelDataId,HouseholdOfPanelData> households,
-		Map<HouseholdOfPanelDataId,List<PersonOfPanelData>> persons
-	) {
+        for (Integer key : male.keySet()) {
+            double quotient = male.get(key);
 
-		this.households = households;
-		this.persons = persons;
-
-		SortedMap<Integer,Double> maleDist = normalizedDistribution(maleAgeDistribution);
-		SortedMap<Integer,Double> femaleDist = normalizedDistribution(femaleAgeDistribution);
-		SortedMap<Integer,Double> empDist = normalizedDistribution(empDistribution);
-		SortedMap<Integer,Double> hhDist = normalizedDistribution(hhDistribution);
-
-
-		if(!this.hh_lists_initialized) {
-			initHHIdLists(maleDist, femaleDist, householdOfPanelDataIds);
-			this.hh_lists_initialized = true;
-		}
+            if (this.hh_male.get(key) != null) {
+                for (HouseholdOfPanelDataId hhId : this.hh_male.get(key)) {
+                    double weight = hhId.get_weight();
+                    hhId.set_weight(weight * Math.sqrt(quotient));
+                }
+            }
+        }
 
-		for (HouseholdOfPanelDataId hhId : householdOfPanelDataIds) {
-			hhId.set_weight(1.0);
-		}
+        for (Integer key : female.keySet()) {
+            double quotient = female.get(key);
 
-		for (int i=0; i <20; i++) {
+            if (this.hh_female.get(key) != null) {
+                for (HouseholdOfPanelDataId hhId : this.hh_female.get(key)) {
+                    double weight = hhId.get_weight();
+                    hhId.set_weight(weight * Math.sqrt(quotient));
+                }
+            }
+        }
 
-			Map<String,SortedMap<Integer,Double>> quotients 
-				= calculateWeightedDistributions(
-						maleDist,
-						femaleDist,
-						empDist,
-						hhDist,
-						householdOfPanelDataIds
-					);
+        for (Integer key : emp.keySet()) {
+            double quotient = emp.get(key);
 
-			adjustHouseholdWeights(
-				quotients.get("MALE"),
-				quotients.get("FEMALE"),
-				quotients.get("EMP")
-			);
+            if (this.hh_emp.get(key) != null) {
+                for (HouseholdOfPanelDataId hhId : this.hh_emp.get(key)) {
+                    double weight = hhId.get_weight();
+                    hhId.set_weight(weight * Math.sqrt(quotient));
+                }
+            }
+        }
 
-			normalizeHHWeights(householdOfPanelDataIds);
+    }
 
-		}
+    private void normalizeHHWeights(List<HouseholdOfPanelDataId> householdOfPanelDataIds) {
 
+        double total = 0.0;
 
-		return new ArrayList<HouseholdOfPanelDataId>();
-	}
+        for (HouseholdOfPanelDataId hhId : householdOfPanelDataIds) {
+            total += hhId.get_weight();
+        }
 
-	private void adjustHouseholdWeights(
-		SortedMap<Integer,Double> male,
-		SortedMap<Integer,Double> female,
-		SortedMap<Integer,Double> emp
-	) {
+        for (HouseholdOfPanelDataId hhId : householdOfPanelDataIds) {
+            double weight = hhId.get_weight() / total * householdOfPanelDataIds.size();
+            hhId.set_weight(weight);
+        }
+    }
 
-		for (Integer key : male.keySet()) {
-			double quotient = male.get(key);
+    protected Map<String, SortedMap<Integer, Double>> calculateWeightedDistributions(
+            SortedMap<Integer, Double> maleDist,
+            SortedMap<Integer, Double> femaleDist,
+            SortedMap<Integer, Double> empDist,
+            SortedMap<Integer, Double> hhDist,
+            List<HouseholdOfPanelDataId> householdOfPanelDataIds
+    ) {
 
-			if (this.hh_male.get(key) != null) {
-				for (HouseholdOfPanelDataId hhId : this.hh_male.get(key)) {
-					double weight = hhId.get_weight();
-					hhId.set_weight(weight*Math.sqrt(quotient));
-				}
-			}
-		}
+        SortedMap<Integer, Double> maleCurr = initDistribution(maleDist);
+        SortedMap<Integer, Double> femaleCurr = initDistribution(femaleDist);
+        SortedMap<Integer, Double> empCurr = initDistribution(empDist);
 
-		for (Integer key : female.keySet()) {
-			double quotient = female.get(key);
+        for (HouseholdOfPanelDataId hhId : householdOfPanelDataIds) {
 
-			if (this.hh_female.get(key) != null) {
-				for (HouseholdOfPanelDataId hhId : this.hh_female.get(key)) {
-					double weight = hhId.get_weight();
-					hhId.set_weight(weight*Math.sqrt(quotient));
-				}
-			}
-		}
+            HouseholdOfPanelData hh = this.households.get(hhId);
 
-		for (Integer key : emp.keySet()) {
-			double quotient = emp.get(key);
+            double hh_weight = hhId.get_weight();
 
-			if (this.hh_emp.get(key) != null) {
-				for (HouseholdOfPanelDataId hhId : this.hh_emp.get(key)) {
-					double weight = hhId.get_weight();
-					hhId.set_weight(weight*Math.sqrt(quotient));
-				}
-			}
-		}
+            int domcode = hh.domCode();
 
-	}
+            double domcode_weight = hhDist.get(domcode);
 
-	private void normalizeHHWeights(List<HouseholdOfPanelDataId> householdOfPanelDataIds) {
+            double children = hh.numberOfNotReportingChildren();
+            incrementDistribution(maleCurr, 5, 0.5 * children * hh_weight * domcode_weight);
+            incrementDistribution(femaleCurr, 5, 0.5 * children * hh_weight * domcode_weight);
+            incrementDistribution(empCurr, 8, children * hh_weight * domcode_weight);
 
-		double total = 0.0;
+            for (PersonOfPanelData pers : this.persons.get(hhId)) {
 
-		for (HouseholdOfPanelDataId hhId : householdOfPanelDataIds) {
-			total += hhId.get_weight();
-		}
+                int age = pers.age();
+                int emp = empDistributionType(pers.getEmploymentTypeAsInt());
+                int sex = pers.getGenderTypeAsInt();
 
-		for (HouseholdOfPanelDataId hhId : householdOfPanelDataIds) {
-			double weight = hhId.get_weight() / total * householdOfPanelDataIds.size();
-			hhId.set_weight(weight);
-		}
-	}
+                incrementDistribution(empCurr, emp, hh_weight * domcode_weight);
 
-	protected Map<String,SortedMap<Integer,Double>> calculateWeightedDistributions(
-		SortedMap<Integer,Double> maleDist,
-		SortedMap<Integer,Double> femaleDist,
-		SortedMap<Integer,Double> empDist,
-		SortedMap<Integer,Double> hhDist,
-		List<HouseholdOfPanelDataId> householdOfPanelDataIds
-	) {
+                if (sex == 1) {
+                    incrementDistribution(maleCurr, age, hh_weight * domcode_weight);
+                } else if (sex == 2) {
+                    incrementDistribution(femaleCurr, age, hh_weight * domcode_weight);
+                } else {
+                    throwIncorrectGenderFor(pers);
+                }
 
-		SortedMap<Integer,Double> maleCurr = initDistribution(maleDist);
-		SortedMap<Integer,Double> femaleCurr = initDistribution(femaleDist);
-		SortedMap<Integer,Double> empCurr = initDistribution(empDist);
+            }
+        }
 
-		for (HouseholdOfPanelDataId hhId : householdOfPanelDataIds) {
+        Map<String, SortedMap<Integer, Double>> result = new TreeMap<String, SortedMap<Integer, Double>>();
 
-			HouseholdOfPanelData hh = this.households.get(hhId);
+        result.put("MALE", calcQuotient(maleDist, normalizedDistribution(maleCurr)));
+        result.put("FEMALE", calcQuotient(femaleDist, normalizedDistribution(femaleCurr)));
+        result.put("EMP", calcQuotient(empDist, normalizedDistribution(empCurr)));
 
-			double hh_weight = hhId.get_weight();
+        return result;
+    }
 
-			int domcode = hh.domCode();
 
-			double domcode_weight = hhDist.get(domcode);
+    private SortedMap<Integer, Double> normalizedDistribution(RangeDistributionIfc distribution) {
 
-			double children = hh.numberOfNotReportingChildren();
-			incrementDistribution(maleCurr, 5, 0.5*children*hh_weight*domcode_weight);
-			incrementDistribution(femaleCurr, 5, 0.5*children*hh_weight*domcode_weight);
-			incrementDistribution(empCurr, 8, children*hh_weight*domcode_weight);
+        SortedMap<Integer, Double> data = new TreeMap<Integer, Double>();
 
-			for (PersonOfPanelData pers : this.persons.get(hhId)) {
+        double total = distribution.getTotalAmount();
 
-				int age = pers.age();
-				int emp = empDistributionType(pers.getEmploymentTypeAsInt());
-				int sex = pers.getGenderTypeAsInt();
+        for (RangeDistributionItem item :
+                (Collection<RangeDistributionItem>) distribution.getItems()) {
 
-				incrementDistribution(empCurr, emp, hh_weight*domcode_weight);
+            double new_val = Math.max(item.amount() / total, 0.001d);
 
-				if (sex == 1) {
-					incrementDistribution(maleCurr, age, hh_weight*domcode_weight);
-				} else if (sex ==2) {
-					incrementDistribution(femaleCurr, age, hh_weight*domcode_weight);
-				} else {
-							throwIncorrectGenderFor(pers);
-				}
+            data.put(item.upperBound(), new_val);
+        }
 
-			}
-		}
+        return data;
+    }
 
-		Map<String,SortedMap<Integer,Double>> result = new TreeMap<String,SortedMap<Integer,Double>>();
+    private SortedMap<Integer, Double> normalizedDistribution(EmploymentDistribution distribution) {
 
-		result.put("MALE",  calcQuotient(maleDist, normalizedDistribution(maleCurr)));
-		result.put("FEMALE", calcQuotient(femaleDist, normalizedDistribution(femaleCurr)));
-		result.put("EMP", calcQuotient(empDist, normalizedDistribution(empCurr)));
+        SortedMap<Integer, Double> data = new TreeMap<Integer, Double>();
 
-		return result;
-	}
+        double total = distribution.getTotalAmount();
 
+        for (EmploymentDistributionItem item :
+                (Collection<EmploymentDistributionItem>) distribution.getItems()) {
 
-	private SortedMap<Integer,Double> normalizedDistribution(RangeDistributionIfc distribution) {
+            double new_val = Math.max(item.amount() / total, 0.001d);
 
-		SortedMap<Integer,Double> data = new TreeMap<Integer,Double>();
+            data.put(item.getTypeAsInt(), new_val);
+        }
 
-		double total = distribution.getTotalAmount();
+        return data;
+    }
 
-		for (RangeDistributionItem item:
-					(Collection<RangeDistributionItem>) distribution.getItems()) {
+    private SortedMap<Integer, Double> normalizedDistribution(Map<Integer, Double> distribution) {
 
-			double new_val =  Math.max(item.amount()/total,0.001d);
+        SortedMap<Integer, Double> data = new TreeMap<Integer, Double>();
 
-			data.put(item.upperBound(),new_val);
-		}
+        double total = 0.0;
 
-		return data;
-	}
+        for (Integer key : distribution.keySet()) {
+            total += distribution.get(key);
+        }
 
-	private SortedMap<Integer,Double> normalizedDistribution(EmploymentDistribution distribution) {
 
-		SortedMap<Integer,Double> data = new TreeMap<Integer,Double>();
+        for (Integer key : distribution.keySet()) {
 
-		double total = distribution.getTotalAmount();
+            double val = distribution.get(key);
 
-		for (EmploymentDistributionItem item:
-					(Collection<EmploymentDistributionItem>) distribution.getItems()) {
+            if (total != 0.0) {
+                data.put(key, val / total);
+            } else {
+                data.put(key, 0.0);
+            }
 
-			double new_val =  Math.max(item.amount()/total,0.001d);
+        }
 
-			data.put(item.getTypeAsInt(),new_val);
-		}
+        return data;
+    }
 
-		return data;
-	}
+    private SortedMap<Integer, Double> initDistribution(Map<Integer, Double> dist) {
 
-	private SortedMap<Integer,Double> normalizedDistribution(Map<Integer,Double> distribution) {
+        SortedMap<Integer, Double> data = new TreeMap<Integer, Double>();
 
-		SortedMap<Integer,Double> data = new TreeMap<Integer,Double>();
+        for (Integer key : dist.keySet()) {
 
-		double total = 0.0;
+            data.put(key, 0.0);
+        }
 
-		for (Integer key : distribution.keySet()) {
-			total += distribution.get(key);
-		}
+        return data;
+    }
 
+    private void incrementDistribution(SortedMap<Integer, Double> distribution, Integer key, double value) {
+        SortedMap<Integer, Double> tail = distribution.tailMap(key);
+        Integer dist_key;
 
-		for (Integer key : distribution.keySet()) {
+        if (!tail.isEmpty()) {
+            dist_key = tail.firstKey();
+        } else {
+            dist_key = distribution.lastKey();
+        }
+        distribution.put(dist_key, distribution.get(dist_key) + value);
+    }
 
-			double val = distribution.get(key);
+    private int empDistributionType(int val) {
 
-			if (total != 0.0) {
-				data.put(key, val/total);
-			} else {
-				data.put(key, 0.0);
-			}
-			
-		}
+        switch (val) {
+            case 1:
+            case 2:
+            case 4:
+            case 40:
+            case 41:
+            case 42:
+            case 5:
+            case 7:
+            case 8:
+                return val;
+            case 3:
+            case 6:
+                return 9;
+            default:
+                return 0;
+        }
 
-		return data;
-	}
+    }
 
-	private SortedMap<Integer,Double> initDistribution(Map<Integer,Double> dist) {
+    private SortedMap<Integer, Double> calcQuotient(Map<Integer, Double> dist1, Map<Integer, Double> dist2) {
 
-		SortedMap<Integer,Double> data = new TreeMap<Integer,Double>();
+        SortedMap<Integer, Double> quotient = new TreeMap<Integer, Double>();
 
-		for (Integer key : dist.keySet()) {
+        for (Integer key : dist1.keySet()) {
+            double val1 = dist1.get(key);
+            double val2 = dist2.get(key);
 
-			data.put(key,0.0);
-		}
 
-		return data;
-	}
+            quotient.put(key, val1 / val2);
+        }
 
-	private void incrementDistribution(SortedMap<Integer,Double> distribution, Integer key, double value) {
-		SortedMap<Integer,Double> tail = distribution.tailMap(key);
-		Integer dist_key;
+        return quotient;
+    }
 
-		if (!tail.isEmpty()) {
-			dist_key = tail.firstKey();
-		} else {
-			dist_key = distribution.lastKey();
-		}
-		distribution.put(dist_key, distribution.get(dist_key)+value);
-	}
+    private void initHHIdLists(
+            SortedMap<Integer, Double> maleAgeDistribution,
+            SortedMap<Integer, Double> femaleAgeDistribution,
+            List<HouseholdOfPanelDataId> householdOfPanelDataIds
+    ) {
 
-	private int empDistributionType(int val) {
+        for (HouseholdOfPanelDataId hhId : householdOfPanelDataIds) {
 
-		switch(val) {
-			case 1:
-			case 2:
-			case 40:
-			case 41:
-			case 42:
-			case 5:
-			case 7:
-			case 8:
-				return val;
-			case 3:
-			case 6:
-				return 9;
-			default:
-				return 0;
-		}
+            for (PersonOfPanelData pers : this.persons.get(hhId)) {
 
-	}
+                int age = pers.age();
+                int emp = empDistributionType(pers.getEmploymentTypeAsInt());
+                int sex = pers.getGenderTypeAsInt();
 
-	private SortedMap<Integer,Double> calcQuotient(Map<Integer,Double> dist1, Map<Integer,Double> dist2) {
+                if (!this.hh_emp.containsKey(emp)) {
+                    this.hh_emp.put(emp, new TreeSet<HouseholdOfPanelDataId>());
+                }
 
-		SortedMap<Integer,Double> quotient = new TreeMap<Integer,Double>();
+                this.hh_emp.get(emp).add(hhId);
 
-		for (Integer key : dist1.keySet()) {
-			double val1 = dist1.get(key);
-			double val2 = dist2.get(key);
+                if (sex == 1) {
+                    addToHHList(this.hh_male, age, hhId, maleAgeDistribution);
+                } else if (sex == 2) {
+                    addToHHList(this.hh_female, age, hhId, femaleAgeDistribution);
+                } else {
+                    throwIncorrectGenderFor(pers);
+                }
+            }
 
+            int emp = Employment.INFANT.getTypeAsInt();
 
-			quotient.put(key, val1/val2);
-		}
+            if (!this.hh_emp.containsKey(emp)) {
+                this.hh_emp.put(emp, new TreeSet<HouseholdOfPanelDataId>());
+            }
 
-		return quotient;
-	}
+            HouseholdOfPanelData hh = this.households.get(hhId);
 
-	private void initHHIdLists(
-		SortedMap<Integer,Double> maleAgeDistribution,
-		SortedMap<Integer,Double> femaleAgeDistribution,
-		List<HouseholdOfPanelDataId> householdOfPanelDataIds
-	) {
+            for (int i = 0; i < hh.numberOfNotReportingChildren(); i++) {
 
-		for (HouseholdOfPanelDataId hhId : householdOfPanelDataIds) {
+                this.hh_emp.get(emp).add(hhId);
 
-			for (PersonOfPanelData pers : this.persons.get(hhId)) {
+                if (this.nextChildGender == Gender.MALE) {
+                    addToHHList(this.hh_male, 5, hhId, maleAgeDistribution);
+                    this.nextChildGender = Gender.FEMALE;
+                } else {
+                    addToHHList(this.hh_female, 5, hhId, femaleAgeDistribution);
+                    this.nextChildGender = Gender.MALE;
+                }
+            }
+        }
+    }
 
-				int age = pers.age();
-				int emp = empDistributionType(pers.getEmploymentTypeAsInt());
-				int sex = pers.getGenderTypeAsInt();
+    private void throwIncorrectGenderFor(PersonOfPanelData pers) {
+        throw warn(new IllegalArgumentException("Incorrect gender for person: " + pers), log);
+    }
 
-				if (!this.hh_emp.containsKey(emp)) {
-					this.hh_emp.put(emp, new TreeSet<HouseholdOfPanelDataId>());
-				}
+    private void addToHHList(
+            Map<Integer, Set<HouseholdOfPanelDataId>> hh_list,
+            Integer key,
+            HouseholdOfPanelDataId hhId,
+            SortedMap<Integer, Double> distribution
+    ) {
 
-				this.hh_emp.get(emp).add(hhId);
+        SortedMap<Integer, Double> tail = distribution.tailMap(key);
 
-				if (sex == 1) {
-					addToHHList(this.hh_male, age, hhId, maleAgeDistribution);
-				} else if (sex ==2) {
-					addToHHList(this.hh_female, age, hhId, femaleAgeDistribution);
-				} else {
-					throwIncorrectGenderFor(pers);
-				}
-			}
+        Integer dist_key;
 
-			int emp = Employment.INFANT.getTypeAsInt();
+        if (!tail.isEmpty()) {
+            dist_key = tail.firstKey();
+        } else {
+            dist_key = distribution.lastKey();
+        }
 
-			if (!this.hh_emp.containsKey(emp)) {
-				this.hh_emp.put(emp, new TreeSet<HouseholdOfPanelDataId>());
-			}
+        if (!hh_list.containsKey(dist_key)) {
+            hh_list.put(dist_key, new TreeSet<HouseholdOfPanelDataId>());
+        }
+        hh_list.get(dist_key).add(hhId);
 
-			HouseholdOfPanelData hh = this.households.get(hhId);
-
-			for (int i=0; i<= hh.numberOfNotReportingChildren(); i++) {
-			
-				this.hh_emp.get(emp).add(hhId);
-			
-				if (this.nextChildGender == Gender.MALE) {
-					addToHHList(this.hh_male, 5, hhId, maleAgeDistribution);
-					this.nextChildGender = Gender.FEMALE;
-				} else {
-					addToHHList(this.hh_female, 5, hhId, femaleAgeDistribution);
-					this.nextChildGender = Gender.MALE;
-				}
-			}
-		}
-	}
-
-	private void throwIncorrectGenderFor(PersonOfPanelData pers) {
-		throw warn(new IllegalArgumentException("Incorrect gender for person: " + pers), log);
-	}
-
-	private void addToHHList(
-		Map<Integer,Set<HouseholdOfPanelDataId>> hh_list,
-		Integer key,
-		HouseholdOfPanelDataId hhId,
-		SortedMap<Integer,Double> distribution
-	) {
-
-		SortedMap<Integer,Double> tail = distribution.tailMap(key);
-
-		Integer dist_key;
-
-		if (!tail.isEmpty()) {
-			dist_key = tail.firstKey();
-		} else {
-			dist_key = distribution.lastKey();
-		}
-
-		if (!hh_list.containsKey(dist_key)) {
-			hh_list.put(dist_key, new TreeSet<HouseholdOfPanelDataId>());
-		}
-		hh_list.get(dist_key).add(hhId);
-
-	}
-
+    }
 
 }

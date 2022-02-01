@@ -53,7 +53,9 @@ public class InMemoryHouseholds {
 
 	public List<HouseholdOfPanelDataId> getHouseholdIds(int domCodeType) {
 		List<HouseholdOfPanelDataId> ids = domCodes.get(domCodeType);
-		Collections.sort(ids);
+		if (ids != null) {
+			Collections.sort(ids);
+		}
 		return ids;
 	}
 

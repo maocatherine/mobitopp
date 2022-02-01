@@ -17,47 +17,47 @@ import edu.kit.ifv.mobitopp.util.panel.PersonOfPanelDataId;
 
 public class InMemoryPersons {
 
-  private final Map<HouseholdOfPanelDataId, List<PersonOfPanelData>> households;
-  private final Map<PersonOfPanelDataId, PersonOfPanelData> persons;
+    private final Map<HouseholdOfPanelDataId, List<PersonOfPanelData>> households;
+    private final Map<PersonOfPanelDataId, PersonOfPanelData> persons;
 
-  private InMemoryPersons(
-      Map<HouseholdOfPanelDataId, List<PersonOfPanelData>> households,
-      Map<PersonOfPanelDataId, PersonOfPanelData> persons) {
-    super();
-    this.households = households;
-    this.persons = persons;
-  }
-
-  public static InMemoryPersons createFrom(List<PersonOfPanelData> persons) {
-    Map<PersonOfPanelDataId, PersonOfPanelData> personMapping = mapIdsOf(persons);
-    Map<HouseholdOfPanelDataId, List<PersonOfPanelData>> households = mapHouseholdsOf(persons);
-    return new InMemoryPersons(households, personMapping);
-  }
-
-  private static Map<PersonOfPanelDataId, PersonOfPanelData> mapIdsOf(
-      List<PersonOfPanelData> persons) {
-    return persons.stream().collect(toMap(PersonOfPanelData::getId, Function.identity()));
-  }
-
-  private static LinkedHashMap<HouseholdOfPanelDataId, List<PersonOfPanelData>> mapHouseholdsOf(
-      List<PersonOfPanelData> persons) {
-    LinkedHashMap<HouseholdOfPanelDataId, List<PersonOfPanelData>> assigned = new LinkedHashMap<>();
-    for (PersonOfPanelData person : persons) {
-      HouseholdOfPanelDataId householdId = person.getId().getHouseholdId();
-      assigned.computeIfAbsent(householdId, k -> new ArrayList<>());
-      assigned.merge(householdId, asList(person), mergeLists());
+    private InMemoryPersons(
+            Map<HouseholdOfPanelDataId, List<PersonOfPanelData>> households,
+            Map<PersonOfPanelDataId, PersonOfPanelData> persons) {
+        super();
+        this.households = households;
+        this.persons = persons;
     }
-    return assigned;
-  }
 
-  public List<PersonOfPanelData> getPersonsOfHousehold(HouseholdOfPanelDataId id) {
-    List<PersonOfPanelData> persons = this.households.get(id);
-    Collections.sort(persons);
-    return persons;
-  }
+    public static InMemoryPersons createFrom(List<PersonOfPanelData> persons) {
+        Map<PersonOfPanelDataId, PersonOfPanelData> personMapping = mapIdsOf(persons);
+        Map<HouseholdOfPanelDataId, List<PersonOfPanelData>> households = mapHouseholdsOf(persons);
+        return new InMemoryPersons(households, personMapping);
+    }
 
-  public PersonOfPanelData getPerson(PersonOfPanelDataId id) {
-    return persons.get(id);
-  }
+    private static Map<PersonOfPanelDataId, PersonOfPanelData> mapIdsOf(
+            List<PersonOfPanelData> persons) {
+        return persons.stream().collect(toMap(PersonOfPanelData::getId, Function.identity()));
+    }
+
+    private static LinkedHashMap<HouseholdOfPanelDataId, List<PersonOfPanelData>> mapHouseholdsOf(
+            List<PersonOfPanelData> persons) {
+        LinkedHashMap<HouseholdOfPanelDataId, List<PersonOfPanelData>> assigned = new LinkedHashMap<>();
+        for (PersonOfPanelData person : persons) {
+            HouseholdOfPanelDataId householdId = person.getId().getHouseholdId();
+            assigned.computeIfAbsent(householdId, k -> new ArrayList<>());
+            assigned.merge(householdId, asList(person), mergeLists());
+        }
+        return assigned;
+    }
+
+    public List<PersonOfPanelData> getPersonsOfHousehold(HouseholdOfPanelDataId id) {
+        List<PersonOfPanelData> persons = this.households.get(id);
+        Collections.sort(persons);
+        return persons;
+    }
+
+    public PersonOfPanelData getPerson(PersonOfPanelDataId id) {
+        return persons.get(id);
+    }
 
 }
