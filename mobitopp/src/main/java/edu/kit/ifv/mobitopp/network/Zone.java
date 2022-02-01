@@ -23,362 +23,363 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Zone implements Serializable {
 
-	private static final long serialVersionUID = 6726608239268453865L;
-	
-	/** Industrial, commercial, public, military and private unit **/
-	private static final String industrialAreaType = "12100";
-	private static final List<String> residentialAreaTypes = new ArrayList<String>();
+    private static final long serialVersionUID = 6726608239268453865L;
 
-	static {
-			residentialAreaTypes.add("11100"); // Continuous Urban Fabric (S.L. > 80%)
-			residentialAreaTypes.add("11210"); // Discontinuous Dense Urban Fabric (S.L. : 50% -  80%)
-			residentialAreaTypes.add("11220"); // Discontinuous Medium Density Urban Fabric (S.L. : 30% - 50%)
-			residentialAreaTypes.add("11230"); // Discontinuous Low Density Urban Fabric (S.L. : 10% - 30%)
-			residentialAreaTypes.add("11240"); // Discontinuous Very Low Density Urban Fabric (S.L. < 10%)
-			residentialAreaTypes.add("11300"); // Isolated Structures
-	}
+    /**
+     * Industrial, commercial, public, military and private unit
+     **/
+    private static final String industrialAreaType = "12100";
+    private static final List<String> residentialAreaTypes = new ArrayList<String>();
 
-	private final SimpleRoadNetwork network;
-	private final VisumZone vZone; 
-	private	final VisumSurface surface;
+    static {
+        residentialAreaTypes.add("11100"); // Continuous Urban Fabric (S.L. > 80%)
+        residentialAreaTypes.add("11210"); // Discontinuous Dense Urban Fabric (S.L. : 50% -  80%)
+        residentialAreaTypes.add("11220"); // Discontinuous Medium Density Urban Fabric (S.L. : 30% - 50%)
+        residentialAreaTypes.add("11230"); // Discontinuous Low Density Urban Fabric (S.L. : 10% - 30%)
+        residentialAreaTypes.add("11240"); // Discontinuous Very Low Density Urban Fabric (S.L. < 10%)
+        residentialAreaTypes.add("11300"); // Isolated Structures
+    }
 
-	private final	Point2D center;
-	private final ZoneArea residentialArea;
-	private final ZoneArea totalArea;
-	private final Map<String,ZoneArea> zoneAreasByLanduse;
-	private final List<Edge> intersectingEdges;
+    private final SimpleRoadNetwork network;
+    private final VisumZone vZone;
+    private final VisumSurface surface;
 
-	public Zone(SimpleRoadNetwork network, VisumRoadNetwork visumNetwork, VisumZone vZone) {
-		this.network = network;
-		this.vZone = vZone;
-		this.surface = visumNetwork.areas.get(vZone.areaId);
-		this.totalArea = new ZoneArea(surface.area());
+    private final Point2D center;
+    private final ZoneArea residentialArea;
+    private final ZoneArea totalArea;
+    private final Map<String, ZoneArea> zoneAreasByLanduse;
+    private final List<Edge> intersectingEdges;
 
-		final Map<String,Area> areasByLanduse = calculateAreasByLanduse(visumNetwork.territories);
+    public Zone(SimpleRoadNetwork network, VisumRoadNetwork visumNetwork, VisumZone vZone) {
+        this.network = network;
+        this.vZone = vZone;
+        this.surface = visumNetwork.areas.get(vZone.areaId);
+        this.totalArea = new ZoneArea(surface.area());
 
-		this.zoneAreasByLanduse = asZoneAreas(areasByLanduse);
-		this.residentialArea = calculateResidentialArea(this.surface, areasByLanduse);
+        final Map<String, Area> areasByLanduse = calculateAreasByLanduse(visumNetwork.territories);
 
-		this.intersectingEdges = this.totalArea.filterIntersectingEdges(this.network.edges());
-		this.center = vZone.coord.asPoint2D();
-	}
+        this.zoneAreasByLanduse = asZoneAreas(areasByLanduse);
+        this.residentialArea = calculateResidentialArea(this.surface, areasByLanduse);
 
+        this.intersectingEdges = this.totalArea.filterIntersectingEdges(this.network.edges());
+        this.center = vZone.coord.asPoint2D();
+    }
 
-	public Integer id() {
-		return vZone.id;
-	}
 
-	public ZoneArea residentialArea() {
+    public Integer id() {
+        return vZone.id;
+    }
 
-		return residentialArea;
-	}
-
-	public ZoneArea totalArea() {
-
-		return totalArea;
-	}
-	
-	public boolean contains(Point2D point) {
-		return totalArea.contains(point);
-	}
-
-	public boolean isExternal() {
-
-		String id = id().toString();
-
-		return id.length() > 5 && Integer.valueOf(id.substring(0,1)) < 7;
-	}
-
-	public boolean isOuter() {
-	
-		String id = id().toString();
-
-		return id.length() > 5 && Integer.valueOf(id.substring(0,1)) >= 7;
-	}
+    public ZoneArea residentialArea() {
 
-	public Point2D center() {
+        return residentialArea;
+    }
 
-		return new Point2D.Double(this.center.getX(), this.center.getY());
-	}
+    public ZoneArea totalArea() {
 
+        return totalArea;
+    }
 
-	private ZoneArea calculateResidentialArea(VisumSurface surface, Map<String,Area> areasByLanduse) {
+    public boolean contains(Point2D point) {
+        return totalArea.contains(point);
+    }
 
-		Area area = new Area();
+    public boolean isExternal() {
 
+        String id = id().toString();
 
-		for (String type : residentialAreaTypes) {
-			if (!areasByLanduse.containsKey(type)) {
-				continue;
-			}
-			Area a = areasByLanduse.get(type);
-			area.add(a);
-			log.info("Used residential area type: " + type);
-		}
+        return id.length() > 5 && Integer.valueOf(id.substring(0, 1)) < 7;
+    }
 
-		if (area.isEmpty() && !areasByLanduse.containsKey(industrialAreaType)) {
-			log.warn("Zone - No residential area types are available and industrial area type is also not available: "
-							+ industrialAreaType);
-		}
-		if (area.isEmpty() && areasByLanduse.containsKey(industrialAreaType)) {
-			Area a = areasByLanduse.get(industrialAreaType);
-			area.add(a);
-		}
+    public boolean isOuter() {
 
-		if (area.isEmpty()) {
-			area = surface.area();
-		}
+        String id = id().toString();
 
-		return  new ZoneArea(area);
-	}
+        return id.length() > 5 && Integer.valueOf(id.substring(0, 1)) >= 7;
+    }
 
-	public Map<String,ZoneArea> areasByLanduse(Collection<String> landTypes) {
+    public Point2D center() {
 
-		Map<String,ZoneArea> areas = new LinkedHashMap<String,ZoneArea>();
+        return new Point2D.Double(this.center.getX(), this.center.getY());
+    }
 
-		for (String type : landTypes) {
-			if ( this.zoneAreasByLanduse.containsKey(type)) {
-				
-				ZoneArea area = this.zoneAreasByLanduse.get(type);
 
-				if(area == null) {
-					log.warn("Area is null! zone id=" + this.id() + ", land type=" + type);
-				} else {
-					areas.put(type, area);
-				}
-				
-			}
-			
-		}
+    private ZoneArea calculateResidentialArea(VisumSurface surface, Map<String, Area> areasByLanduse) {
 
-		return areas;
-	}
+        Area area = new Area();
 
-	private Map<String,Area>  calculateAreasByLanduse(Map<Integer,VisumTerritory> territories) {
 
-		Map<String,Area> areas = new LinkedHashMap<String,Area>();
-		
-		int i = 0;
-		int totalSize = territories.size();
+        for (String type : residentialAreaTypes) {
+            if (!areasByLanduse.containsKey(type)) {
+                continue;
+            }
+            Area a = areasByLanduse.get(type);
+            area.add(a);
+            log.info("Used residential area type: " + type);
+        }
 
-		for(VisumTerritory territory : territories.values()) {
-			
-			
-			if ( territory.isRelevantForZoneId(vZone.id)) {
+        if (area.isEmpty() && !areasByLanduse.containsKey(industrialAreaType)) {
+            log.warn("Zone - No residential area types are available and industrial area type is also not available: "
+                    + industrialAreaType);
+        }
+        if (area.isEmpty() && areasByLanduse.containsKey(industrialAreaType)) {
+            Area a = areasByLanduse.get(industrialAreaType);
+            area.add(a);
+        }
 
-				Area a = territory.intersect(this.surface.area());
-				
-				if (areas.containsKey(territory.code)) {
-					areas.get(territory.code).add(a);
-					
-				} else {
-					areas.put(territory.code, a);
-				}			
-				
-			}
-			
-			i = i + 1;
-			if ( i % 10000 == 0) {
-				System.out.println("territory " + i + " of " + totalSize + " id=" + territory.id);
-			}
+        if (area.isEmpty()) {
+            area = surface.area();
+        }
 
-		}
+        return new ZoneArea(area);
+    }
 
-		return areas;
-	}
+    public Map<String, ZoneArea> areasByLanduse(Collection<String> landTypes) {
 
-	private static Map<String,ZoneArea>  asZoneAreas(Map<String,Area> areas) {
+        Map<String, ZoneArea> areas = new LinkedHashMap<String, ZoneArea>();
 
-		Map<String,ZoneArea> zoneAreas = new LinkedHashMap<String,ZoneArea>();
+        for (String type : landTypes) {
+            if (this.zoneAreasByLanduse.containsKey(type)) {
 
-		for (String key : areas.keySet()) {
+                ZoneArea area = this.zoneAreasByLanduse.get(type);
 
-				zoneAreas.put(key, new ZoneArea(areas.get(key)));
-		}
+                if (area == null) {
+                    log.warn("Area is null! zone id=" + this.id() + ", land type=" + type);
+                } else {
+                    areas.put(type, area);
+                }
 
-		return zoneAreas;
-	}
+            }
 
-	public Map<Integer,Edge> containedEdges(SimpleRoadNetwork network) {
+        }
 
-		List<Line2D> lines = new ArrayList<Line2D>();
-		Map<Line2D,Edge> mappedEdges = new LinkedHashMap<Line2D,Edge>();
+        return areas;
+    }
 
-		for(Integer key : network.edges.keySet()) {
+    private Map<String, Area> calculateAreasByLanduse(Map<Integer, VisumTerritory> territories) {
 
-			Edge edge = network.edges.get(key);
+        Map<String, Area> areas = new LinkedHashMap<String, Area>();
 
-			Line2D line = edge.line();
+        int i = 0;
+        int totalSize = territories.size();
 
-			lines.add(line);
-			mappedEdges.put(line, edge);
-		}
+        for (VisumTerritory territory : territories.values()) {
 
-		List<Line2D> innerLines = filterInnerEdges(lines);
 
-		if (innerLines.isEmpty()) {
-			innerLines = filterMeetingEdges(lines);
-		}
+            if (territory.isRelevantForZoneId(vZone.id)) {
 
-		Map<Integer,Edge> result = new LinkedHashMap<Integer,Edge>();
+                Area a = territory.intersect(this.surface.area());
 
-		for (Line2D l : innerLines) {
+                if (areas.containsKey(territory.code)) {
+                    areas.get(territory.code).add(a);
 
-			Edge e = mappedEdges.get(l);
+                } else {
+                    areas.put(territory.code, a);
+                }
 
-			assert result != null;
-			assert e != null : l;
+            }
 
-			result.put(e.id(), e);
-		}
+            i = i + 1;
+            if (i % 10000 == 0) {
+                System.out.println("territory " + i + " of " + totalSize + " id=" + territory.id);
+            }
 
-		return result;
-	}
+        }
 
-	private  List<Line2D> filterInnerEdges(List<Line2D> lines) {
+        return areas;
+    }
 
-		Area area = this.surface.area();
-		Rectangle2D bbox = area.getBounds2D();
+    private static Map<String, ZoneArea> asZoneAreas(Map<String, Area> areas) {
 
-		List<Line2D> innerLines = new ArrayList<Line2D>();
+        Map<String, ZoneArea> zoneAreas = new LinkedHashMap<String, ZoneArea>();
 
-		for (Line2D l : lines) {
-			Point2D from = l.getP1();
-			Point2D to = l.getP2();
+        for (String key : areas.keySet()) {
 
+            zoneAreas.put(key, new ZoneArea(areas.get(key)));
+        }
 
-			if (bbox.contains(from) && bbox.contains(to)) {
-				if (area.contains(from) && area.contains(to)) {
+        return zoneAreas;
+    }
 
-					innerLines.add(l);
-				}
-			}
-		}
+    public Map<Integer, Edge> containedEdges(SimpleRoadNetwork network) {
 
-		return innerLines;
-	}
+        List<Line2D> lines = new ArrayList<Line2D>();
+        Map<Line2D, Edge> mappedEdges = new LinkedHashMap<Line2D, Edge>();
 
-	private  List<Line2D> filterMeetingEdges(List<Line2D> lines) {
+        for (Integer key : network.edges.keySet()) {
 
-		Area area = this.surface.area();
-		Rectangle2D bbox = area.getBounds2D();
+            Edge edge = network.edges.get(key);
 
-		List<Line2D> innerLines = new ArrayList<Line2D>();
+            Line2D line = edge.line();
 
-		for (Line2D l : lines) {
-			Point2D from = l.getP1();
-			Point2D to = l.getP2();
+            lines.add(line);
+            mappedEdges.put(line, edge);
+        }
 
+        List<Line2D> innerLines = filterInnerEdges(lines);
 
-			if (bbox.contains(from) || bbox.contains(to)) {
-				if (area.contains(from) || area.contains(to)) {
+        if (innerLines.isEmpty()) {
+            innerLines = filterMeetingEdges(lines);
+        }
 
-					innerLines.add(l);
-				}
-			}
-		}
+        Map<Integer, Edge> result = new LinkedHashMap<Integer, Edge>();
 
-		return innerLines;
-	}
+        for (Line2D l : innerLines) {
 
+            Edge e = mappedEdges.get(l);
 
-	
-	public List<Line2D> edgesAsLines(Collection<SimpleEdge> edges) {
-		List<Line2D> lines = new ArrayList<Line2D>();
+            assert result != null;
+            assert e != null : l;
 
-		for (SimpleEdge edge : edges) {
-			lines.add(edge.line());
-		}
+            result.put(e.id(), e);
+        }
 
-		return lines;
-	}
+        return result;
+    }
 
+    private List<Line2D> filterInnerEdges(List<Line2D> lines) {
 
-	public SimpleEdge nearestEdge(Point2D point) {
+        Area area = this.surface.area();
+        Rectangle2D bbox = area.getBounds2D();
 
+        List<Line2D> innerLines = new ArrayList<Line2D>();
 
-		if (this.intersectingEdges.isEmpty()) {
+        for (Line2D l : lines) {
+            Point2D from = l.getP1();
+            Point2D to = l.getP2();
 
-			return (SimpleEdge) nearestEdgeAtConnector(point);
-		}
 
-		return (SimpleEdge) nearestEdge(point, this.intersectingEdges);
-	}
+            if (bbox.contains(from) && bbox.contains(to)) {
+                if (area.contains(from) && area.contains(to)) {
 
-	private Edge nearestEdgeAtConnector(Point2D point) {
+                    innerLines.add(l);
+                }
+            }
+        }
 
-		List<Edge> edges = edgesAtConnector();
+        return innerLines;
+    }
 
-		assert !edges.isEmpty();
+    private List<Line2D> filterMeetingEdges(List<Line2D> lines) {
 
-		return nearestEdge(point, edges);
-	}
+        Area area = this.surface.area();
+        Rectangle2D bbox = area.getBounds2D();
 
+        List<Line2D> innerLines = new ArrayList<Line2D>();
 
-	private Edge nearestEdge(Point2D point, List<Edge> edges) {
+        for (Line2D l : lines) {
+            Point2D from = l.getP1();
+            Point2D to = l.getP2();
 
-		assert !edges.isEmpty();
 
-		double min_dist = Double.MAX_VALUE;
-		Edge nearest_edge = edges.get(0);
+            if (bbox.contains(from) || bbox.contains(to)) {
+                if (area.contains(from) || area.contains(to)) {
 
-		for (Edge edge : edges) {
+                    innerLines.add(l);
+                }
+            }
+        }
 
-			double dist = edge.line().ptSegDist(point);
-			if (dist < min_dist && !((SimpleEdge)edge).isDegenerated()) {
-				nearest_edge = edge;
-				min_dist = dist;
-			}
-		}
+        return innerLines;
+    }
 
-		return nearest_edge;
-	}
 
+    public List<Line2D> edgesAsLines(Collection<SimpleEdge> edges) {
+        List<Line2D> lines = new ArrayList<Line2D>();
 
-	private	List<Edge> edgesAtConnector() {
+        for (SimpleEdge edge : edges) {
+            lines.add(edge.line());
+        }
 
-		List<Edge> edges = new ArrayList<Edge>();
+        return lines;
+    }
 
-		SimpleNode center = this.network.zoneCenterNodes.get(this.vZone.id);
 
-		List<Edge> connectors = this.network.connectorEdges.get(this.vZone.id);
+    public SimpleEdge nearestEdge(Point2D point) {
 
-		assert !connectors.isEmpty();
 
-		Set<Node> connectorNodes = new LinkedHashSet<Node>();
+        if (this.intersectingEdges.isEmpty()) {
 
-		for (Edge e :connectors) {
-			connectorNodes.add(e.from());
-			connectorNodes.add(e.to());
-		}
+            return (SimpleEdge) nearestEdgeAtConnector(point);
+        }
 
-		connectorNodes.remove(center);
+        return (SimpleEdge) nearestEdge(point, this.intersectingEdges);
+    }
 
-		assert !connectorNodes.isEmpty();
+    private Edge nearestEdgeAtConnector(Point2D point) {
 
-		for (Node node : connectorNodes) {
+        List<Edge> edges = edgesAtConnector();
 
-			Collection<Edge> outgoingEdges = this.network.out(node);
+        assert !edges.isEmpty();
 
-			assert !outgoingEdges.isEmpty();
+        return nearestEdge(point, edges);
+    }
 
-			edges.addAll(outgoingEdges);
-		}
 
-		return edges;
-	}
+    private Edge nearestEdge(Point2D point, List<Edge> edges) {
 
-	public Location randomLocation(
-		int randomValue
-	) {
+        assert !edges.isEmpty();
 
-		Point2D point = residentialArea.randomPoint(randomValue);
+        double min_dist = Double.MAX_VALUE;
+        Edge nearest_edge = edges.get(0);
 
-		SimpleEdge road = nearestEdge(point);
+        for (Edge edge : edges) {
 
-		double pos = road.nearestPositionOnEdge(point);
+            double dist = edge.line().ptSegDist(point);
+            if (dist < min_dist && !((SimpleEdge) edge).isDegenerated()) {
+                nearest_edge = edge;
+                min_dist = dist;
+            }
+        }
 
-		return new Location(point, road.id(), pos);
-	}
+        return nearest_edge;
+    }
+
+
+    private List<Edge> edgesAtConnector() {
+
+        List<Edge> edges = new ArrayList<Edge>();
+
+        SimpleNode center = this.network.zoneCenterNodes.get(this.vZone.id);
+
+        List<Edge> connectors = this.network.connectorEdges.get(this.vZone.id);
+
+        assert !connectors.isEmpty();
+
+        Set<Node> connectorNodes = new LinkedHashSet<Node>();
+
+        for (Edge e : connectors) {
+            connectorNodes.add(e.from());
+            connectorNodes.add(e.to());
+        }
+
+        connectorNodes.remove(center);
+
+        assert !connectorNodes.isEmpty();
+
+        for (Node node : connectorNodes) {
+
+            Collection<Edge> outgoingEdges = this.network.out(node);
+
+            assert !outgoingEdges.isEmpty();
+
+            edges.addAll(outgoingEdges);
+        }
+
+        return edges;
+    }
+
+    public Location randomLocation(
+            int randomValue
+    ) {
+
+        Point2D point = residentialArea.randomPoint(randomValue);
+
+        SimpleEdge road = nearestEdge(point);
+
+        double pos = road.nearestPositionOnEdge(point);
+
+        return new Location(point, road.id(), pos);
+    }
 
 }
