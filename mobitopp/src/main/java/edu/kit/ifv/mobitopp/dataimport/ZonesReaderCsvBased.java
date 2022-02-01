@@ -36,237 +36,237 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ZonesReaderCsvBased implements ZonesReader {
 
-  private final VisumNetwork visumNetwork;
-  private final ChargingDataBuilder chargingDataBuilder;
-  private final ZonePropertiesData zonePropertiesData;
-  private final AttractivitiesData attractivities;
+    private final VisumNetwork visumNetwork;
+    private final ChargingDataBuilder chargingDataBuilder;
+    private final ZonePropertiesData zonePropertiesData;
+    private final AttractivitiesData attractivities;
 
-  private final ZoneLocationSelector locationSelector;
-  private final IdToOidMapper idToOid;
-  private final ParkingFacilityDataRepository parkingFacilitiesDataRepository;
-  private final BikeSharingDataRepository bikeSharingDataRepository;
-	private final CarSharingDataRepository carSharingDataRepository;
+    private final ZoneLocationSelector locationSelector;
+    private final IdToOidMapper idToOid;
+    private final ParkingFacilityDataRepository parkingFacilitiesDataRepository;
+    private final BikeSharingDataRepository bikeSharingDataRepository;
+    private final CarSharingDataRepository carSharingDataRepository;
 
-	ZonesReaderCsvBased(
-			final VisumNetwork visumNetwork, 
-			final SimpleRoadNetwork roadNetwork, 
-			final ZonePropertiesData zoneproperties,
-			final AttractivitiesData attractivities,
-			final ParkingFacilityDataRepository parkingFacilitiesDataRepository,
-			final BikeSharingDataRepository bikeSharingDataRepository, 
-			final CarSharingDataRepository carSharingDataRepository, 
-			final ChargingType charging,
-			final DefaultPower defaultPower, 
-			final IdToOidMapper mapper) {
-		super();
-    this.visumNetwork = visumNetwork;
-    this.zonePropertiesData = zoneproperties;
-    this.attractivities = attractivities;
-    this.parkingFacilitiesDataRepository = parkingFacilitiesDataRepository;
-    this.bikeSharingDataRepository = bikeSharingDataRepository;
-    this.carSharingDataRepository = carSharingDataRepository;
-    this.idToOid = mapper;
-    ChargingDataFactory factory = charging.factory(defaultPower);
-    locationSelector = new ZoneLocationSelector(roadNetwork);
-    chargingDataBuilder = new ChargingDataBuilder(visumNetwork, locationSelector, factory,
-        defaultPower);
-  }
+    ZonesReaderCsvBased(
+            final VisumNetwork visumNetwork,
+            final SimpleRoadNetwork roadNetwork,
+            final ZonePropertiesData zoneproperties,
+            final AttractivitiesData attractivities,
+            final ParkingFacilityDataRepository parkingFacilitiesDataRepository,
+            final BikeSharingDataRepository bikeSharingDataRepository,
+            final CarSharingDataRepository carSharingDataRepository,
+            final ChargingType charging,
+            final DefaultPower defaultPower,
+            final IdToOidMapper mapper) {
+        super();
+        this.visumNetwork = visumNetwork;
+        this.zonePropertiesData = zoneproperties;
+        this.attractivities = attractivities;
+        this.parkingFacilitiesDataRepository = parkingFacilitiesDataRepository;
+        this.bikeSharingDataRepository = bikeSharingDataRepository;
+        this.carSharingDataRepository = carSharingDataRepository;
+        this.idToOid = mapper;
+        ChargingDataFactory factory = charging.factory(defaultPower);
+        locationSelector = new ZoneLocationSelector(roadNetwork);
+        chargingDataBuilder = new ChargingDataBuilder(visumNetwork, locationSelector, factory,
+                defaultPower);
+    }
 
-	@Override
-	public List<Zone> getZones() {
-		zonePropertiesData.data().resetRow();
-		ArrayList<VisumZone> visumZones = new ArrayList<>(visumNetwork.zones.values());
-		Collections.sort(visumZones, Comparator.comparing(zone -> zone.id));
-		List<Zone> zones = new ArrayList<>();
-		while (zonePropertiesData.data().hasNext()) {
-			VisumZone visumZone = visumNetwork.zones.get(zonePropertiesData.data().currentRegion());
-			zones.add(zoneFrom(visumZone));
-			
-			log.info("Processed zone {} of {} zones", visumZone.id, visumZones.size());
-			
-			zonePropertiesData.data().next();
-		}
-		return zones;
-	}
+    @Override
+    public List<Zone> getZones() {
+        zonePropertiesData.data().resetRow();
+        ArrayList<VisumZone> visumZones = new ArrayList<>(visumNetwork.zones.values());
+        Collections.sort(visumZones, Comparator.comparing(zone -> zone.id));
+        List<Zone> zones = new ArrayList<>();
+        while (zonePropertiesData.data().hasNext()) {
+            VisumZone visumZone = visumNetwork.zones.get(zonePropertiesData.data().currentRegion());
+            zones.add(zoneFrom(visumZone));
 
-  private Zone zoneFrom(VisumZone visumZone) {
-    String visumId = String.valueOf(visumZone.id);
-    int oid = idToOid.map(visumId);
-    ZoneId zoneId = new ZoneId(visumId, oid);
-    String name = visumZone.name;
-    AreaType areaType = currentZoneAreaType(visumId);
-    RegionType regionType = regionType(visumId);
-    ZoneClassificationType classification = currentClassification(visumId);
-    int parkingPlaces = getParkingPlaces(visumZone, zoneId);
-    ZonePolygon polygon = currentZonePolygon(visumZone);
-    Location centroid = polygon.centroidLocation();
-    boolean isDestination = isDestination(visumId);
-    double relief = relief(visumId);
-    Attractivities attractivities = attractivities(visumId);
-		ChargingDataForZone chargingData = chargingData(visumZone, polygon);
-		ZoneProperties zoneProperties = ZoneProperties
-				.builder()
-				.name(name)
-				.areaType(areaType)
-				.regionType(regionType)
-				.classification(classification)
-				.parkingPlaces(parkingPlaces)
-				.isDestination(isDestination)
-				.centroidLocation(centroid)
-				.relief(relief)
-				.zoneProperties(zonePropertiesFor(visumId))
-				.build();
-		Zone zone = new Zone(zoneId, zoneProperties, attractivities, chargingData);
-		BikeSharingDataForZone bikeSharingData = getBikeSharingData(zone);
-		zone.setBikeSharing(bikeSharingData);
-    CarSharingDataForZone carSharingData = getCarSharingData(visumZone, polygon, zone);
-    zone.setCarSharing(carSharingData);
-    zone.setMaas(MaasDataForZone.everywhereAvailable());
-    return zone;
-  }
+            log.info("Processed zone {} of {} zones", visumZone.id, visumZones.size());
 
-  private Map<String, Value> zonePropertiesFor(String visumId) {
-    return zonePropertiesData
-        .getValues(visumId)
-        .entrySet()
-        .stream()
-        .collect(StreamUtils
-            .toLinkedMap(entry -> entry.getKey().toLowerCase(), entry -> entry.getValue()));
-  }
+            zonePropertiesData.data().next();
+        }
+        return zones;
+    }
 
-	private BikeSharingDataForZone getBikeSharingData(Zone zone) {
-		return bikeSharingDataRepository.getData(zone.getId());
-	}
+    private Zone zoneFrom(VisumZone visumZone) {
+        String visumId = String.valueOf(visumZone.id);
+        int oid = idToOid.map(visumId);
+        ZoneId zoneId = new ZoneId(visumId, oid);
+        String name = visumZone.name;
+        AreaType areaType = currentZoneAreaType(visumId);
+        RegionType regionType = regionType(visumId);
+        ZoneClassificationType classification = currentClassification(visumId);
+        int parkingPlaces = getParkingPlaces(visumZone, zoneId);
+        ZonePolygon polygon = currentZonePolygon(visumZone);
+        Location centroid = polygon.centroidLocation();
+        boolean isDestination = isDestination(visumId);
+        double relief = relief(visumId);
+        Attractivities attractivities = attractivities(visumId);
+        ChargingDataForZone chargingData = chargingData(visumZone, polygon);
+        ZoneProperties zoneProperties = ZoneProperties
+                .builder()
+                .name(name)
+                .areaType(areaType)
+                .regionType(regionType)
+                .classification(classification)
+                .parkingPlaces(parkingPlaces)
+                .isDestination(isDestination)
+                .centroidLocation(centroid)
+                .relief(relief)
+                .zoneProperties(zonePropertiesFor(visumId))
+                .build();
+        Zone zone = new Zone(zoneId, zoneProperties, attractivities, chargingData);
+        BikeSharingDataForZone bikeSharingData = getBikeSharingData(zone);
+        zone.setBikeSharing(bikeSharingData);
+        CarSharingDataForZone carSharingData = getCarSharingData(visumZone, polygon, zone);
+        zone.setCarSharing(carSharingData);
+        zone.setMaas(MaasDataForZone.everywhereAvailable());
+        return zone;
+    }
 
-	private CarSharingDataForZone getCarSharingData(
-			VisumZone visumZone, ZonePolygon polygon, Zone zone) {
-		return carSharingDataRepository.getData(visumZone, polygon, zone);
-	}
+    private Map<String, Value> zonePropertiesFor(String visumId) {
+        return zonePropertiesData
+                .getValues(visumId)
+                .entrySet()
+                .stream()
+                .collect(StreamUtils
+                        .toLinkedMap(entry -> entry.getKey().toLowerCase(), entry -> entry.getValue()));
+    }
 
-	private int getParkingPlaces(VisumZone visumZone, ZoneId zoneId) {
-		return parkingFacilitiesDataRepository.getNumberOfParkingLots(visumZone, zoneId);
-	}
+    private BikeSharingDataForZone getBikeSharingData(Zone zone) {
+        return bikeSharingDataRepository.getData(zone.getId());
+    }
 
-  private ChargingDataForZone chargingData(VisumZone visumZone, ZonePolygon polygon) {
-    return chargingDataBuilder().chargingData(visumZone, polygon);
-  }
+    private CarSharingDataForZone getCarSharingData(
+            VisumZone visumZone, ZonePolygon polygon, Zone zone) {
+        return carSharingDataRepository.getData(visumZone, polygon, zone);
+    }
 
-  ChargingDataBuilder chargingDataBuilder() {
-    return chargingDataBuilder;
-  }
+    private int getParkingPlaces(VisumZone visumZone, ZoneId zoneId) {
+        return parkingFacilitiesDataRepository.getNumberOfParkingLots(visumZone, zoneId);
+    }
 
-  private Attractivities attractivities(String zoneId) {
-    return attractivitiesBuilder().attractivities(zoneId);
-  }
+    private ChargingDataForZone chargingData(VisumZone visumZone, ZonePolygon polygon) {
+        return chargingDataBuilder().chargingData(visumZone, polygon);
+    }
 
-  AttractivitiesBuilder attractivitiesBuilder() {
-    return new AttractivitiesBuilder(attractivities);
-  }
+    ChargingDataBuilder chargingDataBuilder() {
+        return chargingDataBuilder;
+    }
 
-  private ZonePolygon currentZonePolygon(VisumZone visumZone) {
-    Location centroid = makeLocation(visumZone, visumZone.coord);
-    return new ZonePolygon(surface(visumZone), centroid);
-  }
+    private Attractivities attractivities(String zoneId) {
+        return attractivitiesBuilder().attractivities(zoneId);
+    }
 
-  private Location makeLocation(VisumZone zone, VisumPoint2 coordinate) {
-    return locationSelector().selectLocation(zone, coordinate);
-  }
+    AttractivitiesBuilder attractivitiesBuilder() {
+        return new AttractivitiesBuilder(attractivities);
+    }
 
-  ZoneLocationSelector locationSelector() {
-    return locationSelector;
-  }
+    private ZonePolygon currentZonePolygon(VisumZone visumZone) {
+        Location centroid = makeLocation(visumZone, visumZone.coord);
+        return new ZonePolygon(surface(visumZone), centroid);
+    }
 
-  private VisumSurface surface(VisumZone visumZone) {
-    return visumNetwork.areas.get(visumZone.areaId);
-  }
+    private Location makeLocation(VisumZone zone, VisumPoint2 coordinate) {
+        return locationSelector().selectLocation(zone, coordinate);
+    }
 
-  private ZoneClassificationType currentClassification(String zoneId) {
-    return zonePropertiesData.currentClassification(zoneId);
-  }
+    ZoneLocationSelector locationSelector() {
+        return locationSelector;
+    }
 
-  private RegionType regionType(String zoneId) {
-    return zonePropertiesData.currentRegionType(zoneId);
-  }
-  
-  private AreaType currentZoneAreaType(String zoneId) {
-    return zonePropertiesData.currentZoneAreaType(zoneId);
-  }
+    private VisumSurface surface(VisumZone visumZone) {
+        return visumNetwork.areas.get(visumZone.areaId);
+    }
 
-	private boolean isDestination(String zoneId) {
-		return zonePropertiesData.isDestination(zoneId);
-	}
+    private ZoneClassificationType currentClassification(String zoneId) {
+        return zonePropertiesData.currentClassification(zoneId);
+    }
 
-	private double relief(String zoneId) {
-		return zonePropertiesData.relief(zoneId);
-	}
+    private RegionType regionType(String zoneId) {
+        return zonePropertiesData.currentRegionType(zoneId);
+    }
 
-	public static ZonesReaderCsvBased from(
-			final VisumNetwork visumNetwork, 
-			final SimpleRoadNetwork roadNetwork, 
-			final ChargingType charging,
-			final DefaultPower defaultPower, 
-			final File zonePropertiesDataFile, 
-			final File attractivityDataFile,
-			final File parkingFacilitiesDataFile, 
-			final File carSharingPropertiesFile, 
-			final File stationsDataFile,
-			final File freeFloatingDataFile, 
-			final File bikeSharingPropertiesFile,
-			final AreaTypeRepository areaTypeRepository, 
-			final IdToOidMapper mapper) {
-		ZonePropertiesData zonePropertiesData = zonePropertyDataFrom(zonePropertiesDataFile,
-        areaTypeRepository);
-    AttractivitiesData attractivityData = attractivityDataFrom(attractivityDataFile);
-    ParkingFacilityDataRepository parkingFacilitiesData = parkingFacilitiesDataFrom(parkingFacilitiesDataFile);
-		BikeSharingDataRepository bikeSharingData = bikeSharingDataFrom(
-				bikeSharingPropertiesFile, mapper);
-		CarSharingDataRepository carSharingStationsData = carSharingStationsDataFrom(visumNetwork,
-				roadNetwork, carSharingPropertiesFile, stationsDataFile, freeFloatingDataFile);
-    return new ZonesReaderCsvBased(visumNetwork, roadNetwork, zonePropertiesData, attractivityData, parkingFacilitiesData,
-    		bikeSharingData, carSharingStationsData, charging, defaultPower, mapper);
-  }
+    private AreaType currentZoneAreaType(String zoneId) {
+        return zonePropertiesData.currentZoneAreaType(zoneId);
+    }
 
-	private static ParkingFacilityDataRepository parkingFacilitiesDataFrom(
-  		File parkingFacilitiesDataFile) {
-		if (parkingFacilitiesDataFile.exists()) {
-			CsvFile dataFile = CsvFile.createFrom(parkingFacilitiesDataFile.getAbsolutePath());
-			StructuralData structuralData = new StructuralData(dataFile);
-			return (zone, id) -> structuralData.valueOrDefault(id.getExternalId(), "numberofparkingplaces");
-		}
+    private boolean isDestination(String zoneId) {
+        return zonePropertiesData.isDestination(zoneId);
+    }
 
-		log.warn("parking facility data file is not available - will try to get parkingfacilities from visum zone information!");
-		return (zone, id) -> zone.parkingPlaces;
-  }
-  
-  private static AttractivitiesData attractivityDataFrom(
-      File structuralDataFile) {
-    StructuralData dataFile = new StructuralData(CsvFile.createFrom(structuralDataFile.getAbsolutePath()));
-    return new AttractivitiesData(dataFile);
-  }
+    private double relief(String zoneId) {
+        return zonePropertiesData.relief(zoneId);
+    }
 
-  private static ZonePropertiesData zonePropertyDataFrom(
-      File structuralDataFile, AreaTypeRepository areaTypeRepository) {
-    StructuralData dataFile = new StructuralData(CsvFile.createFrom(structuralDataFile.getAbsolutePath()));
-    return new ZonePropertiesData(dataFile, areaTypeRepository);
-  }
+    public static ZonesReaderCsvBased from( //Here reads extra information from csv files.
+            final VisumNetwork visumNetwork,
+            final SimpleRoadNetwork roadNetwork,
+            final ChargingType charging,
+            final DefaultPower defaultPower,
+            final File zonePropertiesDataFile,
+            final File attractivityDataFile,
+            final File parkingFacilitiesDataFile,
+            final File carSharingPropertiesFile,
+            final File stationsDataFile,
+            final File freeFloatingDataFile,
+            final File bikeSharingPropertiesFile,
+            final AreaTypeRepository areaTypeRepository,
+            final IdToOidMapper mapper) {
+        ZonePropertiesData zonePropertiesData = zonePropertyDataFrom(zonePropertiesDataFile,
+                areaTypeRepository);
+        AttractivitiesData attractivityData = attractivityDataFrom(attractivityDataFile);
+        ParkingFacilityDataRepository parkingFacilitiesData = parkingFacilitiesDataFrom(parkingFacilitiesDataFile);
+        BikeSharingDataRepository bikeSharingData = bikeSharingDataFrom(
+                bikeSharingPropertiesFile, mapper);
+        CarSharingDataRepository carSharingStationsData = carSharingStationsDataFrom(visumNetwork,
+                roadNetwork, carSharingPropertiesFile, stationsDataFile, freeFloatingDataFile);
+        return new ZonesReaderCsvBased(visumNetwork, roadNetwork, zonePropertiesData, attractivityData, parkingFacilitiesData,
+                bikeSharingData, carSharingStationsData, charging, defaultPower, mapper);
+    }
 
-	private static BikeSharingDataRepository bikeSharingDataFrom(File bikeSharingPropertiesFile, IdToOidMapper mapper) {
-		StructuralData properties = new StructuralData(CsvFile.createFrom(bikeSharingPropertiesFile));
-		return new BikeSharingPropertiesData(properties, mapper);
-	}
+    private static ParkingFacilityDataRepository parkingFacilitiesDataFrom(
+            File parkingFacilitiesDataFile) {
+        if (parkingFacilitiesDataFile.exists()) {
+            CsvFile dataFile = CsvFile.createFrom(parkingFacilitiesDataFile.getAbsolutePath());
+            StructuralData structuralData = new StructuralData(dataFile);
+            return (zone, id) -> structuralData.valueOrDefault(id.getExternalId(), "numberofparkingplaces");
+        }
 
-	private static CarSharingDataRepository carSharingStationsDataFrom(
-			VisumNetwork visumNetwork, SimpleRoadNetwork roadNetwork, File carSharingPropertiesFile,
-			File stationsDataFile, File freeFloatingDataFile) {
-		IdSequence carIds = new IdSequence();
-		if (stationsDataFile.exists()) {
-			CsvFile properties = CsvFile.createFrom(carSharingPropertiesFile.getAbsolutePath());
-			CsvFile stationData = CsvFile.createFrom(stationsDataFile.getAbsolutePath());
-			CsvFile freeFloatingData = CsvFile.createFrom(freeFloatingDataFile.getAbsolutePath());
-			return new FileBasedCarSharingDataRepository(roadNetwork, properties, stationData,
-					freeFloatingData, carIds);
-		}
-		log.warn("carsharingstation data file is not available - will try to get carsharingstation data from visum zone information!");
-		return new VisumBasedCarSharingDataRepository(visumNetwork, roadNetwork, carIds);
-  }
+        log.warn("parking facility data file is not available - will try to get parkingfacilities from visum zone information!");
+        return (zone, id) -> zone.parkingPlaces;
+    }
+
+    private static AttractivitiesData attractivityDataFrom(
+            File structuralDataFile) {
+        StructuralData dataFile = new StructuralData(CsvFile.createFrom(structuralDataFile.getAbsolutePath()));
+        return new AttractivitiesData(dataFile);
+    }
+
+    private static ZonePropertiesData zonePropertyDataFrom(
+            File structuralDataFile, AreaTypeRepository areaTypeRepository) {
+        StructuralData dataFile = new StructuralData(CsvFile.createFrom(structuralDataFile.getAbsolutePath()));
+        return new ZonePropertiesData(dataFile, areaTypeRepository);
+    }
+
+    private static BikeSharingDataRepository bikeSharingDataFrom(File bikeSharingPropertiesFile, IdToOidMapper mapper) {
+        StructuralData properties = new StructuralData(CsvFile.createFrom(bikeSharingPropertiesFile));
+        return new BikeSharingPropertiesData(properties, mapper);
+    }
+
+    private static CarSharingDataRepository carSharingStationsDataFrom(
+            VisumNetwork visumNetwork, SimpleRoadNetwork roadNetwork, File carSharingPropertiesFile,
+            File stationsDataFile, File freeFloatingDataFile) {
+        IdSequence carIds = new IdSequence();
+        if (stationsDataFile.exists()) {
+            CsvFile properties = CsvFile.createFrom(carSharingPropertiesFile.getAbsolutePath());
+            CsvFile stationData = CsvFile.createFrom(stationsDataFile.getAbsolutePath());
+            CsvFile freeFloatingData = CsvFile.createFrom(freeFloatingDataFile.getAbsolutePath());
+            return new FileBasedCarSharingDataRepository(roadNetwork, properties, stationData,
+                    freeFloatingData, carIds);
+        }
+        log.warn("carsharingstation data file is not available - will try to get carsharingstation data from visum zone information!");
+        return new VisumBasedCarSharingDataRepository(visumNetwork, roadNetwork, carIds);
+    }
 }
