@@ -16,66 +16,66 @@ import edu.kit.ifv.mobitopp.util.panel.PersonOfPanelDataId;
 
 public class PanelBasedPersonCreator implements PersonCreator {
 
-	private final CommutationTicketModelIfc commutationTicketModel;
-	private final ModeChoicePreferenceCreator modeChoicePreferenceCreator;
+    private final CommutationTicketModelIfc commutationTicketModel;
+    private final ModeChoicePreferenceCreator modeChoicePreferenceCreator;
 
-	private int personIdCounter = 1;
-	
-  public PanelBasedPersonCreator(
-      CommutationTicketModelIfc commutationTicketModel,
-      ModeChoicePreferenceCreator modeChoicePreferenceCreator) {
-    this.commutationTicketModel = commutationTicketModel;
-    this.modeChoicePreferenceCreator = modeChoicePreferenceCreator;
-  }
+    private int personIdCounter = 1;
 
-  public PanelBasedPersonCreator(CommutationTicketModelIfc commutationTicketModel) {
-    this(commutationTicketModel, new UncorrelatedModeChoicePreferenceCreator(0));
-  }
+    public PanelBasedPersonCreator(
+            CommutationTicketModelIfc commutationTicketModel,
+            ModeChoicePreferenceCreator modeChoicePreferenceCreator) {
+        this.commutationTicketModel = commutationTicketModel;
+        this.modeChoicePreferenceCreator = modeChoicePreferenceCreator;
+    }
 
-	public PersonBuilder createPerson(
-		PersonOfPanelData panelPerson,
-		HouseholdOfPanelData panelHousehold,
-		HouseholdForSetup household,
-		Zone zone
-	) {
-    boolean hasCommuterTicket = this.commutationTicketModel
-        .estimateCommutationTicket(panelPerson, panelHousehold, zone);
-    return newPerson(personIdCounter++, panelPerson, household, hasCommuterTicket);
-  }
+    public PanelBasedPersonCreator(CommutationTicketModelIfc commutationTicketModel) {
+        this(commutationTicketModel, new UncorrelatedModeChoicePreferenceCreator(0));
+    }
 
-  protected PersonBuilder newPerson(
-			int oid,
-			PersonOfPanelData personOfPanelData,
-			HouseholdForSetup household,
-			boolean hasCommuterTicket
-	) {
-    PersonOfPanelDataId panel_id = personOfPanelData.getId(); 
-    PersonId pid = new PersonId(oid, household.getId(), panel_id.getPersonNumber());
-    return new DefaultPersonForSetup(
-        pid, 
-        household, 
-        personOfPanelData.age(), 
-        personOfPanelData.employment(), 
-        personOfPanelData.gender(), 
-        personOfPanelData.graduation(), 
-        personOfPanelData.getIncome(), 
-        createPreferencesFor(personOfPanelData))
-        .setHasBike(personOfPanelData.hasBicycle())
-        .setHasAccessToCar(personOfPanelData.hasAccessToCar())
-        .setHasPersonalCar(personOfPanelData.hasPersonalCar())
-        .setHasCommuterTicket(hasCommuterTicket)
-        .setHasDrivingLicense(personOfPanelData.hasLicence())
-        .setModeChoicePreferences(modeChoicePreferenceCreator.createPreferences());
-	}
+    public PersonBuilder createPerson(
+            PersonOfPanelData panelPerson,
+            HouseholdOfPanelData panelHousehold,
+            HouseholdForSetup household,
+            Zone zone
+    ) {
+        boolean hasCommuterTicket = this.commutationTicketModel
+                .estimateCommutationTicket(panelPerson, panelHousehold, zone);
+        return newPerson(personIdCounter++, panelPerson, household, hasCommuterTicket);
+    }
 
-  private ModeChoicePreferences createPreferencesFor(PersonOfPanelData personOfPanelData) {
-    Map<Mode, Double> preferences = new LinkedHashMap<>();
-    preferences.put(StandardMode.BIKE, (double) personOfPanelData.pref_cycling);
-    preferences.put(StandardMode.CAR, (double) personOfPanelData.pref_cardriver);
-    preferences.put(StandardMode.PASSENGER, (double) personOfPanelData.pref_carpassenger);
-    preferences.put(StandardMode.PEDESTRIAN, (double) personOfPanelData.pref_walking);
-    preferences.put(StandardMode.PUBLICTRANSPORT, (double) personOfPanelData.pref_publictransport);
-    return new ModeChoicePreferences(preferences);
-  }
+    protected PersonBuilder newPerson(
+            int oid,
+            PersonOfPanelData personOfPanelData,
+            HouseholdForSetup household,
+            boolean hasCommuterTicket
+    ) {
+        PersonOfPanelDataId panel_id = personOfPanelData.getId();
+        PersonId pid = new PersonId(oid, household.getId(), panel_id.getPersonNumber());
+        return new DefaultPersonForSetup(
+                pid,
+                household,
+                personOfPanelData.age(),
+                personOfPanelData.employment(),
+                personOfPanelData.gender(),
+                personOfPanelData.graduation(),
+                personOfPanelData.getIncome(),
+                createPreferencesFor(personOfPanelData))
+                .setHasBike(personOfPanelData.hasBicycle())
+                .setHasAccessToCar(personOfPanelData.hasAccessToCar())
+                .setHasPersonalCar(personOfPanelData.hasPersonalCar())
+                .setHasCommuterTicket(hasCommuterTicket)
+                .setHasDrivingLicense(personOfPanelData.hasLicense())
+                .setModeChoicePreferences(modeChoicePreferenceCreator.createPreferences());
+    }
+
+    private ModeChoicePreferences createPreferencesFor(PersonOfPanelData personOfPanelData) {
+        Map<Mode, Double> preferences = new LinkedHashMap<>();
+        preferences.put(StandardMode.BIKE, (double) personOfPanelData.pref_cycling);
+        preferences.put(StandardMode.CAR, (double) personOfPanelData.pref_cardriver);
+        preferences.put(StandardMode.PASSENGER, (double) personOfPanelData.pref_carpassenger);
+        preferences.put(StandardMode.PEDESTRIAN, (double) personOfPanelData.pref_walking);
+        preferences.put(StandardMode.PUBLICTRANSPORT, (double) personOfPanelData.pref_publictransport);
+        return new ModeChoicePreferences(preferences);
+    }
 
 }

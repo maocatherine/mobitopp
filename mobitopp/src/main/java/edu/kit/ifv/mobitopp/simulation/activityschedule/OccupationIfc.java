@@ -2,13 +2,12 @@ package edu.kit.ifv.mobitopp.simulation.activityschedule;
 
 import edu.kit.ifv.mobitopp.time.Time;
 
-public interface OccupationIfc
-{ 
+public interface OccupationIfc {
 
-	int getOid();
+    int getOid();
 
-  Time startDate();
+    Time startDate();
 
-  Time calculatePlannedEndDate();
+    Time calculatePlannedEndDate();
 
 }

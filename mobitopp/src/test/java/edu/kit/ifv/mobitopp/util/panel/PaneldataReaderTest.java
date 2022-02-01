@@ -51,7 +51,7 @@ public class PaneldataReaderTest {
 	private static final String hhActivityRadiusMode = "1";
 	private static final String distanceWork = valueOf(person.getDistanceWork());
 	private static final String distanceEducation = valueOf(person.getDistanceEducation());
-	private static final String licence = person.hasLicence() ? "1" : "0";
+	private static final String license = person.hasLicense() ? "1" : "0";
   private static final String defaultWeight = "1.0";
 	private LinkedHashMap<String, String> example;
 
@@ -79,7 +79,7 @@ public class PaneldataReaderTest {
 
 	private void addNewColumnNames() {
 		LinkedHashMap<String, String> required = new LinkedHashMap<>();
-		required.put("licence", licence);
+		required.put("license", license);
 		required.put("distance_work", distanceWork);
 		required.put("distance_education", distanceEducation);
 		required.forEach(example::put);
@@ -123,7 +123,7 @@ public class PaneldataReaderTest {
 		addOldColumnNames();
 		final LinkedHashMap<String, String> missingColumns = new LinkedHashMap<>();
 		missingColumns.put("gender", "sex");
-		missingColumns.put("licence", "caravailable and personalcar");
+		missingColumns.put("license", "caravailable and personalcar");
 		missingColumns.put("hhincome_class", "0");
 		missingColumns.put("incomeperson", "0");
 		missingColumns.put("pref_cardriver", "0.0");
