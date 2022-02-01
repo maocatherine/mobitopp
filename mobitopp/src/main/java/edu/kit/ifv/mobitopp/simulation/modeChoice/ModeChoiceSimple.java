@@ -12,39 +12,37 @@ import edu.kit.ifv.mobitopp.util.logit.DefaultLogitModel;
 import edu.kit.ifv.mobitopp.util.logit.LogitModel;
 
 public class ModeChoiceSimple
-	implements ModeChoiceModel 
-{
+        implements ModeChoiceModel {
 
-	private final ModeChoiceSimpleUtilityFunction utilityFunction;
+    private final ModeChoiceSimpleUtilityFunction utilityFunction;
 
-	private final LogitModel<Mode> logitModel = new DefaultLogitModel<Mode>();
+    private final LogitModel<Mode> logitModel = new DefaultLogitModel<Mode>();
 
 
-	public ModeChoiceSimple(ImpedanceIfc impedance) {
+    public ModeChoiceSimple(ImpedanceIfc impedance) {
 
-		this.utilityFunction = new ModeChoiceSimpleUtilityFunction(impedance);
-	}
+        this.utilityFunction = new ModeChoiceSimpleUtilityFunction(impedance);
+    }
 
-	
 
-	public Mode selectMode(
-		Person person,
-		Zone source,
-		Zone destination,
-		ActivityIfc previousActivity,
-		ActivityIfc nextActivity,
-		Set<Mode> choiceSet,
-		double randomNumber
-	) {
+    public Mode selectMode(
+            Person person,
+            Zone source,
+            Zone destination,
+            ActivityIfc previousActivity,
+            ActivityIfc nextActivity,
+            Set<Mode> choiceSet,
+            double randomNumber
+    ) {
 
-		Map<Mode,Double> utilities = this.utilityFunction.calculateUtilities(
-																														person, source, destination,
-																														previousActivity, nextActivity
-																														,choiceSet
-																													);
+        Map<Mode, Double> utilities = this.utilityFunction.calculateUtilities(
+                person, source, destination,
+                previousActivity, nextActivity
+                , choiceSet
+        );
 
-		return logitModel.select(utilities, choiceSet, randomNumber);
-	}
+        return logitModel.select(utilities, choiceSet, randomNumber);
+    }
 
-	
+
 }

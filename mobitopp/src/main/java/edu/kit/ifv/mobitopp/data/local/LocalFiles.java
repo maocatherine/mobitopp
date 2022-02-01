@@ -62,372 +62,372 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LocalFiles implements DataSource {
 
-	private static final String defaultZoneRepository = "output/zone-repository/";
-	private static final boolean defaultMapIds = true;
-	
-	private File zoneRepositoryFolder;
-	private File matrixConfigurationFile;
-	private File demandDataFolder;
-	private File zonePropertiesDataFile;
-	private File attractivityDataFile;
-	private File parkingFacilitiesDataFile;
-	private File carSharingPropertiesDataFile;
-	private File carSharingStationsDataFile;
-	private File carSharingFreeFloatingDataFile;
-	private File bikeSharingPropertiesDataFile;
-	private ChargingType charging;
-	private String defaultChargingPower;
-	private boolean mapIds;
+    private static final String defaultZoneRepository = "output/zone-repository/";
+    private static final boolean defaultMapIds = true;
+
+    private File zoneRepositoryFolder;
+    private File matrixConfigurationFile;
+    private File demandDataFolder;
+    private File zonePropertiesDataFile;
+    private File attractivityDataFile;
+    private File parkingFacilitiesDataFile;
+    private File carSharingPropertiesDataFile;
+    private File carSharingStationsDataFile;
+    private File carSharingFreeFloatingDataFile;
+    private File bikeSharingPropertiesDataFile;
+    private ChargingType charging;
+    private String defaultChargingPower;
+    private boolean mapIds;
 
 
-	public LocalFiles() {
-		charging = ChargingType.unlimited;
-		zoneRepositoryFolder = new File(defaultZoneRepository);
-		mapIds = defaultMapIds;
-	}
+    public LocalFiles() {
+        charging = ChargingType.unlimited;
+        zoneRepositoryFolder = new File(defaultZoneRepository);
+        mapIds = defaultMapIds;
+    }
 
-	/**
-	 * Load zone properties from data file, if available. Otherwise fall back to attractivities data file.
-	 */
-	private File getZonePropertiesDataAsFile() {
-		/* Fallback solution to return attractivitiesDataFile to ensure backward compatibility */
-		if (zonePropertiesDataFile.exists()) {
-			return zonePropertiesDataFile;
-		}
-		log.warn("referenced zonePropertiesDataFile does not exist - using attractivityDataFile instead!");
-		return attractivityDataFile;
-	}	
-	
-	public String getZoneRepositoryFolder() {
-		return Convert.asString(zoneRepositoryFolder);
-	}
-	
-	public void setZoneRepositoryFolder(String zoneRepositoryFile) {
-		this.zoneRepositoryFolder = Convert.asFile(zoneRepositoryFile);
-	}
+    /**
+     * Load zone properties from data file, if available. Otherwise fall back to attractivities data file.
+     */
+    private File getZonePropertiesDataAsFile() {
+        /* Fallback solution to return attractivitiesDataFile to ensure backward compatibility */
+        if (zonePropertiesDataFile.exists()) {
+            return zonePropertiesDataFile;
+        }
+        log.warn("referenced zonePropertiesDataFile does not exist - using attractivityDataFile instead!");
+        return attractivityDataFile;
+    }
 
-	public String getMatrixConfigurationFile() {
-		return Convert.asString(matrixConfigurationFile);
-	}
+    public String getZoneRepositoryFolder() {
+        return Convert.asString(zoneRepositoryFolder);
+    }
 
-	public void setMatrixConfigurationFile(String matrixConfigurationFile) {
-		this.matrixConfigurationFile = Convert.asFile(matrixConfigurationFile);
-	}
+    public void setZoneRepositoryFolder(String zoneRepositoryFile) {
+        this.zoneRepositoryFolder = Convert.asFile(zoneRepositoryFile);
+    }
 
-	public String getDemandDataFolder() {
-		return Convert.asString(demandDataFolder);
-	}
+    public String getMatrixConfigurationFile() {
+        return Convert.asString(matrixConfigurationFile);
+    }
 
-	public void setDemandDataFolder(String demandDataFolder) {
-		this.demandDataFolder = Convert.asFile(demandDataFolder);
-	}
+    public void setMatrixConfigurationFile(String matrixConfigurationFile) {
+        this.matrixConfigurationFile = Convert.asFile(matrixConfigurationFile);
+    }
 
-	public String getZonePropertiesDataFile() {
-		return Convert.asString(zonePropertiesDataFile);
-	}
-	
-	public void setZonePropertiesDataFile(String zonePropertiesDataFile) {
-		this.zonePropertiesDataFile = Convert.asFile(zonePropertiesDataFile);
-	}
-	
-	public String getAttractivityDataFile() {
-		return Convert.asString(attractivityDataFile);
-	}
-	
-	public void setAttractivityDataFile(String attractivityDataFile) {
-		this.attractivityDataFile = Convert.asFile(attractivityDataFile);
-	}
-	
-	public String getParkingFacilitiesDataFile() {
-		return Convert.asString(parkingFacilitiesDataFile);
-	}
-	
-	public void setParkingFacilitiesDataFile(String parkingFacilitiesDataFile) {
-		this.parkingFacilitiesDataFile = Convert.asFile(parkingFacilitiesDataFile);
-	}
+    public String getDemandDataFolder() {
+        return Convert.asString(demandDataFolder);
+    }
 
-	public String getCarSharingPropertiesDataFile() {
-		return Convert.asString(carSharingPropertiesDataFile);
-	}
-	
-	public void setCarSharingPropertiesDataFile(String carSharingPropertiesDataFile) {
-		this.carSharingPropertiesDataFile = Convert.asFile(carSharingPropertiesDataFile);
-	}
+    public void setDemandDataFolder(String demandDataFolder) {
+        this.demandDataFolder = Convert.asFile(demandDataFolder);
+    }
 
-	public String getCarSharingStationsDataFile() {
-		return Convert.asString(carSharingStationsDataFile);
-	}
-	
-	public void setCarSharingStationsDataFile(String carSharingStationsDataFile) {
-		this.carSharingStationsDataFile = Convert.asFile(carSharingStationsDataFile);
-	}
-	
-	public String getCarSharingFreeFloatingDataFile() {
-		return Convert.asString(carSharingFreeFloatingDataFile);
-	}
-	
-	public void setCarSharingFreeFloatingDataFile(String carSharingFreeFloatingDataFile) {
-		this.carSharingFreeFloatingDataFile = Convert.asFile(carSharingFreeFloatingDataFile);
-	}
-	
-	public String getBikeSharingPropertiesDataFile() {
-		return Convert.asString(bikeSharingPropertiesDataFile);
-	}
-	
-	public void setBikeSharingPropertiesDataFile(String bikeSharingDataFile) {
-		this.bikeSharingPropertiesDataFile = Convert.asFile(bikeSharingDataFile);
-	}
+    public String getZonePropertiesDataFile() {
+        return Convert.asString(zonePropertiesDataFile);
+    }
 
-	public ChargingType getCharging() {
-		return charging;
-	}
+    public void setZonePropertiesDataFile(String zonePropertiesDataFile) {
+        this.zonePropertiesDataFile = Convert.asFile(zonePropertiesDataFile);
+    }
 
-	public void setCharging(ChargingType charging) {
-		this.charging = charging;
-	}
+    public String getAttractivityDataFile() {
+        return Convert.asString(attractivityDataFile);
+    }
 
-	public String getDefaultChargingPower() {
-		return defaultChargingPower;
-	}
+    public void setAttractivityDataFile(String attractivityDataFile) {
+        this.attractivityDataFile = Convert.asFile(attractivityDataFile);
+    }
 
-	public void setDefaultChargingPower(String defaultChargingPower) {
-		this.defaultChargingPower = defaultChargingPower;
-  }
+    public String getParkingFacilitiesDataFile() {
+        return Convert.asString(parkingFacilitiesDataFile);
+    }
 
-  public boolean isMapIds() {
-    return mapIds;
-  }
+    public void setParkingFacilitiesDataFile(String parkingFacilitiesDataFile) {
+        this.parkingFacilitiesDataFile = Convert.asFile(parkingFacilitiesDataFile);
+    }
 
-  public void setMapIds(boolean mapIds) {
-    this.mapIds = mapIds;
-  }
+    public String getCarSharingPropertiesDataFile() {
+        return Convert.asString(carSharingPropertiesDataFile);
+    }
 
-	@Override
-	public DataRepositoryForPopulationSynthesis forPopulationSynthesis(
-			final VisumNetwork visumNetwork, final SimpleRoadNetwork roadNetwork,
-			final DemographyData demographyData, final StructuralData zoneProperties,
-			final PanelDataRepository panelDataRepository, final int numberOfZones,
-			final StartDateSpecification input, final ResultWriter results,
-			final AreaTypeRepository areaTypeRepository, final TypeMapping modeToType,
-			final PersonChanger personChanger, final Function<ImpedanceIfc, ImpedanceIfc> wrapImpedance,
-			final DemandRegionMapping demandRegionMapping)
-			throws IOException {
-		ChargingListener electricChargingWriter = new ElectricChargingWriter(results);
-		Matrices matrices = matrices(modeToType);
-		DemographyRepository demographyRepository = demographyRepository(demographyData);
-		ZoneRepository zoneRepository = loadZonesFromVisum(visumNetwork, roadNetwork,
-				areaTypeRepository, matrices);
-		initialiseResultWriting(zoneRepository, results, electricChargingWriter);
-		DemandZoneRepository demandZoneRepository = demandZoneRepository(zoneRepository, demographyData,
-				numberOfZones, zoneProperties);
-		ImpedanceIfc impedance = impedance(input, matrices, zoneRepository, wrapImpedance);
-		DemandDataFolder demandData = demandDataFolder(zoneRepository, numberOfZones, personChanger);
-		DemandDataRepository demandRepository = new SerialisingDemandRepository(
-				demandData.serialiseAsCsv());
-		DemandRegionRepository demandRegionRepository = demandRegionRepository(demandZoneRepository,
-				demandRegionMapping, demographyRepository);
-		return new LocalDataForPopulationSynthesis(matrices, demographyRepository,
-				demandRegionRepository, demandZoneRepository, panelDataRepository, impedance,
-				demandRepository, results);
-	}
+    public void setCarSharingPropertiesDataFile(String carSharingPropertiesDataFile) {
+        this.carSharingPropertiesDataFile = Convert.asFile(carSharingPropertiesDataFile);
+    }
 
-	private DemandRegionRepository demandRegionRepository(
-			final DemandZoneRepository demandZoneRepository,
-			final DemandRegionMapping demandRegionMapping,
-			final DemographyRepository demographyRepository) {
-		return new DemandRegionRepositoryBuilder(demandRegionMapping, demandZoneRepository,
-				demographyRepository).create();
-	}
+    public String getCarSharingStationsDataFile() {
+        return Convert.asString(carSharingStationsDataFile);
+    }
 
-	private DemandZoneRepository demandZoneRepository(
-			final ZoneRepository zoneRepository, final DemographyData demographyData,
-			final int numberOfZones, final StructuralData zoneProperties) {
-		return LocalDemandZoneRepository
-				.from(zoneRepository, demographyData, numberOfZones, zoneProperties);
-	}
+    public void setCarSharingStationsDataFile(String carSharingStationsDataFile) {
+        this.carSharingStationsDataFile = Convert.asFile(carSharingStationsDataFile);
+    }
 
-	private DemandDataFolder demandDataFolder(
-			final ZoneRepository zoneRepository, final int numberOfZones,
-			final PersonChanger personChanger)
-			throws IOException {
-		Map<ZoneId, Zone> mapping = new LocalZoneLoader(zoneRepository).mapZones(numberOfZones);
-		ZoneRepository zonesToSimulate = new LocalZoneRepository(mapping);
-		return DemandDataFolder.at(this.demandDataFolder, zoneRepository, zonesToSimulate, personChanger);
-	}
+    public String getCarSharingFreeFloatingDataFile() {
+        return Convert.asString(carSharingFreeFloatingDataFile);
+    }
 
-	private Matrices matrices(TypeMapping modeToType) throws FileNotFoundException {
-		MatrixConfiguration matrixConfiguration = loadMatrixConfiguration(modeToType);
-		return new MatrixRepository(matrixConfiguration);
-	}
+    public void setCarSharingFreeFloatingDataFile(String carSharingFreeFloatingDataFile) {
+        this.carSharingFreeFloatingDataFile = Convert.asFile(carSharingFreeFloatingDataFile);
+    }
 
-	private MatrixConfiguration loadMatrixConfiguration(TypeMapping modeToType) throws FileNotFoundException {
-		File configFile = matrixConfigurationFile;
-		File matrixFolder = configFile.getParentFile();
-		return FileMatrixConfiguration.from(configFile, matrixFolder, modeToType);
-	}
+    public String getBikeSharingPropertiesDataFile() {
+        return Convert.asString(bikeSharingPropertiesDataFile);
+    }
 
-	private DemographyRepository demographyRepository(DemographyData demographyData) {
-		return new DemographyBuilder(demographyData);
-	}
+    public void setBikeSharingPropertiesDataFile(String bikeSharingDataFile) {
+        this.bikeSharingPropertiesDataFile = Convert.asFile(bikeSharingDataFile);
+    }
 
-	private ZoneRepository loadZonesFromVisum(VisumNetwork visumNetwork,
-		SimpleRoadNetwork roadNetwork, AreaTypeRepository areaTypeRepository, Matrices matrices)
-		throws IOException {
-		CostMatrix matrix = matrices.distanceMatrix(Time.start);
-		Map<String, Integer> map = matrix
-			.ids()
-			.stream()
-			.collect(toMap(ZoneId::getExternalId, ZoneId::getMatrixColumn));
-		IdToOidMapper mapper = IdToOidMapper.createFrom(map);
-		ZoneRepository fromVisum = LocalZoneRepository
-			.from(visumNetwork, roadNetwork, charging, defaultPower(),
-				getZonePropertiesDataAsFile(), attractivityDataFile, parkingFacilitiesDataFile,
-				carSharingPropertiesDataFile, carSharingStationsDataFile,
-				carSharingFreeFloatingDataFile, bikeSharingPropertiesDataFile, areaTypeRepository,
-				mapper);
-		ZoneRepositorySerialiser serialised = createSerialiser(areaTypeRepository);
-		serialised.serialise(fromVisum);
-		return fromVisum;
-	}
+    public ChargingType getCharging() {
+        return charging;
+    }
 
-	private void initialiseResultWriting(
-			ZoneRepository zoneRepository, ResultWriter results,
-			ChargingListener electricChargingWriter) {
-		CarSharingWriter carSharingWriter = new CarSharingWriter(results);
-		for (Zone zone : zoneRepository.getZones()) {
-			zone.charging().register(electricChargingWriter);
-			zone.carSharing().register(carSharingWriter);
-		}
-	}
+    public void setCharging(ChargingType charging) {
+        this.charging = charging;
+    }
 
-	private DefaultPower defaultPower() {
-		if (Convert.asFile(defaultChargingPower).exists()) {
-			return new DefaultPower(defaultChargingPower);
-		}
-		log.warn("Default charging power file not specified using zero charging power.");
-		return DefaultPower.zero;
-	}
+    public String getDefaultChargingPower() {
+        return defaultChargingPower;
+    }
 
-	private void addOpportunities(
-			final ZoneRepository zoneRepository, final int numberOfZones,
-			final PersonChanger personChanger) throws IOException {
-		DemandDataFolder demandData = demandDataFolder(zoneRepository, numberOfZones, personChanger);
-		try (DemandDataDeserialiser deserialiser = demandData.deserialiseFromCsv()) {
-			deserialiser.addOpportunitiesTo(zoneRepository);
-		} catch (Exception e) {
-			throw warn(new IOException("Could not load demand data.", e), log);
-		}
-	}
+    public void setDefaultChargingPower(String defaultChargingPower) {
+        this.defaultChargingPower = defaultChargingPower;
+    }
 
-	private ImpedanceIfc impedance(
-			StartDateSpecification input, Matrices matrices, ZoneRepository zoneRepository,
-			Function<ImpedanceIfc, ImpedanceIfc> wrapImpedance) {
-		ImpedanceLocalData localImpedance = new ImpedanceLocalData(matrices, zoneRepository,
-				input.startDate());
-		return wrapImpedance.apply(localImpedance);
-	}
+    public boolean isMapIds() {
+        return mapIds;
+    }
 
-	@Override
-	public DataRepositoryForSimulation forSimulation(
-			Supplier<Network> network, int numberOfZones, InputSpecification input,
-			PublicTransportData data, ResultWriter results, ElectricChargingWriter electricChargingWriter,
-			AreaTypeRepository areaTypeRepository, TypeMapping modeToType,
-			Predicate<HouseholdForSetup> householdFilter, PersonChanger personChanger,
-			Function<ImpedanceIfc, ImpedanceIfc> wrapImpedance) throws IOException {
-		Matrices matrices = matrices(modeToType);
-		ZoneRepository zoneRepository = loadZonesFromMobiTopp(network, areaTypeRepository, matrices);
-		initialiseResultWriting(zoneRepository, results, electricChargingWriter);
-		addOpportunities(zoneRepository, numberOfZones, personChanger);
-		ImpedanceIfc localImpedance = impedance(input, matrices, zoneRepository, wrapImpedance);
-		ImpedanceIfc impedance = data.impedance(localImpedance, zoneRepository);
-		VehicleBehaviour vehicleBehaviour = data.vehicleBehaviour(results);
-		PersonLoader personLoader = personLoader(zoneRepository, numberOfZones, householdFilter,
-				personChanger);
-		triggerGarbageCollector();
-		return new LocalDataForSimulation(matrices, zoneRepository, impedance, personLoader,
-				vehicleBehaviour);
-	}
+    public void setMapIds(boolean mapIds) {
+        this.mapIds = mapIds;
+    }
 
-	private void triggerGarbageCollector() {
-	  System.gc();
-  }
+    @Override
+    public DataRepositoryForPopulationSynthesis forPopulationSynthesis(
+            final VisumNetwork visumNetwork, final SimpleRoadNetwork roadNetwork,
+            final DemographyData demographyData, final StructuralData zoneProperties,
+            final PanelDataRepository panelDataRepository, final int numberOfZones,
+            final StartDateSpecification input, final ResultWriter results,
+            final AreaTypeRepository areaTypeRepository, final TypeMapping modeToType,
+            final PersonChanger personChanger, final Function<ImpedanceIfc, ImpedanceIfc> wrapImpedance,
+            final DemandRegionMapping demandRegionMapping)
+            throws IOException {
+        ChargingListener electricChargingWriter = new ElectricChargingWriter(results);
+        Matrices matrices = matrices(modeToType);
+        DemographyRepository demographyRepository = demographyRepository(demographyData);
+        ZoneRepository zoneRepository = loadZonesFromVisum(visumNetwork, roadNetwork,
+                areaTypeRepository, matrices);
+        initialiseResultWriting(zoneRepository, results, electricChargingWriter);
+        DemandZoneRepository demandZoneRepository = demandZoneRepository(zoneRepository, demographyData,
+                numberOfZones, zoneProperties);
+        ImpedanceIfc impedance = impedance(input, matrices, zoneRepository, wrapImpedance);
+        DemandDataFolder demandData = demandDataFolder(zoneRepository, numberOfZones, personChanger);
+        DemandDataRepository demandRepository = new SerialisingDemandRepository(
+                demandData.serialiseAsCsv());
+        DemandRegionRepository demandRegionRepository = demandRegionRepository(demandZoneRepository,
+                demandRegionMapping, demographyRepository);
+        return new LocalDataForPopulationSynthesis(matrices, demographyRepository,
+                demandRegionRepository, demandZoneRepository, panelDataRepository, impedance,
+                demandRepository, results);
+    }
 
-  private ZoneRepository loadZonesFromMobiTopp(
-			Supplier<Network> networkSupplier, AreaTypeRepository areaTypeRepository, Matrices matrices) throws IOException {
-		ZoneRepositorySerialiser serialisedData = createSerialiser(areaTypeRepository);
-		if (serialisedData.isAvailable()) {
-			return serialisedData.load();
-		}
-		Network network = networkSupplier.get();
-		return loadZonesFromVisum(network.visumNetwork, network.roadNetwork, areaTypeRepository, matrices);
-	}
+    private DemandRegionRepository demandRegionRepository(
+            final DemandZoneRepository demandZoneRepository,
+            final DemandRegionMapping demandRegionMapping,
+            final DemographyRepository demographyRepository) {
+        return new DemandRegionRepositoryBuilder(demandRegionMapping, demandZoneRepository,
+                demographyRepository).create();
+    }
 
-	private ZoneRepositorySerialiser createSerialiser(AreaTypeRepository areaTypeRepository) {
-		ChargingDataFactory factory = createChargingFactory();
-		return new ZoneRepositorySerialiser(zoneRepositoryFolder, factory, attractivityDataFile,
-				bikeSharingPropertiesDataFile, areaTypeRepository);
-	}
+    private DemandZoneRepository demandZoneRepository(
+            final ZoneRepository zoneRepository, final DemographyData demographyData,
+            final int numberOfZones, final StructuralData zoneProperties) {
+        return LocalDemandZoneRepository
+                .from(zoneRepository, demographyData, numberOfZones, zoneProperties);
+    }
 
-	private ChargingDataFactory createChargingFactory() {
-		return charging.factory(defaultPower());
-	}
+    private DemandDataFolder demandDataFolder(
+            final ZoneRepository zoneRepository, final int numberOfZones,
+            final PersonChanger personChanger)
+            throws IOException {
+        Map<ZoneId, Zone> mapping = new LocalZoneLoader(zoneRepository).mapZones(numberOfZones);
+        ZoneRepository zonesToSimulate = new LocalZoneRepository(mapping);
+        return DemandDataFolder.at(this.demandDataFolder, zoneRepository, zonesToSimulate, personChanger);
+    }
 
-	private PersonLoader personLoader(
-			final ZoneRepository zoneRepository, final int numberOfZones,
-			final Predicate<HouseholdForSetup> householdFilter, final PersonChanger personChanger) {
-		try {
-			return loadFromLocalFolder(zoneRepository, numberOfZones, householdFilter, personChanger);
-		} catch (Exception e) {
-			throw warn(new RuntimeException(e), log);
-		}
-	}
+    private Matrices matrices(TypeMapping modeToType) throws FileNotFoundException {
+        MatrixConfiguration matrixConfiguration = loadMatrixConfiguration(modeToType);
+        return new MatrixRepository(matrixConfiguration);
+    }
 
-	private PersonLoader loadFromLocalFolder(
-			final ZoneRepository zoneRepository, final int numberOfZones,
-			final Predicate<HouseholdForSetup> householdFilter, final PersonChanger personChanger)
-			throws Exception {
-		DemandDataFolder demandDataFolder = demandDataFolder(zoneRepository, numberOfZones, personChanger);
-		try (DemandDataDeserialiser deserialiser = demandDataFolder.deserialiseFromCsv()) {
-			Population population = deserialiser.loadPopulation(householdFilter);
-			return new LocalPersonLoader(population);
-		}
-	}
+    private MatrixConfiguration loadMatrixConfiguration(TypeMapping modeToType) throws FileNotFoundException {
+        File configFile = matrixConfigurationFile;
+        File matrixFolder = configFile.getParentFile();
+        return FileMatrixConfiguration.from(configFile, matrixFolder, modeToType);
+    }
 
-	@Override
-	public void validate(TypeMapping modeToType) throws IOException {
-		validateFiles();
-		validateMatrices(modeToType);
-	}
+    private DemographyRepository demographyRepository(DemographyData demographyData) {
+        return new DemographyBuilder(demographyData);
+    }
 
-	private void validateFiles() throws IOException {
-		validateDemandDataFolder();
-		validateZoneRepositoryFolder();
-		Validate.files(matrixConfigurationFile).doExist();
-	}
+    private ZoneRepository loadZonesFromVisum(VisumNetwork visumNetwork,
+                                              SimpleRoadNetwork roadNetwork, AreaTypeRepository areaTypeRepository, Matrices matrices)
+            throws IOException {
+        CostMatrix matrix = matrices.distanceMatrix(Time.start);
+        Map<String, Integer> map = matrix
+                .ids()
+                .stream()
+                .collect(toMap(ZoneId::getExternalId, ZoneId::getMatrixColumn));
+        IdToOidMapper mapper = IdToOidMapper.createFrom(map);
+        ZoneRepository fromVisum = LocalZoneRepository
+                .from(visumNetwork, roadNetwork, charging, defaultPower(),
+                        getZonePropertiesDataAsFile(), attractivityDataFile, parkingFacilitiesDataFile,
+                        carSharingPropertiesDataFile, carSharingStationsDataFile,
+                        carSharingFreeFloatingDataFile, bikeSharingPropertiesDataFile, areaTypeRepository,
+                        mapper);
+        ZoneRepositorySerialiser serialised = createSerialiser(areaTypeRepository);
+        serialised.serialise(fromVisum);
+        return fromVisum;
+    }
 
-	private void validateZoneRepositoryFolder() throws IOException {
-		CreateFolder.at(zoneRepositoryFolder).ifMissing();
-	}
+    private void initialiseResultWriting(
+            ZoneRepository zoneRepository, ResultWriter results,
+            ChargingListener electricChargingWriter) {
+        CarSharingWriter carSharingWriter = new CarSharingWriter(results);
+        for (Zone zone : zoneRepository.getZones()) {
+            zone.charging().register(electricChargingWriter);
+            zone.carSharing().register(carSharingWriter);
+        }
+    }
 
-	private void validateDemandDataFolder() throws IOException {
-		CreateFolder.at(demandDataFolder).ifMissing();
-	}
+    private DefaultPower defaultPower() {
+        if (Convert.asFile(defaultChargingPower).exists()) {
+            return new DefaultPower(defaultChargingPower);
+        }
+        log.warn("Default charging power file not specified using zero charging power.");
+        return DefaultPower.zero;
+    }
 
-	private void validateMatrices(TypeMapping modeToType) {
-		try {
-      loadMatrixConfiguration(modeToType).validate();
-		} catch (FileNotFoundException cause) {
-			throw warn(new UncheckedIOException("Missing file check for matrix configuration.", cause), log);
-		}
-	}
+    private void addOpportunities(
+            final ZoneRepository zoneRepository, final int numberOfZones,
+            final PersonChanger personChanger) throws IOException {
+        DemandDataFolder demandData = demandDataFolder(zoneRepository, numberOfZones, personChanger);
+        try (DemandDataDeserialiser deserialiser = demandData.deserialiseFromCsv()) {
+            deserialiser.addOpportunitiesTo(zoneRepository);
+        } catch (Exception e) {
+            throw warn(new IOException("Could not load demand data.", e), log);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return getClass().getName() + " [matrixConfigurationFile=" + matrixConfigurationFile
-				+ ", demandDataFolder=" + demandDataFolder + "zonePropertiesDataFile=" + getZonePropertiesDataAsFile() 
-				+ ", attractivityDataFile=" + attractivityDataFile + ", parkingFacilitiesDataFile=" + parkingFacilitiesDataFile
-				+ ", carSharingstationsDataFile=" + carSharingStationsDataFile
-				+ ", charging=" + charging  + ", defaultChargingPower=" + defaultChargingPower + "]";
-	}
+    private ImpedanceIfc impedance(
+            StartDateSpecification input, Matrices matrices, ZoneRepository zoneRepository,
+            Function<ImpedanceIfc, ImpedanceIfc> wrapImpedance) {
+        ImpedanceLocalData localImpedance = new ImpedanceLocalData(matrices, zoneRepository,
+                input.startDate());
+        return wrapImpedance.apply(localImpedance);
+    }
+
+    @Override
+    public DataRepositoryForSimulation forSimulation(
+            Supplier<Network> network, int numberOfZones, InputSpecification input,
+            PublicTransportData data, ResultWriter results, ElectricChargingWriter electricChargingWriter,
+            AreaTypeRepository areaTypeRepository, TypeMapping modeToType,
+            Predicate<HouseholdForSetup> householdFilter, PersonChanger personChanger,
+            Function<ImpedanceIfc, ImpedanceIfc> wrapImpedance) throws IOException {
+        Matrices matrices = matrices(modeToType);
+        ZoneRepository zoneRepository = loadZonesFromMobiTopp(network, areaTypeRepository, matrices);
+        initialiseResultWriting(zoneRepository, results, electricChargingWriter);
+        addOpportunities(zoneRepository, numberOfZones, personChanger);
+        ImpedanceIfc localImpedance = impedance(input, matrices, zoneRepository, wrapImpedance);
+        ImpedanceIfc impedance = data.impedance(localImpedance, zoneRepository);//impedance equals to localImpedance here
+        VehicleBehaviour vehicleBehaviour = data.vehicleBehaviour(results);
+        PersonLoader personLoader = personLoader(zoneRepository, numberOfZones, householdFilter,
+                personChanger);
+        triggerGarbageCollector();
+        return new LocalDataForSimulation(matrices, zoneRepository, impedance, personLoader,
+                vehicleBehaviour);
+    }
+
+    private void triggerGarbageCollector() {
+        System.gc();
+    }
+
+    private ZoneRepository loadZonesFromMobiTopp(
+            Supplier<Network> networkSupplier, AreaTypeRepository areaTypeRepository, Matrices matrices) throws IOException {
+        ZoneRepositorySerialiser serialisedData = createSerialiser(areaTypeRepository);
+        if (serialisedData.isAvailable()) {
+            return serialisedData.load();
+        }
+        Network network = networkSupplier.get();
+        return loadZonesFromVisum(network.visumNetwork, network.roadNetwork, areaTypeRepository, matrices);
+    }
+
+    private ZoneRepositorySerialiser createSerialiser(AreaTypeRepository areaTypeRepository) {
+        ChargingDataFactory factory = createChargingFactory();
+        return new ZoneRepositorySerialiser(zoneRepositoryFolder, factory, attractivityDataFile,
+                bikeSharingPropertiesDataFile, areaTypeRepository);
+    }
+
+    private ChargingDataFactory createChargingFactory() {
+        return charging.factory(defaultPower());
+    }
+
+    private PersonLoader personLoader(
+            final ZoneRepository zoneRepository, final int numberOfZones,
+            final Predicate<HouseholdForSetup> householdFilter, final PersonChanger personChanger) {
+        try {
+            return loadFromLocalFolder(zoneRepository, numberOfZones, householdFilter, personChanger);
+        } catch (Exception e) {
+            throw warn(new RuntimeException(e), log);
+        }
+    }
+
+    private PersonLoader loadFromLocalFolder(
+            final ZoneRepository zoneRepository, final int numberOfZones,
+            final Predicate<HouseholdForSetup> householdFilter, final PersonChanger personChanger)
+            throws Exception {
+        DemandDataFolder demandDataFolder = demandDataFolder(zoneRepository, numberOfZones, personChanger);
+        try (DemandDataDeserialiser deserialiser = demandDataFolder.deserialiseFromCsv()) {
+            Population population = deserialiser.loadPopulation(householdFilter);
+            return new LocalPersonLoader(population);
+        }
+    }
+
+    @Override
+    public void validate(TypeMapping modeToType) throws IOException {
+        validateFiles();
+        validateMatrices(modeToType);
+    }
+
+    private void validateFiles() throws IOException {
+        validateDemandDataFolder();
+        validateZoneRepositoryFolder();
+        Validate.files(matrixConfigurationFile).doExist();
+    }
+
+    private void validateZoneRepositoryFolder() throws IOException {
+        CreateFolder.at(zoneRepositoryFolder).ifMissing();
+    }
+
+    private void validateDemandDataFolder() throws IOException {
+        CreateFolder.at(demandDataFolder).ifMissing();
+    }
+
+    private void validateMatrices(TypeMapping modeToType) {
+        try {
+            loadMatrixConfiguration(modeToType).validate();
+        } catch (FileNotFoundException cause) {
+            throw warn(new UncheckedIOException("Missing file check for matrix configuration.", cause), log);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName() + " [matrixConfigurationFile=" + matrixConfigurationFile
+                + ", demandDataFolder=" + demandDataFolder + "zonePropertiesDataFile=" + getZonePropertiesDataAsFile()
+                + ", attractivityDataFile=" + attractivityDataFile + ", parkingFacilitiesDataFile=" + parkingFacilitiesDataFile
+                + ", carSharingstationsDataFile=" + carSharingStationsDataFile
+                + ", charging=" + charging + ", defaultChargingPower=" + defaultChargingPower + "]";
+    }
 
 }
