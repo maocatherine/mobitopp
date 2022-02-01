@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="mobitopp-parent.mobitopp:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/mobitopp_parent_mobitopp_jar</output-path>
+    <root id="archive" name="mobitopp-parent.mobitopp_jar.jar">
+      <element id="archive" name="mobitopp-parent.mobitopp.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>
