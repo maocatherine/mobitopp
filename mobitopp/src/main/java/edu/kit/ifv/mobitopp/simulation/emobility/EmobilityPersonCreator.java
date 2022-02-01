@@ -16,48 +16,48 @@ import edu.kit.ifv.mobitopp.util.panel.PersonOfPanelData;
 
 public class EmobilityPersonCreator extends PanelBasedPersonCreator implements PersonCreator {
 
-  private final Random random;
-	private	final Map<String,MobilityProviderCustomerModel> carSharingCustomerModels;
-	private final PublicChargingInfluenceModel publicChargingInfluenceModel;
+    private final Random random;
+    private final Map<String, MobilityProviderCustomerModel> carSharingCustomerModels;
+    private final PublicChargingInfluenceModel publicChargingInfluenceModel;
 
-	public EmobilityPersonCreator(
-		CommutationTicketModelIfc commutationTicketModel,
-		Map<String,MobilityProviderCustomerModel> carSharingCustomerModels,
-		long seed
-	) {
-		super(commutationTicketModel);
-		assert carSharingCustomerModels != null;
-		this.carSharingCustomerModels = Collections.unmodifiableMap(carSharingCustomerModels);
-		this.publicChargingInfluenceModel = new PublicChargingInfluenceModel();
-		this.random = new Random(seed);
-	}
+    public EmobilityPersonCreator(
+            CommutationTicketModelIfc commutationTicketModel,
+            Map<String, MobilityProviderCustomerModel> carSharingCustomerModels,
+            long seed
+    ) {
+        super(commutationTicketModel);
+        assert carSharingCustomerModels != null;
+        this.carSharingCustomerModels = Collections.unmodifiableMap(carSharingCustomerModels);
+        this.publicChargingInfluenceModel = new PublicChargingInfluenceModel();
+        this.random = new Random(seed);
+    }
 
 
-	@Override
-	protected PersonBuilder newPerson(
-		int oid,
-		PersonOfPanelData personOfPanelData,
-		HouseholdForSetup household,
-		boolean hasCommuterTicket
-	) {
-		PersonBuilder person = super.newPerson(oid, personOfPanelData, household, hasCommuterTicket);
-		float eMobilityAcceptance = this.random.nextFloat();
-		Map<String, Boolean> carSharingCustomership = new TreeMap<String, Boolean>();
-		for(String carSharingCompany : this.carSharingCustomerModels.keySet()) {
-			MobilityProviderCustomerModel model = this.carSharingCustomerModels.get(carSharingCompany);
-			Boolean isCustomer = model.estimateCustomership(person);
-			carSharingCustomership.put(carSharingCompany, isCustomer);
-		}
-		double randomNumber = this.random.nextDouble();
+    @Override
+    protected PersonBuilder newPerson(
+            int oid,
+            PersonOfPanelData personOfPanelData,
+            HouseholdForSetup household,
+            boolean hasCommuterTicket
+    ) {
+        PersonBuilder person = super.newPerson(oid, personOfPanelData, household, hasCommuterTicket);
+        float eMobilityAcceptance = this.random.nextFloat();
+        Map<String, Boolean> carSharingCustomership = new TreeMap<String, Boolean>();
+        for (String carSharingCompany : this.carSharingCustomerModels.keySet()) {
+            MobilityProviderCustomerModel model = this.carSharingCustomerModels.get(carSharingCompany);
+            Boolean isCustomer = model.estimateCustomership(person);
+            carSharingCustomership.put(carSharingCompany, isCustomer);
+        }
+        double randomNumber = this.random.nextDouble();
 
-		EmobilityPerson.PublicChargingInfluencesDestinationChoice chargingInfluencesDestinationChoice 
-			=	this.publicChargingInfluenceModel.estimatePublicChargingInfluence(person, carSharingCustomership, randomNumber);
+        EmobilityPerson.PublicChargingInfluencesDestinationChoice chargingInfluencesDestinationChoice
+                = this.publicChargingInfluenceModel.estimatePublicChargingInfluence(person, carSharingCustomership, randomNumber);
 
-    return new EmobilityPersonBuilder(person)
-        .setEmobilityAcceptance(eMobilityAcceptance)
-        .setChargingInfluencesDestinationChoice(chargingInfluencesDestinationChoice)
-        .setMobilityProviderMembership(carSharingCustomership);
-	}
+        return new EmobilityPersonBuilder(person)
+                .setEmobilityAcceptance(eMobilityAcceptance)
+                .setChargingInfluencesDestinationChoice(chargingInfluencesDestinationChoice)
+                .setMobilityProviderMembership(carSharingCustomership);
+    }
 
 }
 

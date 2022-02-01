@@ -113,7 +113,7 @@ public class DijkstraVisumTest {
 
 	@Test
 	public void complexShortestToAll() {
-		graph = new GraphFromVisumNetwork(visum, NodeFromVisumZone::useExternalInRouteSeach);
+		graph = new GraphFromVisumNetwork(visum, NodeFromVisumZone::useExternalInRouteSearch);
 
 		searchPaths();
 
