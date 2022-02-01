@@ -15,65 +15,68 @@ import edu.kit.ifv.mobitopp.time.Time;
 
 public class ImpedanceLocalData implements ImpedanceIfc {
 
-	private final Matrices matrices;
-	private final Time start;
-	private final ZoneRepository zoneRepository;
+    private final Matrices matrices;
+    private final Time start;
+    private final ZoneRepository zoneRepository;
 
-	public ImpedanceLocalData(
-			Matrices matrices, ZoneRepository zoneRepository, Time startDate) {
-		super();
-		this.matrices = matrices;
-		this.zoneRepository = zoneRepository;
-		this.start = startDate;
-	}
-
-	@Override
-	public Optional<PublicTransportRoute> getPublicTransportRoute(
-			Location source, Location target, Mode mode, Time date) {
-		return Optional.empty();
-	}
-	
-	@Override
-	public Optional<PublicTransportRoute> getPublicTransportRoute(Stop start, Stop end, Mode mode, Time date) {
-		return Optional.empty();
-	}
-
-  @Override
-  public float getTravelTime(ZoneId origin, ZoneId destination, Mode mode, Time date) {
-    return matrices.travelTimeFor(mode.legMode(), date).get(origin, destination);
-  }
-
-  @Override
-  public float getTravelCost(ZoneId origin, ZoneId destination, Mode mode, Time date) {
-    if(mode == StandardMode.BIKE || mode == StandardMode.PASSENGER || mode == StandardMode.PEDESTRIAN) {
-    	return 0.0f;
+    public ImpedanceLocalData(
+            Matrices matrices, ZoneRepository zoneRepository, Time startDate) {
+        super();
+        this.matrices = matrices;
+        this.zoneRepository = zoneRepository;
+        this.start = startDate;
     }
-    return matrices.travelCostFor(mode.legMode(), date).get(origin, destination);
-  }
 
-  @Override
-  public float getDistance(ZoneId origin, ZoneId destination) {
-    return matrices.distanceMatrix(start).get(origin, destination);
-  }
+    @Override
+    public Optional<PublicTransportRoute> getPublicTransportRoute(
+            Location source, Location target, Mode mode, Time date) {
+        return Optional.empty();
+    }
 
-  @Override
-  public float getParkingCost(ZoneId destination, Time date) {
-    return matrices.parkingCostMatrix(date).get(destination, destination);
-  }
+    @Override
+    public Optional<PublicTransportRoute> getPublicTransportRoute(Stop start, Stop end, Mode mode, Time date) {
+        return Optional.empty();
+    }
 
-  @Override
-  public float getParkingStress(ZoneId destination, Time date) {
-    return matrices.parkingStressMatrix(date).get(destination, destination);
-  }
+    @Override
+    public float getTravelTime(ZoneId origin, ZoneId destination, Mode mode, Time date) {
+        return matrices.travelTimeFor(mode.legMode(), date).get(origin, destination);
+    }
 
-  @Override
-  public float getConstant(ZoneId origin, ZoneId destination, Time date) {
-    return matrices.constantMatrix(date).get(origin, destination);
-  }
+    @Override
+    public float getTravelCost(ZoneId origin, ZoneId destination, Mode mode, Time date) {
+        if (mode == StandardMode.BIKE || mode == StandardMode.PEDESTRIAN) {
+            return 0.0f;
+        } else if (mode == StandardMode.PASSENGER) {
+            mode = StandardMode.CAR;
+            return matrices.travelCostFor(mode.legMode(), date).get(origin, destination) / 2;
+        }
+        return matrices.travelCostFor(mode.legMode(), date).get(origin, destination);
+    }
 
-  @Override
-  public float getOpportunities(ActivityType activityType, ZoneId zone) {
-    return zoneRepository.getZoneById(zone).getAttractivity(activityType);
-  }
+    @Override
+    public float getDistance(ZoneId origin, ZoneId destination) {
+        return matrices.distanceMatrix(start).get(origin, destination);
+    }
+
+    @Override
+    public float getParkingCost(ZoneId destination, Time date) {
+        return matrices.parkingCostMatrix(date).get(destination, destination);
+    }
+
+    @Override
+    public float getParkingStress(ZoneId destination, Time date) {
+        return matrices.parkingStressMatrix(date).get(destination, destination);
+    }
+
+    @Override
+    public float getConstant(ZoneId origin, ZoneId destination, Time date) {
+        return matrices.constantMatrix(date).get(origin, destination);
+    }
+
+    @Override
+    public float getOpportunities(ActivityType activityType, ZoneId zone) {
+        return zoneRepository.getZoneById(zone).getAttractivity(activityType);
+    }
 
 }
