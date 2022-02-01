@@ -21,311 +21,313 @@ import edu.kit.ifv.mobitopp.simulation.Location;
 import edu.kit.ifv.mobitopp.util.panel.PersonOfPanelData;
 
 
-class DefaultFixedDestinationSelector
-implements FixedDestinationSelector
-{	
+class DefaultFixedDestinationSelector implements FixedDestinationSelector {
 
-	private Map<ActivityType,FixedDistributionMatrix> _fixedDistributionMatrices = null;
+    private Map<ActivityType, FixedDistributionMatrix> _fixedDistributionMatrices = null;
 
-	private final Random random;
+    private final Random random;
 
-	private ActivityType[] activityTypes = new ActivityType[] {
-																									ActivityType.WORK,
-																									ActivityType.EDUCATION_PRIMARY,
-																									ActivityType.EDUCATION_SECONDARY,
-																									ActivityType.EDUCATION_TERTIARY,
-																									ActivityType.EDUCATION_OCCUP,
-																									ActivityType.EDUCATION
-																								};
+    private ActivityType[] activityTypes = new ActivityType[]{
+            ActivityType.WORK,
+            ActivityType.EDUCATION_PRIMARY,
+            ActivityType.EDUCATION_SECONDARY,
+            ActivityType.EDUCATION_TERTIARY,
+            ActivityType.EDUCATION_OCCUP,
+            ActivityType.EDUCATION
+    };
 
-	protected final ZoneRepository zoneRepository;
+    protected final ZoneRepository zoneRepository;
 
-	protected final	ImpedanceIfc impedance;
+    protected final ImpedanceIfc impedance;
 
-	public DefaultFixedDestinationSelector(ActivityType[] activityTypes,
-		ZoneRepository zoneRepository,
-		Map<ActivityType,FixedDistributionMatrix> fixedDistributionMatrices_,
-		ImpedanceIfc impedance,
-		long randomSeed	
-	)
-	{
-	  this.activityTypes = activityTypes;
-		this.zoneRepository = zoneRepository;
-		this._fixedDistributionMatrices = fixedDistributionMatrices_;
+    public DefaultFixedDestinationSelector(ActivityType[] activityTypes,
+                                           ZoneRepository zoneRepository,
+                                           Map<ActivityType, FixedDistributionMatrix> fixedDistributionMatrices_,
+                                           ImpedanceIfc impedance,
+                                           long randomSeed
+    ) {
+        this.activityTypes = activityTypes;
+        this.zoneRepository = zoneRepository;
+        this._fixedDistributionMatrices = fixedDistributionMatrices_;
 
-		this.impedance = impedance;
-		this.random = new Random(randomSeed);
-	}
-	
-	public DefaultFixedDestinationSelector(
-	    ZoneRepository zoneRepository,
-	    Map<ActivityType,FixedDistributionMatrix> fixedDistributionMatrices_,
-	    ImpedanceIfc impedance,
-	    long randomSeed	
-	    )
-	{
-	  this.zoneRepository = zoneRepository;
-	  this._fixedDistributionMatrices = fixedDistributionMatrices_;
-	  
-	  this.impedance = impedance;
-	  this.random = new Random(randomSeed);
-	}
-	
+        this.impedance = impedance;
+        this.random = new Random(randomSeed);
+    }
 
-	public void setFixedDestinations(
-		Zone zone, 
-		Map<Integer, PersonBuilder> persons,
-		Map<Integer, PersonOfPanelData> panelPersons
-	)
-	{
+    public DefaultFixedDestinationSelector(
+            ZoneRepository zoneRepository,
+            Map<ActivityType, FixedDistributionMatrix> fixedDistributionMatrices_,
+            ImpedanceIfc impedance,
+            long randomSeed
+    ) {
+        this.zoneRepository = zoneRepository;
+        this._fixedDistributionMatrices = fixedDistributionMatrices_;
 
-			// Für alle Poltypen (Arbeit/Ausbildung ggf. differenziert)
-			// 1. Personen zählen
-			// 2. nach Poldistanz sortieren
-			// 3. Verteilung der Zielzellen nach Distanz
-			// 4. Distanzverteilung der Zielzellen skalieren (entsprechend Personenzahl)
-			// 5. Pole zuordnen
+        this.impedance = impedance;
+        this.random = new Random(randomSeed);
+    }
 
-		for (ActivityType activityType : this.activityTypes) {
-			SortedMap<Integer,List<PersonBuilder>> personDistances 
-				= calculatePersonDistanceDistribution(activityType, persons, panelPersons);
 
-			// 3. Verteilung der Zielzellen nach Distanz
-			// 4. Distanzverteilung der Zielzellen skalieren (entsprechend Personenzahl)
-			// 5. Pole zuordnen
+    public void setFixedDestinations(
+            Zone zone,
+            Map<Integer, PersonBuilder> persons,
+            Map<Integer, PersonOfPanelData> panelPersons
+    ) {
 
-			SortedMap<Integer,Map<ZoneId,Float>> zoneDistances 
-				= calculateZoneDistanceDistribution(zone, activityType);
+        // Für alle Poltypen (Arbeit/Ausbildung ggf. differenziert)
+        // 1. Personen zählen
+        // 2. nach Poldistanz sortieren
+        // 3. Verteilung der Zielzellen nach Distanz
+        // 4. Distanzverteilung der Zielzellen skalieren (entsprechend Personenzahl)
+        // 5. Pole zuordnen
 
-			reweightZoneDistanceDistribution(zoneDistances, activityType);
+        // For all pole types (work / training may be differentiated)
+        // 1. Count people
+        // 2. Sort by pole distance
+        // 3. Distribution of target cells according to distance
+        // 4. Scale the distance distribution of the target cells (according to the number of people)
+        // 5. Assign poles.
 
-			rescaleZoneDistanceDistributions(personDistances, zoneDistances);	
+        for (ActivityType activityType : this.activityTypes) {
+            //personDistances are calculated from people's demand. From the population.csv file.
+            SortedMap<Integer, List<PersonBuilder>> personDistances
+                    = calculatePersonDistanceDistribution(activityType, persons, panelPersons);
 
-			ActivityType fixedActivityType = (activityType == ActivityType.WORK)
-																				? ActivityType.WORK
-																				: ActivityType.EDUCATION;
+            // 3. Distribution of target cells according to distance
+            // 4. Scale the distance distribution of the target cells (according to the number of people)
+            // 5. Assign poles.
 
-			setPersonsPoleZones(fixedActivityType, personDistances, zoneDistances);	
-		}
-	}
+            SortedMap<Integer, Map<ZoneId, Float>> zoneDistances
+                    = calculateZoneDistanceDistribution(zone, activityType);
 
-  private SortedMap<Integer, Map<ZoneId, Float>> calculateZoneDistanceDistribution(
-      Zone zone, ActivityType activityType) {
+            //TODO:need to double check this.
+            reweightZoneDistanceDistribution(zoneDistances, activityType);
 
-    FixedDistributionMatrix distMatrix = this._fixedDistributionMatrices.get(activityType);
+            rescaleZoneDistanceDistributions(personDistances, zoneDistances);
 
-    SortedMap<Integer, Map<ZoneId, Float>> distances = new TreeMap<>();
+            ActivityType fixedActivityType = (activityType == ActivityType.WORK)
+                    ? ActivityType.WORK
+                    : ActivityType.EDUCATION;
 
-    ZoneId homeId = zone.getId();
+            setPersonsPoleZones(fixedActivityType, personDistances, zoneDistances);
+        }
+    }
 
-    for (ZoneId destinationId : zoneRepository.getZoneIds()) {
-      Float dist_float = this.impedance.getDistance(homeId, destinationId);
-      Integer dist = dist_float.intValue();
-      Float count = distMatrix.get(homeId, destinationId);
-      if (count > 0.0f || destinationId.equals(zone.getId())) {
-        if (distances.get(dist) == null) {
-          distances.put(dist, new LinkedHashMap<>());
+    private SortedMap<Integer, Map<ZoneId, Float>> calculateZoneDistanceDistribution(
+            Zone zone, ActivityType activityType) {
+
+        FixedDistributionMatrix distMatrix = this._fixedDistributionMatrices.get(activityType);
+
+        SortedMap<Integer, Map<ZoneId, Float>> distances = new TreeMap<>();
+
+        ZoneId homeId = zone.getId();
+
+        for (ZoneId destinationId : zoneRepository.getZoneIds()) {
+            Float dist_float = this.impedance.getDistance(homeId, destinationId);
+            Integer dist = dist_float.intValue();
+            Float count = distMatrix.get(homeId, destinationId);
+            if (count > 0.0f || destinationId.equals(zone.getId())) {
+                if (distances.get(dist) == null) {
+                    distances.put(dist, new LinkedHashMap<>());
+                }
+
+                if (count == 0.0f) { // work-around in case that no target zone exists
+                    count = 0.000001f;
+                }
+
+                distances.get(dist).put(destinationId, count);
+            }
+
         }
 
-        if (count == 0.0f) { // work-around in case that no target zone exists
-          count = 0.000001f;
+        return distances;
+    }
+
+    private void reweightZoneDistanceDistribution(
+            SortedMap<Integer, Map<ZoneId, Float>> distances,
+            ActivityType activityType
+    ) {
+
+        float beta;
+        float alpha;
+
+
+        if (activityType == ActivityType.EDUCATION_PRIMARY) {
+            beta = -0.1f;
+            alpha = 1e-3f;
+        } else if (activityType == ActivityType.EDUCATION_SECONDARY) {
+            beta = 0.9f;
+            alpha = 4e-4f;
+        } else if (activityType == ActivityType.EDUCATION_TERTIARY) {
+            beta = 0.5f;
+            alpha = 1e-4f;
+        } else if (activityType == ActivityType.EDUCATION_OCCUP) {
+            beta = 0.5f;
+            alpha = 1e-4f;
+        } else if (activityType == ActivityType.EDUCATION) {
+            beta = 0.7f;
+            alpha = 1e-4f;
+        } else if (activityType == ActivityType.WORK) {
+            beta = 0.45f;
+            alpha = 1e-3f;
+        } else {
+            beta = 0.0f;
+            alpha = 0.0f;
         }
 
-        distances.get(dist).put(destinationId, count);
-      }
+
+        for (Integer distance : distances.keySet()) {
+
+            Map<ZoneId, Float> zones = distances.get(distance);
+
+            float damping = 1.0f - beta * (float) Math.exp(-alpha * distance);
+            for (ZoneId zone : zones.keySet()) {
+
+                float value = zones.get(zone);
+
+                zones.put(zone, damping * value);
+            }
+        }
+    }
+
+    private SortedMap<Integer, List<PersonBuilder>> calculatePersonDistanceDistribution(
+            ActivityType activityType,
+            Map<Integer, PersonBuilder> demandPersons,
+            Map<Integer, PersonOfPanelData> panelPersons
+    ) {
+        SortedMap<Integer, List<PersonBuilder>> distances = new TreeMap<>();
+
+        for (Integer personId : demandPersons.keySet()) {
+
+            PersonOfPanelData personOfPanelData = panelPersons.get(personId);
+            PersonBuilder person = demandPersons.get(personId);
+            assert person != null;
+            assert personOfPanelData != null;
+
+            // Think twice before changing the following if.
+            //~10% of all persons did not report a pole distance, so no zone will be assigned.
+            // This matches the percentage of holiday weeks in a year vs. all weeks of a year (5/50)
+            if (
+                    activityTypeMatchesEmploymentType(activityType, person.employment())
+                            || (activityType == ActivityType.WORK || activityType == ActivityType.EDUCATION)
+                            && person.getPatternActivityWeek().existsPatternActivity(activityType)
+                            && !person.hasFixedZoneFor(activityType)
+            ) {
+                int dist = (int) personOfPanelData.getPoleDistance(); //Here extract the commute distance from panel data.
+
+                if (distances.get(dist) == null) {
+                    distances.put(dist, new ArrayList<>());
+                }
+
+                distances.get(dist).add(person);
+            }
+        }
+
+        return distances;
+    }
+
+    private boolean activityTypeMatchesEmploymentType(
+            ActivityType activityType,
+            Employment employmentType
+    ) {
+
+        return activityType == ActivityType.EDUCATION_PRIMARY
+                && employmentType == Employment.STUDENT_PRIMARY
+                || activityType == ActivityType.EDUCATION_SECONDARY
+                && employmentType == Employment.STUDENT_SECONDARY
+                || activityType == ActivityType.EDUCATION_TERTIARY
+                && employmentType == Employment.STUDENT_TERTIARY
+                || activityType == ActivityType.EDUCATION_OCCUP
+                && employmentType == Employment.EDUCATION;
+    }
+
+
+    private void rescaleZoneDistanceDistributions(
+            SortedMap<Integer, List<PersonBuilder>> personDistances,
+            SortedMap<Integer, Map<ZoneId, Float>> zoneDistances
+    ) {
+
+        int pers_cnt = 0;
+        float zone_cnt = 0.0f;
+
+        for (Integer dist : personDistances.keySet()) {
+            pers_cnt += personDistances.get(dist).size();
+        }
+
+        for (Integer dist : zoneDistances.keySet()) {
+            for (ZoneId target : zoneDistances.get(dist).keySet()) {
+                zone_cnt += zoneDistances.get(dist).get(target);
+            }
+        }
+
+        float scaling = pers_cnt / zone_cnt;
+
+        double curr_cnt = 0.0f;
+        double culum_remainder = 0.0;
+
+        for (Integer dist : zoneDistances.keySet()) {
+            for (ZoneId target : zoneDistances.get(dist).keySet()) {
+                float val = zoneDistances.get(dist).get(target);
+                double scaled = val * scaling;
+                double rounded = Math.floor(scaled);
+                double remainder = scaled - rounded;
+
+                culum_remainder += remainder;
+
+                if (culum_remainder > 1.0) {
+                    rounded += 1.0;
+                    culum_remainder -= 1.0;
+                }
+
+                zoneDistances.get(dist).put(target, (float) rounded);
+
+                curr_cnt += rounded;
+            }
+        }
+
+        int diff = pers_cnt - (int) curr_cnt;
+
+        Integer first = zoneDistances.firstKey();
+        Map<ZoneId, Float> firstMap = zoneDistances.get(first);
+        ZoneId zone = firstMap.keySet().iterator().next();
+        firstMap.put(zone, firstMap.get(zone) + diff);
+
 
     }
 
-    return distances;
-  }
+    private void setPersonsPoleZones(
+            ActivityType activityType,
+            SortedMap<Integer, List<PersonBuilder>> personDistances,
+            SortedMap<Integer, Map<ZoneId, Float>> zoneDistances
+    ) {
 
-	private void reweightZoneDistanceDistribution(
-		SortedMap<Integer,Map<ZoneId,Float>> distances,
-		ActivityType activityType
-	) {
+        LinkedList<ZoneId> zoneOids = new LinkedList<>();
 
-		float	beta;
-		float	alpha;
-
-
-		if (activityType == ActivityType.EDUCATION_PRIMARY) {
-			beta = -0.1f;
-			alpha = 1e-3f;
-		} else if (activityType == ActivityType.EDUCATION_SECONDARY) {
-			beta = 0.9f;
-			alpha = 4e-4f;
-		} else if (activityType == ActivityType.EDUCATION_TERTIARY) {
-			beta = 0.5f;
-			alpha = 1e-4f;
-		} else if (activityType == ActivityType.EDUCATION_OCCUP) {
-			beta = 0.5f;
-			alpha = 1e-4f;
-		} else if (activityType == ActivityType.EDUCATION) {
-			beta = 0.7f;
-			alpha = 1e-4f;
-		} else if (activityType == ActivityType.WORK) {
-			beta = 0.45f;
-			alpha = 1e-3f;
-		} else {
-			beta = 0.0f;
-			alpha = 0.0f;
-		}
-
-		
-
-		for (Integer distance : distances.keySet()) {
-
-			Map<ZoneId,Float> zones = distances.get(distance);
-
-			float damping = 1.0f - beta*(float)Math.exp(-alpha*distance);
-			for (ZoneId zone : zones.keySet()) {
-
-				float value = zones.get(zone);
-
-				zones.put(zone, damping*value);
-			}
-		}
-	}
-
-	private SortedMap<Integer,List<PersonBuilder>> calculatePersonDistanceDistribution(
-		ActivityType activityType,
-		Map<Integer, PersonBuilder> demandPersons,
-		Map<Integer, PersonOfPanelData> panelPersons
-	) {
-			SortedMap<Integer,List<PersonBuilder>> distances = new TreeMap<>();
-
-			for (Integer personId : demandPersons.keySet()) {
-
-				PersonOfPanelData personOfPanelData = panelPersons.get(personId);
-				PersonBuilder person = demandPersons.get(personId);
-				assert person != null;
-				assert personOfPanelData != null;
-
-				// Think twice before changing the following if.
-				//~10% of all persons did not report a pole distance, so no zone will be assigned. 
-				// This matches the percentage of holiday weeks in a year vs. all weeks of a year (5/50)
-				if (
-						activityTypeMatchesEmploymentType(activityType, person.employment())
-						|| (activityType == ActivityType.WORK || activityType == ActivityType.EDUCATION)
-								&& person.getPatternActivityWeek().existsPatternActivity(activityType)
-								&& !person.hasFixedZoneFor(activityType)
-				) {
-					int dist = (int) personOfPanelData.getPoleDistance();
-
-					if (distances.get(dist) == null) {
-							distances.put(dist, new ArrayList<>());
-					}
-
-					distances.get(dist).add(person);
-				}
-			}
-
-		return distances;
-	}
-
-	private boolean activityTypeMatchesEmploymentType(
-		ActivityType activityType, 
-		Employment employmentType
-	) {
-
-		return activityType == ActivityType.EDUCATION_PRIMARY 
-						&& employmentType == Employment.STUDENT_PRIMARY
-				|| activityType == ActivityType.EDUCATION_SECONDARY 
-						&& employmentType == Employment.STUDENT_SECONDARY
-				|| activityType == ActivityType.EDUCATION_TERTIARY 
-						&& employmentType == Employment.STUDENT_TERTIARY
-				|| activityType == ActivityType.EDUCATION_OCCUP
-						&& employmentType == Employment.EDUCATION
-		;
-	}
+        for (Integer dist : zoneDistances.keySet()) {
+            for (ZoneId zone : zoneDistances.get(dist).keySet()) {
+                for (int i = 0; i < zoneDistances.get(dist).get(zone); i++) {
+                    zoneOids.add(zone);
+                }
+            }
+        }
 
 
-	private void rescaleZoneDistanceDistributions(
-		SortedMap<Integer,List<PersonBuilder>> personDistances, 
-		SortedMap<Integer,Map<ZoneId,Float>> zoneDistances
-	) {
+        for (Integer dist : personDistances.keySet()) {
+            for (PersonBuilder person : personDistances.get(dist)) {
+                ZoneId zoneId = zoneOids.remove();
+                Zone zone = this.zoneRepository.getZoneById(zoneId);
+                assert zone != null;
+                Location location;
+                if (zone.opportunities().locationsAvailable(activityType)) {
+                    location = zone.opportunities().selectRandomLocation(activityType, this.random.nextDouble());
+                } else {
+                    location = zone.centroidLocation();
+                }
+                person.addFixedDestination(new FixedDestination(activityType, zone, location));
+            }
+        }
 
-		int pers_cnt = 0;
-		float zone_cnt = 0.0f;
-
-		for (Integer dist : personDistances.keySet()) {
-			pers_cnt +=  personDistances.get(dist).size();
-		}
-
-		for (Integer dist : zoneDistances.keySet()) {
-			for (ZoneId target : zoneDistances.get(dist).keySet()) {
-				zone_cnt +=  zoneDistances.get(dist).get(target);
-			}
-		}
-
-		float scaling = pers_cnt / zone_cnt;
-
-		double curr_cnt = 0.0f;
-		double culum_remainder = 0.0;
-
-		for (Integer dist : zoneDistances.keySet()) {
-			for (ZoneId target : zoneDistances.get(dist).keySet()) {
-				float val =  zoneDistances.get(dist).get(target);
-				double scaled =  val*scaling;
-				double rounded = Math.floor(scaled);
-				double remainder = scaled - rounded;
-
-				culum_remainder += remainder;
-
-				if (culum_remainder > 1.0) {
-					rounded += 1.0;
-					culum_remainder -= 1.0;
-				}	
-
-				zoneDistances.get(dist).put(target, (float) rounded);
-
-				curr_cnt += rounded;
-			}
-		}
-
-		int diff = pers_cnt - (int) curr_cnt;
-
-		Integer first = zoneDistances.firstKey();
-		Map<ZoneId, Float> firstMap = zoneDistances.get(first);
-		ZoneId zone = firstMap.keySet().iterator().next();
-		firstMap.put(zone, firstMap.get(zone)+diff);
-
-
-	}
-
-	private void setPersonsPoleZones(
-		ActivityType activityType,
-		SortedMap<Integer,List<PersonBuilder>> personDistances, 
-		SortedMap<Integer,Map<ZoneId,Float>> zoneDistances
-	) {
-
-			LinkedList<ZoneId> zoneOids = new LinkedList<>();
-
-			for (Integer dist : zoneDistances.keySet()) {
-				for (ZoneId zone : zoneDistances.get(dist).keySet()) {
-					for (int i=0; i <zoneDistances.get(dist).get(zone); i++) {
-						zoneOids.add(zone);
-					}
-				}
-			}
-
-
-			for (Integer dist : personDistances.keySet()) {
-				for (PersonBuilder person : personDistances.get(dist)) {
-					ZoneId zoneId = zoneOids.remove();
-					Zone zone = this.zoneRepository.getZoneById(zoneId);
-					assert zone != null;
-					Location location;
-					if(zone.opportunities().locationsAvailable(activityType)) {
-						location = zone.opportunities().selectRandomLocation(activityType, this.random.nextDouble());
-					} else {
-						location = zone.centroidLocation();
-					}
-					person.addFixedDestination(new FixedDestination(activityType, zone, location));
-				}
-			}
-
-	}
+    }
 
 }
 
