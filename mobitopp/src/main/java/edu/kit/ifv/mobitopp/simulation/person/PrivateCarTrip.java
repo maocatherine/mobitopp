@@ -14,38 +14,38 @@ import edu.kit.ifv.mobitopp.time.Time;
 
 public class PrivateCarTrip extends CarBasedTrip implements Trip {
 
-  public PrivateCarTrip(TripData trip, SimulationPerson person) {
-    super(trip, person, PrivateCar.class, StandardMode.CAR);
-  }
+    public PrivateCarTrip(TripData trip, SimulationPerson person) {
+        super(trip, person, PrivateCar.class, StandardMode.CAR);
+    }
 
-  @Override
-  protected boolean hasPreviouslyUsedCar() {
-    return person().hasParkedCar();
-  }
-  
-  @Override
-  protected Car allocateCar(ImpedanceIfc impedance, Time currentTime) {
-    ZoneId originId = origin().zone().getId();
-    ZoneId destinationId = destination().zone().getId();
-    float distance = impedance.getDistance(originId, destinationId);
-    float distanceKm = distance / 1000.0f;
-    return person().household().takeAvailableCar(person(), distanceKm);
-  }
-  
-  @Override
-  protected void notifyBeforeReturn(PersonListener listener, FinishedTrip finishedTrip) {
-    ActivityIfc prevActivity = trip().previousActivity();
-    assert prevActivity != null;
-    listener.notifyFinishCarTrip(person(), person().whichCar(), finishedTrip, nextActivity());
-  }
+    @Override
+    protected boolean hasPreviouslyUsedCar() {
+        return person().hasParkedCar();
+    }
 
-  @Override
-  protected boolean canReturnCar(ActivityIfc activity) {
-    return activity.activityType().isHomeActivity();
-  }
-  
-  @Override
-  protected Zone getCarReturnZone() {
-  	return nextActivity().zone();
-  }
+    @Override
+    protected Car allocateCar(ImpedanceIfc impedance, Time currentTime) {
+        ZoneId originId = origin().zone().getId();
+        ZoneId destinationId = destination().zone().getId();
+        float distance = impedance.getDistance(originId, destinationId);
+        float distanceKm = distance;
+        return person().household().takeAvailableCar(person(), distanceKm);
+    }
+
+    @Override
+    protected void notifyBeforeReturn(PersonListener listener, FinishedTrip finishedTrip) {
+        ActivityIfc prevActivity = trip().previousActivity();
+        assert prevActivity != null;
+        listener.notifyFinishCarTrip(person(), person().whichCar(), finishedTrip, nextActivity());
+    }
+
+    @Override
+    protected boolean canReturnCar(ActivityIfc activity) {
+        return activity.activityType().isHomeActivity();
+    }
+
+    @Override
+    protected Zone getCarReturnZone() {
+        return nextActivity().zone();
+    }
 }
