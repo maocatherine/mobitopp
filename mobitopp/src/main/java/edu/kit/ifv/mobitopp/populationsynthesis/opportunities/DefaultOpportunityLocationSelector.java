@@ -20,284 +20,278 @@ import edu.kit.ifv.mobitopp.util.randomvariable.DiscreteRandomVariable;
 
 public class DefaultOpportunityLocationSelector implements OpportunityLocationSelector {
 
-	static final protected Map<String,Float> landtypeWeights_DEFAULT = new LinkedHashMap<String,Float>();
+    static final protected Map<String, Float> landtypeWeights_DEFAULT = new LinkedHashMap<String, Float>();
 
-	static {
-			landtypeWeights_DEFAULT.put("11100",0.5f); //  Continuous Urban Fabric (S.L. > 80%)
-			landtypeWeights_DEFAULT.put("11210",0.2f); // Discontinuous Dense Urban Fabric (S.L. : 50% -  80%)
-			landtypeWeights_DEFAULT.put("11220",0.1f); // Discontinuous Medium Density Urban Fabric (S.L. : 30% - 50%)
-			landtypeWeights_DEFAULT.put("11230",0.05f); // Discontinuous Low Density Urban Fabric (S.L. : 10% - 30%)
-			landtypeWeights_DEFAULT.put("11240",0.01f); // Discontinuous Very Low Density Urban Fabric (S.L. < 10%)
-			landtypeWeights_DEFAULT.put("11300",0.01f); // Isolated Structures
-			landtypeWeights_DEFAULT.put("12100",1.0f); // Industrial, commercial, public, military and private units
-	}
+    static {
+        landtypeWeights_DEFAULT.put("11100", 0.5f); //  Continuous Urban Fabric (S.L. > 80%)
+        landtypeWeights_DEFAULT.put("11210", 0.2f); // Discontinuous Dense Urban Fabric (S.L. : 50% -  80%)
+        landtypeWeights_DEFAULT.put("11220", 0.1f); // Discontinuous Medium Density Urban Fabric (S.L. : 30% - 50%)
+        landtypeWeights_DEFAULT.put("11230", 0.05f); // Discontinuous Low Density Urban Fabric (S.L. : 10% - 30%)
+        landtypeWeights_DEFAULT.put("11240", 0.01f); // Discontinuous Very Low Density Urban Fabric (S.L. < 10%)
+        landtypeWeights_DEFAULT.put("11300", 0.01f); // Isolated Structures
+        landtypeWeights_DEFAULT.put("12100", 1.0f); // Industrial, commercial, public, military and private units
+    }
 
-	static final protected Map<String,Float> landtypeWeights_WORK = new LinkedHashMap<String,Float>();
+    static final protected Map<String, Float> landtypeWeights_WORK = new LinkedHashMap<String, Float>();
 
-	static {
-			landtypeWeights_WORK.put("11100",0.5f); //  Continuous Urban Fabric (S.L. > 80%)
-			landtypeWeights_WORK.put("11210",0.2f); // Discontinuous Dense Urban Fabric (S.L. : 50% -  80%)
-			landtypeWeights_WORK.put("12100",1.0f); // Industrial, commercial, public, military and private units
-	}
+    static {
+        landtypeWeights_WORK.put("11100", 0.5f); //  Continuous Urban Fabric (S.L. > 80%)
+        landtypeWeights_WORK.put("11210", 0.2f); // Discontinuous Dense Urban Fabric (S.L. : 50% -  80%)
+        landtypeWeights_WORK.put("12100", 1.0f); // Industrial, commercial, public, military and private units
+    }
 
-	static final protected Map<String,Float> landtypeWeights_EDUCATION = new LinkedHashMap<String,Float>();
+    static final protected Map<String, Float> landtypeWeights_EDUCATION = new LinkedHashMap<String, Float>();
 
-	static {
-			landtypeWeights_EDUCATION.put("11100",1.0f); //  Continuous Urban Fabric (S.L. > 80%)
-			landtypeWeights_EDUCATION.put("12100",0.01f); // Industrial, commercial, public, military and private units
-	}
+    static {
+        landtypeWeights_EDUCATION.put("11100", 1.0f); //  Continuous Urban Fabric (S.L. > 80%)
+        landtypeWeights_EDUCATION.put("12100", 0.01f); // Industrial, commercial, public, military and private units
+    }
 
-	static final protected Map<String,Float> landtypeWeights_SHOPPING = new LinkedHashMap<String,Float>();
+    static final protected Map<String, Float> landtypeWeights_SHOPPING = new LinkedHashMap<String, Float>();
 
-	static {
-			landtypeWeights_SHOPPING.put("11100",1.0f); //  Continuous Urban Fabric (S.L. > 80%)
-			landtypeWeights_SHOPPING.put("11210",0.2f); // Discontinuous Dense Urban Fabric (S.L. : 50% -  80%)
-			landtypeWeights_SHOPPING.put("12100",0.5f); // Industrial, commercial, public, military and private units
-	}
+    static {
+        landtypeWeights_SHOPPING.put("11100", 1.0f); //  Continuous Urban Fabric (S.L. > 80%)
+        landtypeWeights_SHOPPING.put("11210", 0.2f); // Discontinuous Dense Urban Fabric (S.L. : 50% -  80%)
+        landtypeWeights_SHOPPING.put("12100", 0.5f); // Industrial, commercial, public, military and private units
+    }
 
-	static final protected Map<String,Float> landtypeWeights_LEISURE = new LinkedHashMap<String,Float>();
+    static final protected Map<String, Float> landtypeWeights_LEISURE = new LinkedHashMap<String, Float>();
 
-	static {
-			landtypeWeights_LEISURE.put("11100",1.0f); //  Continuous Urban Fabric (S.L. > 80%)
-			landtypeWeights_LEISURE.put("12100",0.1f); // Industrial, commercial, public, military and private units
-	}
+    static {
+        landtypeWeights_LEISURE.put("11100", 1.0f); //  Continuous Urban Fabric (S.L. > 80%)
+        landtypeWeights_LEISURE.put("12100", 0.1f); // Industrial, commercial, public, military and private units
+    }
 
 
+    private final SimpleRoadNetwork network;
 
+    private final Random random;
 
-	private final SimpleRoadNetwork network;
+    public DefaultOpportunityLocationSelector(SynthesisContext context) {
 
-	private final Random random;
+        assert context != null;
 
-	public DefaultOpportunityLocationSelector(SynthesisContext context) {
+        this.network = context.roadNetwork();
+        this.random = new Random(context.seed());
+    }
 
-		assert context != null;
 
-		this.network = context.roadNetwork();
-		this.random = new Random(context.seed());
-	}
+    @Override
+    public Map<Location, Integer> createLocations(
+            ZoneId dataZone,
+            ActivityType activityType,
+            Integer total_opportunities
+    ) {
 
+        assert dataZone != null;
+        assert this.network != null;
 
+        Zone zone = this.network.zone(dataZone);
 
-	@Override
-	public Map<Location,Integer> createLocations(
-		ZoneId dataZone,
-		ActivityType activityType,
-		Integer total_opportunities
-	) {
+        Map<Location, Integer> locations = new LinkedHashMap<Location, Integer>();
 
-		assert dataZone != null;
-		assert this.network != null;
+        List<Integer> locationSizes = sizeOfLocations(activityType, total_opportunities);
 
-		Zone zone = this.network.zone(dataZone);
+        if (isExternal(zone)) {
 
-		Map<Location,Integer> locations = new LinkedHashMap<Location,Integer>();
+            Location location = selectZoneCenter(zone);
 
-		List<Integer> locationSizes = sizeOfLocations(activityType, total_opportunities);
+            locations.put(location, total_opportunities);
+        } else {
+            for (Integer size : locationSizes) {
 
-		if (isExternal(zone)) {
+                Location location = selectLocation(zone, landTypeWeights(activityType));
 
-			Location location = selectZoneCenter(zone);
+                locations.put(location, size);
+            }
+        }
 
-			locations.put(location, total_opportunities);
-		} else {
-			for (Integer size : locationSizes) {
+        return locations;
+    }
 
-				Location location = selectLocation(zone, landTypeWeights(activityType));
+    protected boolean isExternal(Zone zone) {
+        return zone.isOuter() || zone.isExternal();
+    }
+
+    private Map<String, Float> landTypeWeights(ActivityType activityType) {
+
+        switch (activityType.getTypeAsInt()) {
+            case 1:
+            case 2:
+                return landtypeWeights_WORK;
+            case 3:
+            case 31:
+            case 32:
+            case 33:
+            case 34:
+                return landtypeWeights_EDUCATION;
+            case 4:
+            case 41:
+            case 42:
+                return landtypeWeights_SHOPPING;
+            case 5:
+            case 51:
+            case 52:
+                return landtypeWeights_LEISURE;
+            case 6:
+            case 77:
+            case 8:
+            default:
+                return landtypeWeights_DEFAULT;
+        }
+
+    }
+
+
+    private List<Integer> sizeOfLocations(
+            ActivityType activityType,
+            Integer total_opportunities
+    ) {
+
+        double STDDEV = 0.25;
+
+        int number = numberOfLocations(activityType, total_opportunities);
+
+        random.nextDouble();
+
+        List<Double> randoms = new ArrayList<Double>();
+
+        double running_total = 0.0;
+
+        for (int i = 0; i < number; i++) {
+            double val = total_opportunities * Math.exp(STDDEV * random.nextGaussian());
+            randoms.add(val);
+
+            running_total += val;
+        }
+
+        running_total = Math.max(1.0, running_total);
+
+        List<Integer> sizes = new ArrayList<Integer>();
 
-				locations.put(location, size);
-			}
-		}
+        for (int i = 0; i < number; i++) {
+            int val = (int) Math.round(total_opportunities * randoms.get(i) / running_total);
+            sizes.add(val);
+        }
 
-		return locations;
-	}
+        return sizes;
+    }
 
-  protected boolean isExternal(Zone zone) {
-    return zone.isOuter() || zone.isExternal();
-  }
+    private Integer numberOfLocations(ActivityType activityType, Integer total_opportunities) {
+        if (total_opportunities == 0) {
+            return 0;
+        }
+        double averageSize = averageLocationSize(activityType);
+        int estimatedNumber = (int) Math.round(total_opportunities / averageSize);
+        return Math.max(1, estimatedNumber);
+    }
 
-	private  Map<String,Float> landTypeWeights(ActivityType activityType) {
+    protected double averageLocationSize(
+            ActivityType activityType
+    ) {
 
-		switch(activityType.getTypeAsInt()) {
-			case 1  : 
-			case 2  : 
-				return landtypeWeights_WORK;
-			case 3  : 
-			case 31 : 
-			case 32 : 
-			case 33 : 
-			case 34 : 
-				return landtypeWeights_EDUCATION;
-			case 4  : 
-			case 41 : 
-			case 42 : 
-				return landtypeWeights_SHOPPING;
-			case 5  : 
-			case 51 : 
-			case 52 : 
-				return landtypeWeights_LEISURE;
-			case 6 : 
-			case 77: 
-			case 8 : 
-			default:
-				return landtypeWeights_DEFAULT;
-		}
-
-	}
-
-	
-
-
-
-	private List<Integer> sizeOfLocations(
-		ActivityType activityType,
-		Integer total_opportunities
-	) {
-
-		double STDDEV = 0.25;
-
-		int number = numberOfLocations(activityType, total_opportunities);
-
-		random.nextDouble();
-
-		List<Double> randoms = new ArrayList<Double>();
-
-		double running_total = 0.0;
-
-		for (int i=0; i< number; i++) {
-			double val = total_opportunities*Math.exp( STDDEV*random.nextGaussian());
-			randoms.add(val);
-
-			running_total += val;
-		}
-
-		running_total = Math.max(1.0, running_total);	
+        switch (activityType.getTypeAsInt()) {
+            case 1:
+            case 2:
+                return 10;
+            case 3:
+            case 31:
+                return 200;
+            case 32:
+                return 500;
+            case 33:
+                return 1000;
+            case 34:
+                return 1000;
+            case 4:
+            case 41:
+            case 42:
+                return 200;
+            case 5:
+            case 51:
+            case 52:
+                return 200;
+            case 6:
+                return 200;
+            case 77:
+                return 200;
+            case 8:
+                return 200;
+            default:
+                return 200;
+        }
+    }
 
-		List<Integer> sizes = new ArrayList<Integer>();
+    protected Location selectZoneCenter(
+            Zone zone
+    ) {
 
-		for (int i=0; i< number; i++) {
-			int val = (int) Math.round(total_opportunities*randoms.get(i)/running_total);
-			sizes.add(val);
-		}
+        Point2D point = zone.center();
 
-		return sizes;
-	}
+        SimpleEdge road = zone.nearestEdge(point);
 
-	private Integer numberOfLocations(ActivityType activityType, Integer total_opportunities) {
-		if (total_opportunities == 0) {
-			return 0;
-		}
-		double averageSize = averageLocationSize(activityType);
-		int estimatedNumber = (int) Math.round(total_opportunities / averageSize);
-		return Math.max(1, estimatedNumber);
-	}
+        double pos = road.nearestPositionOnEdge(point);
 
-	protected double averageLocationSize(
-		ActivityType activityType
-	) {
+        return new Location(point, road.id(), pos);
+    }
 
-		switch(activityType.getTypeAsInt()) {
-			case 1  : 
-			case 2  : 
-				return 10;
-			case 3  : 
-			case 31 : 
-				return 200;
-			case 32 : 
-				return 500;
-			case 33 : 
-				return 1000;
-			case 34 : 
-				return 1000;
-			case 4  : 
-			case 41 : 
-			case 42 : 
-				return 200;
-			case 5  : 
-			case 51 : 
-			case 52 : 
-				return 200;
-			case 6 : 
-				return 200;
-			case 77: 
-				return 200;
-			case 8 : 
-				return 200;
-			default:
-				return 200;
-		}
-	}
 
-	protected Location selectZoneCenter(
-		Zone zone
-	) {
+    protected Location selectLocation(
+            Zone zone,
+            Map<String, Float> landtypeWeights
+    ) {
 
-		Point2D point = zone.center();
+        assert zone != null;
 
-		SimpleEdge road = zone.nearestEdge(point);
+        Map<ZoneArea, Double> weighted = weightedAreaByLanduse(zone, landtypeWeights);
 
-		double pos = road.nearestPositionOnEdge(point);
+        ZoneArea area = new DiscreteRandomVariable<ZoneArea>(weighted).realization(random.nextDouble());
 
-		return new Location(point, road.id(), pos);
-	}
+        Point2D point = area.randomPoint(random.nextInt());
 
+        SimpleEdge road = zone.nearestEdge(point);
 
-	protected Location selectLocation(
-		Zone zone,
-		Map<String,Float> landtypeWeights
-	) {
+        double pos = road.nearestPositionOnEdge(point);
 
-		assert zone != null;
+        return new Location(point, road.id(), pos);
+    }
 
-		Map<ZoneArea,Double> weighted = weightedAreaByLanduse(zone, landtypeWeights);
+    private Map<ZoneArea, Double> weightedAreaByLanduse(Zone zone, Map<String, Float> landtypeWeights) {
 
-		ZoneArea area = new DiscreteRandomVariable<ZoneArea>(weighted).realization(random.nextDouble());
+        Map<ZoneArea, Double> areasWithWeight = new LinkedHashMap<ZoneArea, Double>();
 
-		Point2D point = area.randomPoint(random.nextInt());
+        Map<String, ZoneArea> areasByLanduse = zone.areasByLanduse(landtypeWeights.keySet());
 
-		SimpleEdge road = zone.nearestEdge(point);
+        boolean empty = true;
+        double total = 0.0;
 
-		double pos = road.nearestPositionOnEdge(point);
+        for (String landtype : areasByLanduse.keySet()) {
 
-		return new Location(point, road.id(), pos);
-	}
+            ZoneArea area = areasByLanduse.get(landtype);
 
-	private Map<ZoneArea,Double> weightedAreaByLanduse(Zone zone,  Map<String,Float> landtypeWeights) {
+            if (!area.isEmpty()) {
+                empty = false;
+            }
 
-		Map<ZoneArea,Double> areasWithWeight = new LinkedHashMap<ZoneArea,Double>();
+            double size = area.estimateSize() * landtypeWeights.get(landtype);
 
-		Map<String,ZoneArea> areasByLanduse = zone.areasByLanduse(landtypeWeights.keySet()); 
+            total += size;
 
-		boolean empty = true;
-		double total = 0.0;
+            areasWithWeight.put(area, size);
+        }
 
-		for (String landtype : areasByLanduse.keySet()) {
+        if (empty || total == 0.0) {
 
-			ZoneArea area = areasByLanduse.get(landtype);
+            areasWithWeight = new LinkedHashMap<ZoneArea, Double>();
+            areasWithWeight.put(zone.totalArea(), 1.0);
+        }
 
-			if (!area.isEmpty()) {
-				empty = false;
-			}
+        return areasWithWeight;
+    }
 
-			double size = area.estimateSize() * landtypeWeights.get(landtype);
-
-			total += size;
-
-			areasWithWeight.put(area, size);
-		}
-
-		if (empty || total == 0.0) {
-
-			areasWithWeight = new LinkedHashMap<ZoneArea,Double>();
-			areasWithWeight.put(zone.totalArea(), 1.0);
-		}
-
-		return areasWithWeight;
-	}
-
-	protected Random random() {
-		return random;
-	}
+    protected Random random() {
+        return random;
+    }
 
 
 }
