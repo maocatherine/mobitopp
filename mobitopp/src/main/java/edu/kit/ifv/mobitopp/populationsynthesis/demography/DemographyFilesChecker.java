@@ -12,30 +12,30 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DemographyFilesChecker {
 
-  public DemographyFilesChecker() {
-    super();
-  }
-
-  public void verify(DemographyData data) {
-    String missingAttributes = calculateMissingAttributes(data);
-    if (missingAttributes.isEmpty()) {
-      return;
+    public DemographyFilesChecker() {
+        super();
     }
-    throw warn(new IllegalArgumentException(
-        String.format("Missing demography for: %s", missingAttributes)), log);
-  }
 
-  String calculateMissingAttributes(DemographyData data) {
-    boolean containsSize = dataContains(data, StandardAttribute.householdSize);
-    boolean containsDomCode = dataContains(data, StandardAttribute.domCode);
-    return containsSize || containsDomCode ? "" : "Missing household size or dom code";
-  }
+    public void verify(DemographyData data) {
+        String missingAttributes = calculateMissingAttributes(data);
+        if (missingAttributes.isEmpty()) {
+            return;
+        }
+        throw warn(new IllegalArgumentException(
+                String.format("Missing demography for: %s", missingAttributes)), log);
+    }
 
-	private boolean dataContains(DemographyData data, StandardAttribute attribute) {
-		return Stream
-				.of(RegionalLevel.values())
-				.map(data::attributes)
-				.anyMatch(attributes -> attributes.contains(attribute));
-	}
+    String calculateMissingAttributes(DemographyData data) {
+        boolean containsSize = dataContains(data, StandardAttribute.householdSize);
+        boolean containsDomCode = dataContains(data, StandardAttribute.domCode);
+        return containsSize || containsDomCode ? "" : "Missing household size or dom code";
+    }
+
+    private boolean dataContains(DemographyData data, StandardAttribute attribute) {
+        return Stream
+                .of(RegionalLevel.values())
+                .map(data::attributes)
+                .anyMatch(attributes -> attributes.contains(attribute));
+    }
 
 }

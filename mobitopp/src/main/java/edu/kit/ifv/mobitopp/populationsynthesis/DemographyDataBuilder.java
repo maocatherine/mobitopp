@@ -18,65 +18,65 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DemographyDataBuilder {
 
-  static final String seperator = ":";
-	private final WrittenConfiguration configuration;
-  private final DataFactory dataFactory;
+    static final String seperator = ":";
+    private final WrittenConfiguration configuration;
+    private final DataFactory dataFactory;
 
-  public DemographyDataBuilder(WrittenConfiguration configuration, DataFactory dataFactory) {
-    super();
-    this.configuration = configuration;
-    this.dataFactory = dataFactory;
-  }
-
-  public DemographyDataBuilder(WrittenConfiguration configuration) {
-    this(configuration, defaultFactory());
-  }
-
-  private static DataFactory defaultFactory() {
-    return file -> new StructuralData(CsvFile.createFrom(file));
-  }
-
-  public DemographyData build() {
-    Map<String, String> input = configuration.getDemographyData();
-    TreeMap<String, String> sorted = new TreeMap<>(input);
-    InMemoryData toData = new InMemoryData();
-    for (Entry<String, String> entry : sorted.entrySet()) {
-      add(entry, toData);
+    public DemographyDataBuilder(WrittenConfiguration configuration, DataFactory dataFactory) {
+        super();
+        this.configuration = configuration;
+        this.dataFactory = dataFactory;
     }
-    return toData;
-  }
 
-	private void add(Entry<String, String> entry, InMemoryData data) {
-		String filePath = entry.getValue();
-		StructuralData structuralData = createStructuralData(filePath);
-		String attributeName = entry.getKey();
-		RegionalLevel level = createRegionalLevel(attributeName);
-		AttributeType type = createType(attributeName);
-		data.store(level, type, structuralData);
-	}
+    public DemographyDataBuilder(WrittenConfiguration configuration) {
+        this(configuration, defaultFactory());
+    }
 
-  private RegionalLevel createRegionalLevel(String attributeName) {
-  	String[] split = attributeName.split(seperator);
-  	if (1 == split.length) {
-  		return RegionalLevel.zone;
-  	}
-		return RegionalLevel.levelOf(split[0]);
-	}
+    private static DataFactory defaultFactory() {
+        return file -> new StructuralData(CsvFile.createFrom(file));
+    }
 
-	private AttributeType createType(String attribute) {
-		String[] split = attribute.split(seperator);
-		String attributeName = split[split.length - 1];
-    return Arrays
-        .stream(StandardAttribute.values())
-        .filter(type -> attributeName.equals(type.attributeName()))
-        .findFirst()
-        .orElseThrow(() -> warn(new IllegalArgumentException(
-            String.format("Can not find attribute with name: %s", attributeName)), log));
-  }
+    public DemographyData build() {
+        Map<String, String> input = configuration.getDemographyData();
+        TreeMap<String, String> sorted = new TreeMap<>(input);
+        InMemoryData toData = new InMemoryData();
+        for (Entry<String, String> entry : sorted.entrySet()) {
+            add(entry, toData);
+        }
+        return toData;
+    }
 
-  protected StructuralData createStructuralData(String filePath) {
-    File file = Convert.asFile(filePath);
-    return dataFactory.createData(file);
-  }
+    private void add(Entry<String, String> entry, InMemoryData data) {
+        String filePath = entry.getValue();
+        StructuralData structuralData = createStructuralData(filePath);
+        String attributeName = entry.getKey();
+        RegionalLevel level = createRegionalLevel(attributeName);
+        AttributeType type = createType(attributeName);
+        data.store(level, type, structuralData);
+    }
+
+    private RegionalLevel createRegionalLevel(String attributeName) {
+        String[] split = attributeName.split(seperator);
+        if (1 == split.length) {
+            return RegionalLevel.zone;
+        }
+        return RegionalLevel.levelOf(split[0]);
+    }
+
+    private AttributeType createType(String attribute) {
+        String[] split = attribute.split(seperator);
+        String attributeName = split[split.length - 1];
+        return Arrays
+                .stream(StandardAttribute.values())
+                .filter(type -> attributeName.equals(type.attributeName()))
+                .findFirst()
+                .orElseThrow(() -> warn(new IllegalArgumentException(
+                        String.format("Can not find attribute with name: %s", attributeName)), log));
+    }
+
+    protected StructuralData createStructuralData(String filePath) {
+        File file = Convert.asFile(filePath);
+        return dataFactory.createData(file);
+    }
 
 }
