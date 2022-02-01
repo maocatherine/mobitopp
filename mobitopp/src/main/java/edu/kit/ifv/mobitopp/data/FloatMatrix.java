@@ -5,82 +5,79 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class FloatMatrix 
-	implements Serializable
-{
+public class FloatMatrix
+        implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private float[][] matrix;
-  private final List<ZoneId> ids;
-	private final int size;
-	private final float defaultValue;
+    private float[][] matrix;
+    private final List<ZoneId> ids;
+    private final int size;
+    private final float defaultValue;
 
-	public FloatMatrix(List<ZoneId> oids, float defaultValue) {
+    public FloatMatrix(List<ZoneId> oids, float defaultValue) {
 
-		this.ids = Collections.unmodifiableList(new ArrayList<>(oids));
-		this.size = oids.size();
+        this.ids = Collections.unmodifiableList(new ArrayList<>(oids));
+        this.size = oids.size();
 
-		this.defaultValue = defaultValue;
+        this.defaultValue = defaultValue;
 
-    this.matrix = new float[size][size]; 
+        this.matrix = new float[size][size];
 
-		initMatrix();
-	}
+        initMatrix();
+    }
 
-	public FloatMatrix(List<ZoneId> oids) {
-		this(oids, Float.NaN);
-	}
+    public FloatMatrix(List<ZoneId> oids) {
+        this(oids, Float.NaN);
+    }
 
 
-	private void initMatrix() {
+    private void initMatrix() {
 
-		for(int i=0; i<this.size; i++) {
-			for(int j=0; j<this.size; j++) {
-			this.matrix[i][j] = this.defaultValue;
-			}
-		}
-	}
+        for (int i = 0; i < this.size; i++) {
+            for (int j = 0; j < this.size; j++) {
+                this.matrix[i][j] = this.defaultValue;
+            }
+        }
+    }
 
-	public List<ZoneId> ids() {
-		return this.ids;
-	}
+    public List<ZoneId> ids() {
+        return this.ids;
+    }
 
-  public Float get(int row,int column)
-  {
-		assert row >= 0 && row < size : String.format("Row %s is higher than size %s", row, size);
-		assert column >= 0 && column < size : String.format("column %s is higher than size %s", column, size);
+    public Float get(int row, int column) {
+        assert row >= 0 && row < size : String.format("Row %s is higher than size %s", row, size);
+        assert column >= 0 && column < size : String.format("column %s is higher than size %s", column, size);
 
-    return this.matrix[row][column];
-  }
+        return this.matrix[row][column];
+    }
 
-	public Float get(ZoneId origin, ZoneId destination) {
-	  verify(origin, destination);
-    return get(origin.getMatrixColumn(), destination.getMatrixColumn());
-	}
+    public Float get(ZoneId origin, ZoneId destination) {
+        verify(origin, destination);
+        return get(origin.getMatrixColumn(), destination.getMatrixColumn());
+    }
 
-  private void verify(ZoneId origin, ZoneId destination) {
-    int row = origin.getMatrixColumn();
-	  int column = destination.getMatrixColumn();
-    assert row >= 0 && row < size : missingRelationMessage(origin, destination);
-    assert column >= 0 && column < size : missingRelationMessage(origin, destination);
-  }
+    private void verify(ZoneId origin, ZoneId destination) {
+        int row = origin.getMatrixColumn();
+        int column = destination.getMatrixColumn();
+        assert row >= 0 && row < size : missingRelationMessage(origin, destination);
+        assert column >= 0 && column < size : missingRelationMessage(origin, destination);
+    }
 
-  private String missingRelationMessage(ZoneId origin, ZoneId destination) {
-    return String.format("Origin (%s) and destination (%s) pair is not available.", origin, destination);
-  }
+    private String missingRelationMessage(ZoneId origin, ZoneId destination) {
+        return String.format("Origin (%s) and destination (%s) pair is not available.", origin, destination);
+    }
 
-  public void set(int row, int column, Float value)
-  {
-		assert row >= 0 && row < size : ("row=" + row + ", size=" + size);
-		assert column >= 0 && column < size : ("column=" + column + ", size=" + size);
+    public void set(int row, int column, Float value) {
+        assert row >= 0 && row < size : ("row=" + row + ", size=" + size);
+        assert column >= 0 && column < size : ("column=" + column + ", size=" + size);
 
-    this.matrix[row][column] = value;
-  }
-  
-  public void set(ZoneId origin, ZoneId destination, Float value) {
-    verify(origin, destination);
-    set(origin.getMatrixColumn(), destination.getMatrixColumn(), value);
-  }
- 
+        this.matrix[row][column] = value;
+    }
+
+    public void set(ZoneId origin, ZoneId destination, Float value) {
+        verify(origin, destination);
+        set(origin.getMatrixColumn(), destination.getMatrixColumn(), value);
+    }
+
 }

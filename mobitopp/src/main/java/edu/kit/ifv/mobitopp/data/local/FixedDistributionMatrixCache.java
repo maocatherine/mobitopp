@@ -10,25 +10,25 @@ import edu.kit.ifv.mobitopp.data.local.configuration.TaggedFixedDistributionMatr
 import edu.kit.ifv.mobitopp.simulation.ActivityType;
 
 public class FixedDistributionMatrixCache
-		extends MatrixCache<FixedDistributionMatrixId, TaggedFixedDistributionMatrix> {
+        extends MatrixCache<FixedDistributionMatrixId, TaggedFixedDistributionMatrix> {
 
-	public FixedDistributionMatrixCache(MatrixConfiguration configuration) {
-		super(configuration);
-	}
+    public FixedDistributionMatrixCache(MatrixConfiguration configuration) {
+        super(configuration);
+    }
 
-	public FixedDistributionMatrix matrixFor(ActivityType activityType) {
-		FixedDistributionMatrixId id = configuration().idOf(activityType);
-		return matrixFor(id).matrix();
-	}
+    public FixedDistributionMatrix matrixFor(ActivityType activityType) {
+        FixedDistributionMatrixId id = configuration().idOf(activityType);
+        return matrixFor(id).matrix();
+    }
 
-	@Override
-	protected TaggedFixedDistributionMatrix loadMatrixBy(FixedDistributionMatrixId id) throws IOException {
-		return configuration().fixedDistributionMatrixFor(id);
-	}
+    @Override
+    protected TaggedFixedDistributionMatrix loadMatrixBy(FixedDistributionMatrixId id) throws IOException {
+        return configuration().fixedDistributionMatrixFor(id);
+    }
 
-	@Override
-	protected Stream<FixedDistributionMatrixId> split(TaggedFixedDistributionMatrix taggedMatrix) {
-		return taggedMatrix.id().split();
-	}
+    @Override
+    protected Stream<FixedDistributionMatrixId> split(TaggedFixedDistributionMatrix taggedMatrix) {
+        return taggedMatrix.id().split();
+    }
 
 }
