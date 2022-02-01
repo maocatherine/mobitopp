@@ -1,5 +1,6 @@
 package edu.kit.ifv.mobitopp.populationsynthesis;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +13,7 @@ import edu.kit.ifv.mobitopp.populationsynthesis.calculator.DemandDataCalculator;
 import edu.kit.ifv.mobitopp.populationsynthesis.calculator.SingleZoneDemandCalculator;
 import edu.kit.ifv.mobitopp.populationsynthesis.carownership.CarOwnershipModel;
 import edu.kit.ifv.mobitopp.populationsynthesis.householdlocation.HouseholdLocationSelector;
-import edu.kit.ifv.mobitopp.populationsynthesis.opportunities.DefaultOpportunityLocationSelector;
-import edu.kit.ifv.mobitopp.populationsynthesis.opportunities.OpportunityLocationSelector;
+import edu.kit.ifv.mobitopp.populationsynthesis.opportunities.*;
 import edu.kit.ifv.mobitopp.simulation.ActivityType;
 import edu.kit.ifv.mobitopp.simulation.Car;
 import edu.kit.ifv.mobitopp.simulation.IdSequence;
@@ -30,227 +30,230 @@ import edu.kit.ifv.mobitopp.simulation.carsharing.StationBasedCarSharingOrganiza
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class BasicPopulationSynthesisIpf extends PopulationSynthesis { 
+public class BasicPopulationSynthesisIpf extends PopulationSynthesis {
 
-	private final PersonCreator personCreator;
-	private final HouseholdLocationSelector householdLocationSelector;
-	private final CarOwnershipModel carOwnershipModel;
-	private final ChargePrivatelySelector chargePrivatelySelector;
-	private final DemandCategories categories;
-  private final ActivityScheduleAssigner activityScheduleAssigner;
-	private final EconomicalStatusCalculator economicalStatusCalculator;
+    private final PersonCreator personCreator;
+    private final HouseholdLocationSelector householdLocationSelector;
+    private final CarOwnershipModel carOwnershipModel;
+    private final ChargePrivatelySelector chargePrivatelySelector;
+    private final DemandCategories categories;
+    private final ActivityScheduleAssigner activityScheduleAssigner;
+    private final EconomicalStatusCalculator economicalStatusCalculator;
 
-	public BasicPopulationSynthesisIpf(
-			CarOwnershipModel carOwnershipModel,
-			HouseholdLocationSelector householdLocationSelector,
-			PersonCreator personCreator,
-			ActivityScheduleAssigner activityScheduleAssigner,
-			EconomicalStatusCalculator economicalStatusCalculator,
-			SynthesisContext context
-			) {
-    this(carOwnershipModel, householdLocationSelector, chargeAlways(), personCreator,
-        activityScheduleAssigner, economicalStatusCalculator, context);
-	}
-	
-	private static ChargePrivatelySelector chargeAlways() {
-		return (zone) -> true;
-	}
-	
-	public BasicPopulationSynthesisIpf(
-		CarOwnershipModel carOwnershipModel,
-		HouseholdLocationSelector householdLocationSelector,
-		ChargePrivatelySelector chargePrivatelySelector,
-		PersonCreator personCreator, 
-		ActivityScheduleAssigner activityScheduleAssigner,
-		EconomicalStatusCalculator economicalStatusCalculator,
-		SynthesisContext context
-	) {
-		super(context);
-		this.personCreator = personCreator;
-		this.householdLocationSelector = householdLocationSelector;
-		this.chargePrivatelySelector = chargePrivatelySelector;
-		this.carOwnershipModel = carOwnershipModel;
-		this.activityScheduleAssigner = activityScheduleAssigner;
-		this.economicalStatusCalculator = economicalStatusCalculator;
-		categories = new DemandCategories();
-	}
-	
-	@Override
-	protected DemandDataCalculator createCalculator(
-			Map<ActivityType, FixedDistributionMatrix> commuterMatrices) {
-		return new SingleZoneDemandCalculator(createZoneCalculator(commuterMatrices),
-				demandZoneRepository(), impedance());
-	}
+    public BasicPopulationSynthesisIpf(
+            CarOwnershipModel carOwnershipModel,
+            HouseholdLocationSelector householdLocationSelector,
+            PersonCreator personCreator,
+            ActivityScheduleAssigner activityScheduleAssigner,
+            EconomicalStatusCalculator economicalStatusCalculator,
+            SynthesisContext context
+    ) {
+        this(carOwnershipModel, householdLocationSelector, chargeAlways(), personCreator,
+                activityScheduleAssigner, economicalStatusCalculator, context);
+    }
 
-	private DemandDataForZoneCalculatorIfc createZoneCalculator(
-			Map<ActivityType, FixedDistributionMatrix> fdMatrices) {
-		FixedDestinationSelector fixedDestinationSelector = new DefaultFixedDestinationSelector(
-																											demandZoneRepository().zoneRepository(),
-																											fdMatrices,
-																											impedance(),
-																											seed()
-																									);
+    private static ChargePrivatelySelector chargeAlways() {
+        return (zone) -> true;
+    }
 
-		HouseholdSelectorIfc householdSelector = new HouseholdSelector(seed());
-		HouseholdWeightCalculatorIfc householdWeightCalculator = new HouseholdWeightCalculator();
+    public BasicPopulationSynthesisIpf(
+            CarOwnershipModel carOwnershipModel,
+            HouseholdLocationSelector householdLocationSelector,
+            ChargePrivatelySelector chargePrivatelySelector,
+            PersonCreator personCreator,
+            ActivityScheduleAssigner activityScheduleAssigner,
+            EconomicalStatusCalculator economicalStatusCalculator,
+            SynthesisContext context
+    ) {
+        super(context);
+        this.personCreator = personCreator;
+        this.householdLocationSelector = householdLocationSelector;
+        this.chargePrivatelySelector = chargePrivatelySelector;
+        this.carOwnershipModel = carOwnershipModel;
+        this.activityScheduleAssigner = activityScheduleAssigner;
+        this.economicalStatusCalculator = economicalStatusCalculator;
+        categories = new DemandCategories();
+    }
 
-		DemandDataForZoneCalculatorIfc calculator =  new DemandDataForZoneCalculatorStuttgart(
-																												results(),
-																												householdSelector,
-																												householdWeightCalculator,
-																												fixedDestinationSelector,
-																												carOwnershipModel,
-																												householdLocationSelector,
-																												chargePrivatelySelector,
-																												personCreator,
-																												activityScheduleAssigner,
-																												economicalStatusCalculator(),
-																												dataRepository()
-																												);
-		return calculator;
-	}
+    @Override
+    protected DemandDataCalculator createCalculator(
+            Map<ActivityType, FixedDistributionMatrix> commuterMatrices) {
+        return new SingleZoneDemandCalculator(createZoneCalculator(commuterMatrices),
+                demandZoneRepository(), impedance());
+    }
 
-	protected EconomicalStatusCalculator economicalStatusCalculator() {
-		return economicalStatusCalculator;
-	}
+    private DemandDataForZoneCalculatorIfc createZoneCalculator(
+            Map<ActivityType, FixedDistributionMatrix> fdMatrices) {
 
-	// BEGIN CarSharing
+        FixedDestinationSelector fixedDestinationSelector = new DefaultFixedDestinationSelector(
+                demandZoneRepository().zoneRepository(),
+                fdMatrices,
+                impedance(),
+                seed()
+        );
 
-	protected void createCarSharingData(
-		Zone zone,
-		edu.kit.ifv.mobitopp.network.Zone networkZone,
-		Random random,
-		IdSequence carIds
-	) {
+        HouseholdSelectorIfc householdSelector = new HouseholdSelector(seed());
+        HouseholdWeightCalculatorIfc householdWeightCalculator = new HouseholdWeightCalculator();
 
-		CarSharingDataForZone carSharing = zone.carSharing();
-		carSharing.clearCars();
+        DemandDataForZoneCalculatorIfc calculator = new DemandDataForZoneCalculatorStuttgart(
+                results(),
+                householdSelector,
+                householdWeightCalculator,
+                fixedDestinationSelector,
+                carOwnershipModel,
+                householdLocationSelector,
+                chargePrivatelySelector,
+                personCreator,
+                activityScheduleAssigner,
+                economicalStatusCalculator(),
+                dataRepository()
+        );
+        return calculator;
+    }
 
-		List<StationBasedCarSharingCar> stationBasedCars = createStationBasedCars(zone, carIds);
+    protected EconomicalStatusCalculator economicalStatusCalculator() {
+        return economicalStatusCalculator;
+    }
 
-		for (StationBasedCarSharingCar car : stationBasedCars) {
+    // BEGIN CarSharing for mode availability model
 
-			StationBasedCarSharingOrganization company = car.station.carSharingCompany;
+    protected void createCarSharingData(
+            Zone zone,
+            edu.kit.ifv.mobitopp.network.Zone networkZone,
+            Random random,
+            IdSequence carIds
+    ) {
 
-			company.ownCar(car, car.station.zone);
+        CarSharingDataForZone carSharing = zone.carSharing();
+        carSharing.clearCars();
 
-			results().write(categories.demanddataResult, car.forLogging());
-		}
+        List<StationBasedCarSharingCar> stationBasedCars = createStationBasedCars(zone, carIds);
 
+        for (StationBasedCarSharingCar car : stationBasedCars) {
 
-		for (FreeFloatingCarSharingOrganization company : carSharing.freeFloatingCarSharingCompanies()) {
+            StationBasedCarSharingOrganization company = car.station.carSharingCompany;
 
-			List<CarSharingCar> freeFloatingCars = createFreeFloatingCars(company, zone, networkZone, random, carIds);
-			company.ownCars(freeFloatingCars, zone);
+            company.ownCar(car, car.station.zone);
 
-			for (CarSharingCar car : freeFloatingCars) {
-				results().write(categories.demanddataResult, car.forLogging());
-			}
-		}
-
-	}
-
-	protected static List<CarSharingCar> createFreeFloatingCars(
-		FreeFloatingCarSharingOrganization company,
-		Zone zone,
-		edu.kit.ifv.mobitopp.network.Zone networkZone,
-		Random random,
-		IdSequence carIds
-	) {
-
-		assert networkZone != null;
-
-		CarSharingDataForZone carSharing = zone.carSharing();
-
-		List<CarSharingCar> freeFloatingCars = new ArrayList<CarSharingCar>();
-
-		int numCarsFreeFloating = carSharing.numberOfFreeFloatingCars(company.name());
-
-		for (int i=0; i<numCarsFreeFloating; i++) {
-
-			CarPosition position =	new CarPosition(zone, networkZone.randomLocation(random.nextInt()));
-
-			CarSharingCar car = new DefaultCarSharingCar(
-														new ConventionalCar(carIds, position, Car.Segment.MIDSIZE),
-														company
-													);
-
-			freeFloatingCars.add(car);
-		}
-
-		return freeFloatingCars;
-	}
+            results().write(categories.demanddataResult, car.forLogging());
+        }
 
 
-	protected static List<StationBasedCarSharingCar> createStationBasedCars(
-		Zone zone,
-		IdSequence carIds
-	) {
+        for (FreeFloatingCarSharingOrganization company : carSharing.freeFloatingCarSharingCompanies()) {
 
-		CarSharingDataForZone carSharing = zone.carSharing();
+            List<CarSharingCar> freeFloatingCars = createFreeFloatingCars(company, zone, networkZone, random, carIds);
+            company.ownCars(freeFloatingCars, zone);
 
-		List<StationBasedCarSharingCar> cars = new ArrayList<StationBasedCarSharingCar>();
+            for (CarSharingCar car : freeFloatingCars) {
+                results().write(categories.demanddataResult, car.forLogging());
+            }
+        }
 
-		for (CarSharingOrganization company :	carSharing.stationBasedCarSharingCompanies()) {
+    }
 
-			for (CarSharingStation station : carSharing.carSharingStations(company.name(), zone)) {
+    protected static List<CarSharingCar> createFreeFloatingCars(
+            FreeFloatingCarSharingOrganization company,
+            Zone zone,
+            edu.kit.ifv.mobitopp.network.Zone networkZone,
+            Random random,
+            IdSequence carIds
+    ) {
 
-				assert station != null;
-				assert station.numberOfCars != null;
+        assert networkZone != null;
 
-				for (int i=0; i<station.numberOfCars; i++) {
+        CarSharingDataForZone carSharing = zone.carSharing();
 
-					CarPosition position =	new CarPosition(zone, station.location);
+        List<CarSharingCar> freeFloatingCars = new ArrayList<CarSharingCar>();
 
-					StationBasedCarSharingCar car = new StationBasedCarSharingCar(
-																new ConventionalCar(carIds, position, Car.Segment.MIDSIZE),
-																company,
-																station
-															);
-		
-					cars.add(car);
-				}
-			}
-		}
+        int numCarsFreeFloating = carSharing.numberOfFreeFloatingCars(company.name());
 
-		return cars;
-	}
+        for (int i = 0; i < numCarsFreeFloating; i++) {
 
+            CarPosition position = new CarPosition(zone, networkZone.randomLocation(random.nextInt()));
 
-	protected void createCarSharing(
-		SimpleRoadNetwork network,
-		Random random,
-		IdSequence carIds
-	) {
+            CarSharingCar car = new DefaultCarSharingCar(
+                    new ConventionalCar(carIds, position, Car.Segment.MIDSIZE),
+                    company
+            );
 
+            freeFloatingCars.add(car);
+        }
 
-		List<Zone> zones = demandZoneRepository().zoneRepository().getZones();
-
-		for (Zone zone : zones) {
+        return freeFloatingCars;
+    }
 
 
-log.debug("zone " + zone.getId() + " is ready? " + zone.carSharing().isReady());
+    protected static List<StationBasedCarSharingCar> createStationBasedCars(
+            Zone zone,
+            IdSequence carIds
+    ) {
 
-			Integer zoneid = Integer.parseInt(zone.getId().getExternalId());
+        CarSharingDataForZone carSharing = zone.carSharing();
 
-			edu.kit.ifv.mobitopp.network.Zone networkZone = network.zones().get(zoneid);
+        List<StationBasedCarSharingCar> cars = new ArrayList<StationBasedCarSharingCar>();
 
-			assert networkZone != null : (zoneid + " / " + zone.getId());
+        for (CarSharingOrganization company : carSharing.stationBasedCarSharingCompanies()) {
 
-			createCarSharingData(zone, networkZone, random, carIds);
-		}
-	}
+            for (CarSharingStation station : carSharing.carSharingStations(company.name(), zone)) {
+
+                assert station != null;
+                assert station.numberOfCars != null;
+
+                for (int i = 0; i < station.numberOfCars; i++) {
+
+                    CarPosition position = new CarPosition(zone, station.location);
+
+                    StationBasedCarSharingCar car = new StationBasedCarSharingCar(
+                            new ConventionalCar(carIds, position, Car.Segment.MIDSIZE),
+                            company,
+                            station
+                    );
+
+                    cars.add(car);
+                }
+            }
+        }
+
+        return cars;
+    }
+
+
+    protected void createCarSharing(
+            SimpleRoadNetwork network,
+            Random random,
+            IdSequence carIds
+    ) {
+
+
+        List<Zone> zones = demandZoneRepository().zoneRepository().getZones();
+
+        for (Zone zone : zones) {
+
+
+            log.debug("zone " + zone.getId() + " is ready? " + zone.carSharing().isReady());
+
+            Integer zoneid = Integer.parseInt(zone.getId().getExternalId());
+
+            edu.kit.ifv.mobitopp.network.Zone networkZone = network.zones().get(zoneid);
+
+            assert networkZone != null : (zoneid + " / " + zone.getId());
+
+            createCarSharingData(zone, networkZone, random, carIds);
+        }
+    }
 // End CarSharing
 
 // BEGIN DEBUG LOG
 
-	
 
 // END DEBUG LOG
-	
-	@Override
-	protected OpportunityLocationSelector createOpportunityLocationSelector() {
-		return new DefaultOpportunityLocationSelector(context());
-	}
+
+    @Override
+    protected OpportunityLocationSelector createOpportunityLocationSelector() {
+        //return new DefaultOpportunityLocationSelector(context());
+        File pointOfInterest = context().opportunityFile();
+        return PoiBasedOpportunityLocationSelector.create(pointOfInterest, new PoiParser(demandZoneRepository().zoneRepository(),
+               new NetworkBasedRoadLocator(context().roadNetwork())));
+    }
 
 }
