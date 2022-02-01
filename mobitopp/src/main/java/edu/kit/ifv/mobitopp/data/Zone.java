@@ -17,148 +17,146 @@ import edu.kit.ifv.mobitopp.simulation.opportunities.OpportunityDataForZone;
 
 public class Zone {
 
-	private final ZoneId id;
-	private final ZoneProperties zoneProperties;
-	private final Attractivities attractivities;
-	private final ChargingDataForZone charging;
+    private final ZoneId id;
+    private final ZoneProperties zoneProperties;
+    private final Attractivities attractivities;
+    private final ChargingDataForZone charging;
 
-  private transient DataForZone zoneData;
-  private CarSharingDataForZone carSharingData;
-  private BikeSharingDataForZone bikeSharingData;
-	private MaasDataForZone maasData;
+    private transient DataForZone zoneData;
+    private CarSharingDataForZone carSharingData;
+    private BikeSharingDataForZone bikeSharingData;
+    private MaasDataForZone maasData;
 
-	public Zone(
-			final ZoneId id, final ZoneProperties zoneProperties, final Attractivities attractivities,
-			final ChargingDataForZone charging) {
-		super();
-		this.id = id;
-		this.zoneProperties = zoneProperties;
-		this.attractivities = attractivities;
-		this.charging = charging;
-	}
-	
-	public ZoneId getId() {
-		return id;
-	}
+    public Zone(
+            final ZoneId id, final ZoneProperties zoneProperties, final Attractivities attractivities,
+            final ChargingDataForZone charging) {
+        super();
+        this.id = id;
+        this.zoneProperties = zoneProperties;
+        this.attractivities = attractivities;
+        this.charging = charging;
+    }
 
-	public AreaType getAreaType() {
-		return zoneProperties.getAreaType();
-	}
-  
-  public RegionType getRegionType() {
-    return zoneProperties.getRegionType();
-  }
+    public ZoneId getId() {
+        return id;
+    }
 
-	public ZoneClassificationType getClassification() {
-		return zoneProperties.getClassification();
-	}
+    public AreaType getAreaType() {
+        return zoneProperties.getAreaType();
+    }
 
-	public int getNumberOfParkingPlaces() {
-		return zoneProperties.getParkingPlaces();
-	}
+    public RegionType getRegionType() {
+        return zoneProperties.getRegionType();
+    }
 
-	public String getName() {
-		return zoneProperties.getName();
-	}
+    public ZoneClassificationType getClassification() {
+        return zoneProperties.getClassification();
+    }
 
-  public Location centroidLocation() {
-  	return zoneProperties.getCentroidLocation();
-  }
-  
-	public boolean isDestination() {
-		return zoneProperties.isDestination();
-	}
-	
-	public boolean isDestinationFor(ActivityType activityType) {
-		return isDestination() && opportunities().locationsAvailable(activityType);
-	}
-	
-	public double getRelief() {
-		return zoneProperties.getRelief();
-	}
-	
-	public Optional<Value> getProperty(String name) {
-	  return Optional.ofNullable(zoneProperties.getZoneProperties().get(name));
-	}
-	
-	public Map<String, Value> getProperties() {
-	  return Collections.unmodifiableMap(zoneProperties.getZoneProperties());
-	}
+    public int getNumberOfParkingPlaces() {
+        return zoneProperties.getParkingPlaces();
+    }
 
-	public DataForZone getDemandData() 
-	{
-		if (this.zoneData == null) {
-			this.zoneData = new DataForZone(id, attractivities);
-		}
+    public String getName() {
+        return zoneProperties.getName();
+    }
 
-		return this.zoneData;
-	}
+    public Location centroidLocation() {
+        return zoneProperties.getCentroidLocation();
+    }
 
-  public boolean hasDemandData()
-  {
-		return this.zoneData != null;
-  }
+    public boolean isDestination() {
+        return zoneProperties.isDestination();
+    }
 
-	public void setCarSharing(CarSharingDataForZone carSharingData) {
-		this.carSharingData = carSharingData;
-	}
+    public boolean isDestinationFor(ActivityType activityType) {
+        return isDestination() && opportunities().locationsAvailable(activityType);
+    }
 
-	public CarSharingDataForZone carSharing() {
-		assert this.carSharingData != null;
+    public double getRelief() {
+        return zoneProperties.getRelief();
+    }
 
-		return this.carSharingData;
-	}
-	
-	public void setBikeSharing(BikeSharingDataForZone bikeSharingData) {
-		assert bikeSharingData != null;
-		this.bikeSharingData = bikeSharingData;
-	}
+    public Optional<Value> getProperty(String name) {
+        return Optional.ofNullable(zoneProperties.getZoneProperties().get(name));
+    }
 
-	public BikeSharingDataForZone bikeSharing() {
-		assert this.bikeSharingData != null;
-		return this.bikeSharingData;
-	}
-	
-	public void setMaas(MaasDataForZone maasData) {
-	  this.maasData = maasData;
-	}
+    public Map<String, Value> getProperties() {
+        return Collections.unmodifiableMap(zoneProperties.getZoneProperties());
+    }
 
-  public MaasDataForZone maas() {
-    assert this.maasData != null;
-    return maasData;
-  }
+    public DataForZone getDemandData() {
+        if (this.zoneData == null) {
+            this.zoneData = new DataForZone(id, attractivities);
+        }
 
-	public OpportunityDataForZone opportunities() {
-		return getDemandData().opportunities();
-	}
+        return this.zoneData;
+    }
 
-	public Attractivities attractivities() {
-		return opportunities().attractivities();
-	}
+    public boolean hasDemandData() {
+        return this.zoneData != null;
+    }
 
-	public float getAttractivity(ActivityType activityType) {
-		Attractivities attractivity = attractivities();
+    public void setCarSharing(CarSharingDataForZone carSharingData) {
+        this.carSharingData = carSharingData;
+    }
 
-		float opportunity = 1.0f;
+    public CarSharingDataForZone carSharing() {
+        assert this.carSharingData != null;
 
-		if (attractivity.getItems().containsKey(activityType)) {
-			opportunity = attractivity.getItems().get(activityType);
-		}
+        return this.carSharingData;
+    }
 
-		return opportunity;
-	}
+    public void setBikeSharing(BikeSharingDataForZone bikeSharingData) {
+        assert bikeSharingData != null;
+        this.bikeSharingData = bikeSharingData;
+    }
 
-	public int numberOfChargingPoints() {
-		return charging().numberOfChargingPoints();
-	}
+    public BikeSharingDataForZone bikeSharing() {
+        assert this.bikeSharingData != null;
+        return this.bikeSharingData;
+    }
 
-	public ChargingDataForZone charging() {
-		return null == charging ? NoChargingDataForZone.noCharging : charging;
-	}
+    public void setMaas(MaasDataForZone maasData) {
+        this.maasData = maasData;
+    }
 
-	@Override
-  public String toString() {
-    return "Zone [internalId=" + id + ", name=" + getName() + "]";
-  }
+    public MaasDataForZone maas() {
+        assert this.maasData != null;
+        return maasData;
+    }
+
+    public OpportunityDataForZone opportunities() {
+        return getDemandData().opportunities();
+    }
+
+    public Attractivities attractivities() {
+        return opportunities().attractivities();
+    }
+
+    public float getAttractivity(ActivityType activityType) {
+        Attractivities attractivity = attractivities();
+
+        float opportunity = 1.0f;
+
+        if (attractivity.getItems().containsKey(activityType)) {
+            opportunity = attractivity.getItems().get(activityType);
+        }
+
+        return opportunity;
+    }
+
+    public int numberOfChargingPoints() {
+        return charging().numberOfChargingPoints();
+    }
+
+    public ChargingDataForZone charging() {
+        return null == charging ? NoChargingDataForZone.noCharging : charging;
+    }
+
+    @Override
+    public String toString() {
+        return "Zone [internalId=" + id + ", name=" + getName() + "]";
+    }
 
 }
