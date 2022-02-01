@@ -82,7 +82,7 @@ public class ContextBuilder {
 	}
 
 	private static LanguageFactory defaultLanguageFactory() {
-		return StandardNetfileLanguages::german;
+		return StandardNetfileLanguages::english;
 	}
 
 	public ContextBuilder() {
@@ -206,6 +206,7 @@ public class ContextBuilder {
 	}
 
 	private void loadVisumNetwork() {
+		System.out.println("Reading VISUM network");
 		log.info("Reading VISUM network");
 		if (null == network) {
 			network = doLoadVisumNetwork(configuration.getVisumFile(), buildLanguage());
@@ -290,10 +291,11 @@ public class ContextBuilder {
 	}
 
 	private SimulationContext createContext() {
-		SimpleSimulationContext context = new SimpleSimulationContext(configuration,
+		SimpleSimulationContext simpleContext = new SimpleSimulationContext(configuration,
 			experimentalParameters, dataRepository, simulationDays, format, resultWriter,
 			electricChargingWriter, personResults, destinationChoiceParameters,
 			modeChoiceParameters);
+		SimulationContextWithRestServer context = new SimulationContextWithRestServer(simpleContext);
 		log("Create context");
 		return context;
 	}
