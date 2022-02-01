@@ -21,107 +21,105 @@ import edu.kit.ifv.mobitopp.util.logit.LinearUtilityFunction;
 import edu.kit.ifv.mobitopp.util.logit.LogitModel;
 
 public class ModeChoiceStuttgart
-	implements ModeChoiceModel 
-{
+        implements ModeChoiceModel {
 
-	protected final ImpedanceIfc impedance;
+    protected final ImpedanceIfc impedance;
 
-	protected final ModeChoiceParameter modeChoiceParameter;
+    protected final ModeChoiceParameter modeChoiceParameter;
 
-	protected final LogitModel<Mode> logitModel = new DefaultLogitModel<Mode>();
+    protected final LogitModel<Mode> logitModel = new DefaultLogitModel<Mode>();
 
-	protected final Map<Mode,LinearUtilityFunction> utilityFunctions;
+    protected final Map<Mode, LinearUtilityFunction> utilityFunctions;
 
-	public ModeChoiceStuttgart(
-		ImpedanceIfc impedance,
-		ModeChoiceParameter modeChoiceParameter
-	) {
+    public ModeChoiceStuttgart(
+            ImpedanceIfc impedance,
+            ModeChoiceParameter modeChoiceParameter
+    ) {
 
-		this.impedance = impedance;
-		this.modeChoiceParameter = modeChoiceParameter;
+        this.impedance = impedance;
+        this.modeChoiceParameter = modeChoiceParameter;
 
-	 	this.utilityFunctions = Collections.unmodifiableMap(makeUtilityFunctions());
-	}
+        this.utilityFunctions = Collections.unmodifiableMap(makeUtilityFunctions());
+    }
 
-	protected Map<Mode,LinearUtilityFunction> makeUtilityFunctions() {
+    protected Map<Mode, LinearUtilityFunction> makeUtilityFunctions() {
 
-		Collection<Mode> modes = Arrays.asList(new Mode[] { 
-															StandardMode.PEDESTRIAN ,
-															StandardMode.PUBLICTRANSPORT,
-															StandardMode.PASSENGER,
-															StandardMode.BIKE,
-															StandardMode.CAR,
-															StandardMode.CARSHARING_STATION,
-															StandardMode.CARSHARING_FREE
-														});
+        Collection<Mode> modes = Arrays.asList(new Mode[]{
+                StandardMode.PEDESTRIAN,
+//                StandardMode.PUBLICTRANSPORT,
+                StandardMode.PASSENGER,
+                StandardMode.BIKE,
+                StandardMode.CAR
+//                StandardMode.CARSHARING_STATION,
+//                StandardMode.CARSHARING_FREE
+        });
 
-		Map<Mode,LinearUtilityFunction> utilityFunctions = new LinkedHashMap<Mode,LinearUtilityFunction>();
+        Map<Mode, LinearUtilityFunction> utilityFunctions = new LinkedHashMap<Mode, LinearUtilityFunction>();
 
-		for (Mode mode : modes) {
+        for (Mode mode : modes) {
 
-			LinearUtilityFunction uF = new LinearUtilityFunction(modeChoiceParameter.parameterForMode(mode));
+            LinearUtilityFunction uF = new LinearUtilityFunction(modeChoiceParameter.parameterForMode(mode));
 
-			utilityFunctions.put(mode,uF);
-		}
+            utilityFunctions.put(mode, uF);
+        }
 
-		return utilityFunctions;
-	}
-
+        return utilityFunctions;
+    }
 
 
-	public Mode selectMode(
-		Person person,
-		Zone source,
-		Zone destination,
-		ActivityIfc previousActivity,
-		ActivityIfc nextActivity,
-		Set<Mode> choiceSet,
-		double randomNumber
-	) {
+    public Mode selectMode(
+            Person person,
+            Zone source,
+            Zone destination,
+            ActivityIfc previousActivity,
+            ActivityIfc nextActivity,
+            Set<Mode> choiceSet,
+            double randomNumber
+    ) {
 
-		Map<Mode,Double> utilities = calculateUtilities(person, source, destination,
-																														previousActivity, nextActivity, choiceSet);
-
-
-		return logitModel.select(utilities, choiceSet, randomNumber);
-	}
+        Map<Mode, Double> utilities = calculateUtilities(person, source, destination,
+                previousActivity, nextActivity, choiceSet);
 
 
-	protected Map<Mode,Double> calculateUtilities(
-		Person person,
-		Zone sourceZone,
-		Zone targetZone,
-		ActivityIfc previousActivity,
-		ActivityIfc nextActivity,
-		Collection<Mode> choiceSet
-	) {
+        return logitModel.select(utilities, choiceSet, randomNumber);
+    }
 
-		Set<Mode> modes = new LinkedHashSet<>(Arrays.asList(new Mode[] { 
-															StandardMode.PEDESTRIAN ,
-															StandardMode.PUBLICTRANSPORT,
-															StandardMode.PASSENGER,
-															StandardMode.BIKE,
-															StandardMode.CAR,
-															StandardMode.CARSHARING_STATION,
-															StandardMode.CARSHARING_FREE
-														}));
 
-		modes.retainAll(choiceSet);
+    protected Map<Mode, Double> calculateUtilities(
+            Person person,
+            Zone sourceZone,
+            Zone targetZone,
+            ActivityIfc previousActivity,
+            ActivityIfc nextActivity,
+            Collection<Mode> choiceSet
+    ) {
 
-		Map<Mode,Map<String,Double>> attributes = modeChoiceParameter.gatherAttributes(
-																													person, modes, sourceZone, targetZone,
-																													previousActivity, nextActivity, this.impedance);
+        Set<Mode> modes = new LinkedHashSet<>(Arrays.asList(new Mode[]{
+                StandardMode.PEDESTRIAN,
+                StandardMode.PUBLICTRANSPORT,
+                StandardMode.PASSENGER,
+                StandardMode.BIKE,
+                StandardMode.CAR,
+                StandardMode.CARSHARING_STATION,
+                StandardMode.CARSHARING_FREE
+        }));
 
-		Map<Mode,Double> utilities = new LinkedHashMap<Mode, Double>(); 
+        modes.retainAll(choiceSet);
 
-		for (Mode mode : modes) {
-			LinearUtilityFunction uf = utilityFunctions.get(mode);
-			Double utility = uf.calculateUtility(attributes.get(mode));	
-		
-			utilities.put(mode, utility);
-		}
-	
-		return utilities;
-	}
-	
+        Map<Mode, Map<String, Double>> attributes = modeChoiceParameter.gatherAttributes(
+                person, modes, sourceZone, targetZone,
+                previousActivity, nextActivity, this.impedance);
+
+        Map<Mode, Double> utilities = new LinkedHashMap<Mode, Double>();
+
+        for (Mode mode : modes) {
+            LinearUtilityFunction uf = utilityFunctions.get(mode);
+            Double utility = uf.calculateUtility(attributes.get(mode));
+
+            utilities.put(mode, utility);
+        }
+
+        return utilities;
+    }
+
 }
