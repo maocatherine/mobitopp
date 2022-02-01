@@ -14,51 +14,51 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreateAndSaveDemand {
 
-	private final Results results;
-	private final DemandCategories categories;
-	private final DemandCreatorFactory demandCreatorFactory;
+    private final Results results;
+    private final DemandCategories categories;
+    private final DemandCreatorFactory demandCreatorFactory;
 
-	public void createAndSave(
-			final List<WeightedHousehold> households, final DemandRegion region,
-			final AttributeResolver attributeResolver) {
-		List<HouseholdForSetup> demand = createDemand(households, region, attributeResolver);
-		save(demand, region);
-	}
+    public void createAndSave(
+            final List<WeightedHousehold> households, final DemandRegion region,
+            final AttributeResolver attributeResolver) {
+        List<HouseholdForSetup> demand = createDemand(households, region, attributeResolver);
+        save(demand, region);
+    }
 
-	private List<HouseholdForSetup> createDemand(
-			final List<WeightedHousehold> households, final DemandRegion region,
-			final AttributeResolver attributeResolver) {
-		DemandCreator create = createDemandCreator(region, attributeResolver);
-		return create.demandFor(households);
-	}
+    private List<HouseholdForSetup> createDemand(
+            final List<WeightedHousehold> households, final DemandRegion region,
+            final AttributeResolver attributeResolver) {
+        DemandCreator create = createDemandCreator(region, attributeResolver);
+        return create.demandFor(households);
+    }
 
-	private DemandCreator createDemandCreator(
-			final DemandRegion region, final AttributeResolver attributeResolver) {
-		return demandCreatorFactory.create(region, attributeResolver);
-	}
+    private DemandCreator createDemandCreator(
+            final DemandRegion region, final AttributeResolver attributeResolver) {
+        return demandCreatorFactory.create(region, attributeResolver);
+    }
 
-	private void save(final List<HouseholdForSetup> demand, final DemandRegion region) {
-	  region.zones().forEach(toZone -> addHouseholdsOf(demand, toZone));
-	}
+    private void save(final List<HouseholdForSetup> demand, final DemandRegion region) {
+        region.zones().forEach(toZone -> addHouseholdsOf(demand, toZone));
+    }
 
-  private void addHouseholdsOf(List<HouseholdForSetup> demand, DemandZone zone) {
-    demand
-        .stream()
-        .filter(household -> matchesHomeZone(zone, household))
-        .forEach(household -> addHousehold(zone, household));
-  }
+    private void addHouseholdsOf(List<HouseholdForSetup> demand, DemandZone zone) {
+        demand
+                .stream()
+                .filter(household -> matchesHomeZone(zone, household))
+                .forEach(household -> addHousehold(zone, household));
+    }
 
-  private boolean matchesHomeZone(DemandZone zone, HouseholdForSetup household) {
-    return zone.getId().equals(household.homeZone().getId());
-  }
+    private boolean matchesHomeZone(DemandZone zone, HouseholdForSetup household) {
+        return zone.getId().equals(household.homeZone().getId());
+    }
 
-  private void addHousehold(DemandZone zone, HouseholdForSetup household) {
-    zone.getPopulation().addHousehold(household);
-    log(household);
-  }
+    private void addHousehold(DemandZone zone, HouseholdForSetup household) {
+        zone.getPopulation().addHousehold(household);
+        log(household);
+    }
 
-  private void log(final HouseholdForSetup newHousehold) {
-		results.write(categories.demanddataResult, newHousehold.toString());
-	}
+    private void log(final HouseholdForSetup newHousehold) {
+        results.write(categories.demanddataResult, newHousehold.toString());
+    }
 
 }

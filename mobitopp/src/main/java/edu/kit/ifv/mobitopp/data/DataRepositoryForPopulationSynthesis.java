@@ -10,20 +10,20 @@ import edu.kit.ifv.mobitopp.simulation.ImpedanceIfc;
 
 public interface DataRepositoryForPopulationSynthesis {
 
-	Map<ActivityType, FixedDistributionMatrix> fixedDistributionMatrices();
-  
-  DemographyRepository demographyRepository();
+    Map<ActivityType, FixedDistributionMatrix> fixedDistributionMatrices();
 
-	DemandDataRepository demandDataRepository();
+    DemographyRepository demographyRepository();
 
-	DemandZoneRepository zoneRepository();
+    DemandDataRepository demandDataRepository();
 
-	ImpedanceIfc impedance();
+    DemandZoneRepository zoneRepository();
 
-	PanelDataRepository panelDataRepository();
+    ImpedanceIfc impedance();
 
-	void finishExecution() throws IOException;
+    PanelDataRepository panelDataRepository();
 
-	DemandRegionRepository demandRegionRepository();
+    void finishExecution() throws IOException;
+
+    DemandRegionRepository demandRegionRepository();
 
 }

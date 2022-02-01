@@ -16,76 +16,76 @@ import edu.kit.ifv.mobitopp.simulation.LocationParser;
 
 public class DefaultFixedDestinationFormat implements SerialiserFormat<PersonFixedDestination> {
 
-  private final ZoneRepository zoneRepository;
-  private final LocationParser locationParser;
-  private final ColumnMapping<PersonFixedDestination> columns;
+    private final ZoneRepository zoneRepository;
+    private final LocationParser locationParser;
+    private final ColumnMapping<PersonFixedDestination> columns;
 
-  public DefaultFixedDestinationFormat(ZoneRepository zoneRepository) {
-    super();
-    this.zoneRepository = zoneRepository;
-    locationParser = new LocationParser();
-    columns = new ColumnMapping<>();
-    columns.add("personOid", e -> e.person().getOid());
-    columns.add("personNumber", e -> e.person().getPersonNumber());
-    columns.add("householdOid", e -> e.person().getHouseholdId().getOid());
-    columns.add("householdYear", e -> e.person().getHouseholdId().getYear());
-    columns.add("householdNumber", e -> e.person().getHouseholdId().getHouseholdNumber());
-    columns.add("activityType", e -> e.fixedDestination().activityType());
-    columns.add("zoneId", e -> e.fixedDestination().zone().getId().getMatrixColumn());
-    columns.add("location", e -> locationParser.serialise(e.fixedDestination().location()));
-		columns.add("locationX", e -> e.fixedDestination().location().coordinatesP().getX());
-		columns.add("locationY", e -> e.fixedDestination().location().coordinatesP().getY());
-  }
-
-  @Override
-  public List<String> header() {
-    return columns.header();
-  }
-
-  @Override
-  public List<String> prepare(PersonFixedDestination element) {
-    return columns.prepare(element);
-  }
-
-  @Override
-  public Optional<PersonFixedDestination> parse(List<String> data) {
-    return destinationOf(data).map(destination -> createFixedDestination(data, destination));
-  }
-
-  private PersonFixedDestination createFixedDestination(
-      List<String> data, FixedDestination destination) {
-    PersonId person = personOf(data);
-    return new PersonFixedDestination(person, destination);
-  }
-
-  private PersonId personOf(List<String> fromData) {
-    int householdOid = columns.get("householdOid", fromData).asInt();
-    short year = columns.get("householdYear", fromData).asShort();
-    long householdNumber = columns.get("householdNumber", fromData).asLong();
-    HouseholdId householdId = new HouseholdId(householdOid, year, householdNumber);
-    int oid = columns.get("personOid", fromData).asInt();
-    int personNumber = columns.get("personNumber", fromData).asInt();
-    return new PersonId(oid, householdId, personNumber);
-  }
-
-  private Optional<FixedDestination> destinationOf(List<String> data) {
-    Optional<Zone> zone = zoneOF(data);
-    return zone.map(z -> createFixedDestination(data, z));
-  }
-
-  private FixedDestination createFixedDestination(List<String> fromData, Zone zone) {
-    String typeId = columns.get("activityType", fromData).asString();
-    ActivityType activityType = ActivityType.valueOf(typeId);
-    Location location = locationParser.parse(columns.get("location", fromData).asString());
-    return new FixedDestination(activityType, zone, location);
-  }
-
-  private Optional<Zone> zoneOF(List<String> fromData) {
-    int zoneOid = columns.get("zoneId", fromData).asInt();
-    if (zoneRepository.hasZone(zoneOid)) {
-      return Optional.of(zoneRepository.getZoneByOid(zoneOid));
+    public DefaultFixedDestinationFormat(ZoneRepository zoneRepository) {
+        super();
+        this.zoneRepository = zoneRepository;
+        locationParser = new LocationParser();
+        columns = new ColumnMapping<>();
+        columns.add("personOid", e -> e.person().getOid());
+        columns.add("personNumber", e -> e.person().getPersonNumber());
+        columns.add("householdOid", e -> e.person().getHouseholdId().getOid());
+        columns.add("householdYear", e -> e.person().getHouseholdId().getYear());
+        columns.add("householdNumber", e -> e.person().getHouseholdId().getHouseholdNumber());
+        columns.add("activityType", e -> e.fixedDestination().activityType());
+        columns.add("zoneId", e -> e.fixedDestination().zone().getId().getMatrixColumn());
+        columns.add("location", e -> locationParser.serialise(e.fixedDestination().location()));
+        columns.add("locationX", e -> e.fixedDestination().location().coordinatesP().getX());
+        columns.add("locationY", e -> e.fixedDestination().location().coordinatesP().getY());
     }
-    return Optional.empty();
-  }
+
+    @Override
+    public List<String> header() {
+        return columns.header();
+    }
+
+    @Override
+    public List<String> prepare(PersonFixedDestination element) {
+        return columns.prepare(element);
+    }
+
+    @Override
+    public Optional<PersonFixedDestination> parse(List<String> data) {
+        return destinationOf(data).map(destination -> createFixedDestination(data, destination));
+    }
+
+    private PersonFixedDestination createFixedDestination(
+            List<String> data, FixedDestination destination) {
+        PersonId person = personOf(data);
+        return new PersonFixedDestination(person, destination);
+    }
+
+    private PersonId personOf(List<String> fromData) {
+        int householdOid = columns.get("householdOid", fromData).asInt();
+        short year = columns.get("householdYear", fromData).asShort();
+        long householdNumber = columns.get("householdNumber", fromData).asLong();
+        HouseholdId householdId = new HouseholdId(householdOid, year, householdNumber);
+        int oid = columns.get("personOid", fromData).asInt();
+        int personNumber = columns.get("personNumber", fromData).asInt();
+        return new PersonId(oid, householdId, personNumber);
+    }
+
+    private Optional<FixedDestination> destinationOf(List<String> data) {
+        Optional<Zone> zone = zoneOF(data);
+        return zone.map(z -> createFixedDestination(data, z));
+    }
+
+    private FixedDestination createFixedDestination(List<String> fromData, Zone zone) {
+        String typeId = columns.get("activityType", fromData).asString();
+        ActivityType activityType = ActivityType.valueOf(typeId);
+        Location location = locationParser.parse(columns.get("location", fromData).asString());
+        return new FixedDestination(activityType, zone, location);
+    }
+
+    private Optional<Zone> zoneOF(List<String> fromData) {
+        int zoneOid = columns.get("zoneId", fromData).asInt();
+        if (zoneRepository.hasZone(zoneOid)) {
+            return Optional.of(zoneRepository.getZoneByOid(zoneOid));
+        }
+        return Optional.empty();
+    }
 
 }

@@ -21,23 +21,23 @@ import edu.kit.ifv.mobitopp.visum.VisumNetwork;
 
 public interface DataSource {
 
-	DataRepositoryForPopulationSynthesis forPopulationSynthesis(
-			final VisumNetwork visumNetwork, final SimpleRoadNetwork roadNetwork,
-			final DemographyData demographyData, final StructuralData zoneProperties,
-			final PanelDataRepository panelDataRepository, final int numberOfZones,
-			final StartDateSpecification input, final ResultWriter results,
-			final AreaTypeRepository areaTypeRepository, final TypeMapping modeToType,
-			final PersonChanger personChanger, final Function<ImpedanceIfc, ImpedanceIfc> wrapImpedance,
-			final DemandRegionMapping demandRegionMapping)
-			throws IOException;
+    DataRepositoryForPopulationSynthesis forPopulationSynthesis(
+            final VisumNetwork visumNetwork, final SimpleRoadNetwork roadNetwork,
+            final DemographyData demographyData, final StructuralData zoneProperties,
+            final PanelDataRepository panelDataRepository, final int numberOfZones,
+            final StartDateSpecification input, final ResultWriter results,
+            final AreaTypeRepository areaTypeRepository, final TypeMapping modeToType,
+            final PersonChanger personChanger, final Function<ImpedanceIfc, ImpedanceIfc> wrapImpedance,
+            final DemandRegionMapping demandRegionMapping)
+            throws IOException;
 
-	DataRepositoryForSimulation forSimulation(
-			Supplier<Network> network, int numberOfZones, InputSpecification input,
-			PublicTransportData data, ResultWriter results, ElectricChargingWriter electricChargingWriter,
-			AreaTypeRepository areaTypeRepository, TypeMapping modeToType,
-			Predicate<HouseholdForSetup> householdFilter, PersonChanger personChanger,
-			Function<ImpedanceIfc, ImpedanceIfc> wrapImpedance) throws IOException;
+    DataRepositoryForSimulation forSimulation(
+            Supplier<Network> network, int numberOfZones, InputSpecification input,
+            PublicTransportData data, ResultWriter results, ElectricChargingWriter electricChargingWriter,
+            AreaTypeRepository areaTypeRepository, TypeMapping modeToType,
+            Predicate<HouseholdForSetup> householdFilter, PersonChanger personChanger,
+            Function<ImpedanceIfc, ImpedanceIfc> wrapImpedance) throws IOException;
 
-	void validate(TypeMapping modeToType) throws IOException;
+    void validate(TypeMapping modeToType) throws IOException;
 
 }

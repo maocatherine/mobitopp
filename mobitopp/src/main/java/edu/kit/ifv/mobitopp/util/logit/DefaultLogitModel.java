@@ -9,143 +9,140 @@ import edu.kit.ifv.mobitopp.util.randomvariable.DiscreteRandomVariable;
 
 
 public class DefaultLogitModel<T>
-	implements LogitModel<T>
-{
+        implements LogitModel<T> {
 
 
+    public Map<T, Double> calculateProbabilities(
+            Map<T, Double> utilities
+    ) {
 
-	public Map<T,Double> calculateProbabilities(
-		Map<T,Double> utilities
-	) {
+        return calculateProbabilities(1.0, utilities, utilities.keySet());
+    }
 
-		return calculateProbabilities(1.0, utilities, utilities.keySet());
-	}
+    public Map<T, Double> calculateProbabilities(
+            Map<T, Double> utilities,
+            Collection<T> choiceSet
+    ) {
 
-	public Map<T,Double> calculateProbabilities(
-		Map<T,Double> utilities, 
-		Collection<T> choiceSet
-	) {
-
-		return calculateProbabilities(1.0, utilities, choiceSet);
-	}
-
-
-	public Map<T,Double> calculateProbabilities(
-		Double beta,
-		Map<T,Double> utils, 
-		Collection<T> choiceSet
-	) {
-
-		Map<T,Double> utilities = new LinkedHashMap<>(utils);
-
-		utilities.keySet().retainAll(choiceSet);
-
-		assert !utilities.isEmpty() : (choiceSet + " - " + utils);
-
-		Map<T,Double> expUtilities = calculateExpUtilities(beta, utilities, 0.0);
-
-		Double total = sum(expUtilities);
-
-		if (total == 0.0) {
-			Double maxVal = Collections.max(utilities.values());
-
-			assert !maxVal.isNaN();
-			assert maxVal < 0.0;
-		
-			expUtilities = calculateExpUtilities(beta, utilities, maxVal);
-			total = sum(expUtilities);
-		}
-
-		assert total > 0.0 : ("sum(expUtilities)=" + total + "\n" 
-																								+ "choiceSet:\n" + choiceSet + "\n"
-																								+ "utilities:\n" + utilities);
-		assert !total.isNaN();
-		assert !total.isInfinite();
-
-		Map<T,Double> probabilities = new LinkedHashMap<T, Double>(); 
-
-		for (T choice: expUtilities.keySet()) {
-
-			Double expVal = expUtilities.get(choice);
-
-			Double probability = expVal/total;
-
-			probabilities.put(choice, probability);
-		}
-
-		return probabilities;
-	}
+        return calculateProbabilities(1.0, utilities, choiceSet);
+    }
 
 
-	private Map<T,Double> calculateExpUtilities(
-		double beta,
-		Map<T,Double> utilities,
-		double offset
-	) {
+    public Map<T, Double> calculateProbabilities(
+            Double beta,
+            Map<T, Double> utils,
+            Collection<T> choiceSet
+    ) {
 
-		Map<T,Double> expUtilities = new LinkedHashMap<T,Double>();
+        Map<T, Double> utilities = new LinkedHashMap<>(utils);
 
-		for (T choice : utilities.keySet()) {
+        utilities.keySet().retainAll(choiceSet);
 
-			assert utilities.containsKey(choice);
+        assert !utilities.isEmpty() : (choiceSet + " - " + utils);
 
-			Double val = utilities.get(choice) + offset;
+        Map<T, Double> expUtilities = calculateExpUtilities(beta, utilities, 0.0);
 
-			assert !(val.isInfinite() && val > 0.0);
+        Double total = sum(expUtilities);
 
-			Double expVal = Math.exp(beta*val);
+        if (total == 0.0) {
+            Double maxVal = Collections.max(utilities.values());
 
-			expUtilities.put(choice, expVal);
-		}
+            assert !maxVal.isNaN();
+            assert maxVal < 0.0;
 
-		if (sum(expUtilities).isInfinite()) {
-			return calculateExpUtilities(beta/2.0, utilities, offset);
-		}
-		
-		if (sum(expUtilities) == 0.0) {
-			return calculateExpUtilities(beta/2.0, utilities, offset);
-		}
+            expUtilities = calculateExpUtilities(beta, utilities, maxVal);
+            total = sum(expUtilities);
+        }
+
+        assert total > 0.0 : ("sum(expUtilities)=" + total + "\n"
+                + "choiceSet:\n" + choiceSet + "\n"
+                + "utilities:\n" + utilities);
+        assert !total.isNaN();
+        assert !total.isInfinite();
+
+        Map<T, Double> probabilities = new LinkedHashMap<T, Double>();
+
+        for (T choice : expUtilities.keySet()) {
+
+            Double expVal = expUtilities.get(choice);
+
+            Double probability = expVal / total;
+
+            probabilities.put(choice, probability);
+        }
+
+        return probabilities;
+    }
 
 
-		return expUtilities;
-	}
+    private Map<T, Double> calculateExpUtilities(
+            double beta,
+            Map<T, Double> utilities,
+            double offset
+    ) {
 
-	private Double sum(Map<T,Double> data) {
+        Map<T, Double> expUtilities = new LinkedHashMap<T, Double>();
 
-		Double total = 0.0;
+        for (T choice : utilities.keySet()) {
 
-		for (Double val : data.values()) {
+            assert utilities.containsKey(choice);
 
-			total += val;
-		}
+            Double val = utilities.get(choice) + offset;
 
-		return total;
-	}
+            assert !(val.isInfinite() && val > 0.0);
+
+            Double expVal = Math.exp(beta * val);
+
+            expUtilities.put(choice, expVal);
+        }
+
+        if (sum(expUtilities).isInfinite()) {
+            return calculateExpUtilities(beta / 2.0, utilities, offset);
+        }
+
+        if (sum(expUtilities) == 0.0) {
+            return calculateExpUtilities(beta / 2.0, utilities, offset);
+        }
 
 
-	public T select(
-		Map<T,Double> utilities, 
-		Collection<T> choiceSet,
-		Double randomNumber
-	) {
+        return expUtilities;
+    }
 
-		assert !utilities.isEmpty();
+    private Double sum(Map<T, Double> data) {
 
-		Map<T,Double> probabilities = calculateProbabilities(utilities, choiceSet);
+        Double total = 0.0;
 
-		DiscreteRandomVariable<T> distribution = new DiscreteRandomVariable<T>(probabilities);
+        for (Double val : data.values()) {
 
-		return distribution.realization(randomNumber);
-	}
+            total += val;
+        }
 
-	public T select(
-		Map<T,Double> utilities, 
-		Double randomNumber
-	) {
+        return total;
+    }
 
-		return select(utilities, utilities.keySet(), randomNumber);
-	}
 
+    public T select(
+            Map<T, Double> utilities,
+            Collection<T> choiceSet,
+            Double randomNumber
+    ) {
+
+        assert !utilities.isEmpty();
+
+        Map<T, Double> probabilities = calculateProbabilities(utilities, choiceSet);
+
+        DiscreteRandomVariable<T> distribution = new DiscreteRandomVariable<T>(probabilities);
+
+        return distribution.realization(randomNumber);
+    }
+
+    public T select(
+            Map<T, Double> utilities,
+            Double randomNumber
+    ) {
+
+        return select(utilities, utilities.keySet(), randomNumber);
+    }
 
 
 }
