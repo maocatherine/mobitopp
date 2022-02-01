@@ -10,13 +10,13 @@ import edu.kit.ifv.mobitopp.simulation.activityschedule.ActivityIfc;
 public interface AttractivityCalculatorIfc {
 
 
-	public Map<Zone, Float> calculateAttractivities(
-		Person person,
-		ActivityIfc nextActivity,
-  	Zone currentZone,
-  	Collection<Zone> possibleTargetZones,
-  	ActivityType activityType,
-  	Set<Mode> choiceSetForModes
-	);
+    public Map<Zone, Float> calculateAttractivities(
+            Person person,
+            ActivityIfc nextActivity,
+            Zone currentZone,
+            Collection<Zone> possibleTargetZones,
+            ActivityType activityType,
+            Set<Mode> choiceSetForModes
+    );
 
 }
