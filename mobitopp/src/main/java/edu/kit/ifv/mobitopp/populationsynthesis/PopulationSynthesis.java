@@ -71,20 +71,32 @@ public abstract class PopulationSynthesis {
 
 	public void createPopulation() {
 		performanceLogger.start();
+		//Create locations like work, education, and shops. Including the total number of them in the area, the coordinates and the attractivities. Results are
+		//Read from poi file defined in configuration.
 		createLocations();
 		measureTime("Create locations");
+
+		//Locations of WORK/EDUCATION activity type. These are fixed locations.
 		Map<ActivityType, FixedDistributionMatrix> fdMatrices = fixedDistributionMatrices();
 		measureTime("Load fixed distribution matrices");
 		assertFixedDistributionMatrices(fdMatrices);
 		measureTime("Assert fixed distribution matrices");
+
+		//Not sure what this does.
 		executeBeforeCreation();
 		measureTime("Execute before creation");
+
+		//Create population with consideration of fixed locations.
 		doCreatePopulation(fdMatrices);
 		measureTime("Create population");
+
+		//Not sure what this does again.
 		doExecuteAfterCreation();
 		measureTime("Execute after creation");
+
 		finishExecution();
 		measureTime("Finish execution");
+
 		printPerformance();
 	}
 
@@ -117,6 +129,7 @@ public abstract class PopulationSynthesis {
 
 	private void createLocationsForZone(
 			OpportunityLocationSelector opportunityLocationSelector, Zone zone) {
+		//Opportunity includes activity type and their attractivity. Activity type is from attractivity heading.
 		OpportunityDataForZone opportunities = zone.opportunities();
 		opportunities.createLocations(opportunityLocationSelector);
 
@@ -149,6 +162,7 @@ public abstract class PopulationSynthesis {
 	}
 
 	void doCreatePopulation(Map<ActivityType, FixedDistributionMatrix> fdMatrices) {
+		//SingleZoneDemandCalculator is called. This method is defined in BasicPopulationSynthesisIpf.java
 		DemandDataCalculator calculator = createCalculator(fdMatrices);
 		calculator.calculateDemand();
 	}
@@ -191,10 +205,11 @@ public abstract class PopulationSynthesis {
 	}
 
 	private Map<ActivityType, FixedDistributionMatrix> fixedDistributionMatrices() {
-		log.info("Lade Matrizen....");
+		//Filter the WORK/EDUCATION activity type locations. Read the fixed matrices directly from input.
+		log.info("Load matrices....");
 		Map<ActivityType, FixedDistributionMatrix> fixedDistributionMatrices = dataRepository()
 				.fixedDistributionMatrices();
-		log.info("...geladen!\n");
+		log.info("...loaded!\n");
 		return fixedDistributionMatrices;
 	}
 
