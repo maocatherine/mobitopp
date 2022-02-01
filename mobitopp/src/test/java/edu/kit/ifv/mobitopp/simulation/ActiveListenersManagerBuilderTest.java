@@ -66,7 +66,7 @@ public class ActiveListenersManagerBuilderTest {
 		when(context.configuration()).thenReturn(configuration);
 
 		DemandSimulatorPassenger simulator = mock(DemandSimulatorPassenger.class);
-		when(simulator.context()).thenReturn(context);
+		when(simulator.context()).thenReturn((SimulationContextWithRestServer) context);
 
 		
 		
