@@ -13,202 +13,201 @@ import edu.kit.ifv.mobitopp.simulation.IdSequence;
 import edu.kit.ifv.mobitopp.simulation.car.CarPosition;
 
 abstract class PersonalCarOwnershipModel
-	implements CarOwnershipModel 
-{
+        implements CarOwnershipModel {
 
-	final IdSequence idSequence;
-	final Random random;
-	final CarSegmentModel segmentModel;
-
-
-	public PersonalCarOwnershipModel(
-		IdSequence idSequence,
-		CarSegmentModel segmentModel,
-		long seed
-	) {
-
-		this.idSequence = idSequence;
-		this.segmentModel = segmentModel;
-		this.random = new Random(seed);
-	}
-
-	@Override
-	public Collection<PrivateCarForSetup> createCars(HouseholdForSetup household) {
-	  int numberOfCars = household.getTotalNumberOfCars();
-		return createCars(household, numberOfCars);
-	}
-
-  public Collection<PrivateCarForSetup> createCars(HouseholdForSetup household, int numberOfCars) {
-    List<PersonBuilder> personsWithLicense = getPersonsWithLicense(household);
-
-		List<PrivateCarForSetup> cars = new ArrayList<>();
+    final IdSequence idSequence;
+    final Random random;
+    final CarSegmentModel segmentModel;
 
 
-		if (numberOfCars == 0) return cars;
+    public PersonalCarOwnershipModel(
+            IdSequence idSequence,
+            CarSegmentModel segmentModel,
+            long seed
+    ) {
 
-		// Should not happen, but is available in the data
-		if (personsWithLicense.size() == 0) {
-		
-			List<PersonBuilder> adultPersons = getAdultPersons(household);
+        this.idSequence = idSequence;
+        this.segmentModel = segmentModel;
+        this.random = new Random(seed);
+    }
 
-			List<PersonBuilder> personsSample = adultPersons.size() > numberOfCars 
-																				? sample(household.getPersons(), numberOfCars)
-																				: sampleWithReplacement(household.getPersons(), numberOfCars);
+    @Override
+    public Collection<PrivateCarForSetup> createCars(HouseholdForSetup household) {
+        int numberOfCars = household.getTotalNumberOfCars();
+        return createCars(household, numberOfCars);
+    }
 
-			for (int i=0; i<numberOfCars; i++) {
-				cars.add(createCar(personsSample.get(i)));
-			}
+    public Collection<PrivateCarForSetup> createCars(HouseholdForSetup household, int numberOfCars) {
+        List<PersonBuilder> personsWithLicense = getPersonsWithLicense(household);
 
-			return cars;
-		}
+        List<PrivateCarForSetup> cars = new ArrayList<>();
 
 
-		if (personsWithLicense.size() == numberOfCars) {
+        if (numberOfCars == 0) return cars;
 
-			for (int i=0; i<numberOfCars; i++) {
-				PrivateCarForSetup car = createPersonalCar(personsWithLicense.get(i));
-				cars.add(car);
-			}
+        // Should not happen, but is available in the data
+        if (personsWithLicense.size() == 0) {
 
-		} else if (personsWithLicense.size() > numberOfCars) {
+            List<PersonBuilder> adultPersons = getAdultPersons(household);
 
-			List<PersonBuilder> personsSample = sample(personsWithLicense, numberOfCars);
+            List<PersonBuilder> personsSample = adultPersons.size() > numberOfCars
+                    ? sample(household.getPersons(), numberOfCars)
+                    : sampleWithReplacement(household.getPersons(), numberOfCars);
 
-			for (int i=0; i<numberOfCars; i++) {
-			  PersonBuilder person = personsSample.get(i);
+            for (int i = 0; i < numberOfCars; i++) {
+                cars.add(createCar(personsSample.get(i)));
+            }
 
-				if (person.hasPersonalCar()) {
-					cars.add(createPersonalCar(person));
-				} else {
-					cars.add(createCar(person));
-				}
-			}
+            return cars;
+        }
 
-		} else if (personsWithLicense.size() < numberOfCars) {
 
-			int withLicense = personsWithLicense.size();
+        if (personsWithLicense.size() == numberOfCars) {
 
-			List<PersonBuilder> personsSample = sampleWithReplacement(personsWithLicense, numberOfCars-withLicense);
+            for (int i = 0; i < numberOfCars; i++) {
+                PrivateCarForSetup car = createPersonalCar(personsWithLicense.get(i));
+                cars.add(car);
+            }
 
-			for (int i=0; i<withLicense; i++) {
-				PrivateCarForSetup car = createPersonalCar(personsWithLicense.get(i));
-				cars.add(car);
-			}
-			for (int i=withLicense; i<numberOfCars; i++) {
-				PrivateCarForSetup car = createCar(personsSample.get(i-withLicense));
-				cars.add(car);
-			}
+        } else if (personsWithLicense.size() > numberOfCars) {
 
-		}
+            List<PersonBuilder> personsSample = sample(personsWithLicense, numberOfCars);
 
-		return cars;
-  }
+            for (int i = 0; i < numberOfCars; i++) {
+                PersonBuilder person = personsSample.get(i);
 
-	private List<PersonBuilder> getPersonsWithLicense(HouseholdForSetup household) {
+                if (person.hasPersonalCar()) {
+                    cars.add(createPersonalCar(person));
+                } else {
+                    cars.add(createCar(person));
+                }
+            }
 
-		List<PersonBuilder> withLicense = new ArrayList<>();
+        } else if (personsWithLicense.size() < numberOfCars) {
 
-		for (PersonBuilder person : household.getPersons()) {
+            int withLicense = personsWithLicense.size();
 
-			if (person.hasDrivingLicense()) {
-				withLicense.add(person);
-			}
-		}
+            List<PersonBuilder> personsSample = sampleWithReplacement(personsWithLicense, numberOfCars - withLicense);
 
-		return withLicense;
-	}
+            for (int i = 0; i < withLicense; i++) {
+                PrivateCarForSetup car = createPersonalCar(personsWithLicense.get(i));
+                cars.add(car);
+            }
+            for (int i = withLicense; i < numberOfCars; i++) {
+                PrivateCarForSetup car = createCar(personsSample.get(i - withLicense));
+                cars.add(car);
+            }
 
-	private List<PersonBuilder> getAdultPersons(HouseholdForSetup household) {
+        }
 
-		List<PersonBuilder> adults = new ArrayList<>();
+        return cars;
+    }
 
-		for (PersonBuilder person : household.getPersons()) {
+    private List<PersonBuilder> getPersonsWithLicense(HouseholdForSetup household) {
 
-			if (person.age() >= 18) {
-				adults.add(person);
-			}
-		}
+        List<PersonBuilder> withLicense = new ArrayList<>();
 
-		return adults;
-	}
+        for (PersonBuilder person : household.getPersons()) {
 
-	private	List<PersonBuilder> sample(
-		List<PersonBuilder> persons, 
-		int size
-	) {
-			assert size < persons.size() : ("size=" + size + " person.size()=" + persons.size());
-			assert size >= 1;
+            if (person.hasDrivingLicense()) {
+                withLicense.add(person);
+            }
+        }
 
-			List<PersonBuilder> sample = new ArrayList<>();
+        return withLicense;
+    }
 
-			List<PersonBuilder> tmp = new ArrayList<>(persons);
+    private List<PersonBuilder> getAdultPersons(HouseholdForSetup household) {
 
-			assert tmp.size() > size;
+        List<PersonBuilder> adults = new ArrayList<>();
 
-			for (int i=0; i<size; i++) {
+        for (PersonBuilder person : household.getPersons()) {
 
-				float rand = random.nextFloat();
-				int idx = (int) Math.floor(rand*tmp.size());
+            if (person.age() >= 18) {
+                adults.add(person);
+            }
+        }
 
-				assert idx < tmp.size() : ("idx=" + idx + " " + tmp.size());
+        return adults;
+    }
 
-				PersonBuilder p = tmp.remove(idx);
-				sample.add(p);
-			}
+    private List<PersonBuilder> sample(
+            List<PersonBuilder> persons,
+            int size
+    ) {
+        assert size < persons.size() : ("size=" + size + " person.size()=" + persons.size());
+        assert size >= 1;
 
-			return sample;
-	}
+        List<PersonBuilder> sample = new ArrayList<>();
 
-	private	List<PersonBuilder> sampleWithReplacement(
-		List<PersonBuilder> persons, 
-		int size
-	) {
+        List<PersonBuilder> tmp = new ArrayList<>(persons);
 
-			assert size >= 1;
-			assert persons.size() >= 1 : ("person.size() ==" + persons.size());
+        assert tmp.size() > size;
 
-			List<PersonBuilder> sample = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
 
-			for (int i=0; i<size; i++) {
+            float rand = random.nextFloat();
+            int idx = (int) Math.floor(rand * tmp.size());
 
-				float rand = random.nextFloat();
-				int idx = (int) Math.floor(rand*persons.size());
+            assert idx < tmp.size() : ("idx=" + idx + " " + tmp.size());
 
-				assert idx < persons.size() : ("idx=" + idx + " " + persons.size());
+            PersonBuilder p = tmp.remove(idx);
+            sample.add(p);
+        }
 
-				PersonBuilder p = persons.get(idx);
-				sample.add(p);
-			}
+        return sample;
+    }
 
-			return sample;
-	}
+    private List<PersonBuilder> sampleWithReplacement(
+            List<PersonBuilder> persons,
+            int size
+    ) {
 
-	protected PrivateCarForSetup createCar(
-	    PersonBuilder person
-	) {
+        assert size >= 1;
+        assert persons.size() >= 1 : ("person.size() ==" + persons.size());
 
-		Car.Segment segment = segmentModel.determineCarSegment(person);
+        List<PersonBuilder> sample = new ArrayList<>();
 
-		HouseholdForSetup household = person.household();
+        for (int i = 0; i < size; i++) {
 
-		CarPosition position = new CarPosition(household.homeZone(), household.homeLocation());
+            float rand = random.nextFloat();
+            int idx = (int) Math.floor(rand * persons.size());
 
-		return createCar(person, position, segment, false);
-	}
+            assert idx < persons.size() : ("idx=" + idx + " " + persons.size());
 
-	protected PrivateCarForSetup createPersonalCar(PersonBuilder person) {
-		Car.Segment segment = segmentModel.determineCarSegment(person);
-		HouseholdForSetup household = person.household();
-		CarPosition position = new CarPosition(household.homeZone(), household.homeLocation());
-		return createCar(person, position, segment, true);
-	}
+            PersonBuilder p = persons.get(idx);
+            sample.add(p);
+        }
 
-	abstract protected PrivateCarForSetup createCar(
-	    PersonBuilder person, 
-		CarPosition position,
-		Car.Segment segment, 
-		boolean personal
-	);
+        return sample;
+    }
+
+    protected PrivateCarForSetup createCar(
+            PersonBuilder person
+    ) {
+
+        Car.Segment segment = segmentModel.determineCarSegment(person);
+
+        HouseholdForSetup household = person.household();
+
+        CarPosition position = new CarPosition(household.homeZone(), household.homeLocation());
+
+        return createCar(person, position, segment, false);
+    }
+
+    protected PrivateCarForSetup createPersonalCar(PersonBuilder person) {
+        Car.Segment segment = segmentModel.determineCarSegment(person);
+        HouseholdForSetup household = person.household();
+        CarPosition position = new CarPosition(household.homeZone(), household.homeLocation());
+        return createCar(person, position, segment, true);
+    }
+
+    abstract protected PrivateCarForSetup createCar(
+            PersonBuilder person,
+            CarPosition position,
+            Car.Segment segment,
+            boolean personal
+    );
 
 
 }
