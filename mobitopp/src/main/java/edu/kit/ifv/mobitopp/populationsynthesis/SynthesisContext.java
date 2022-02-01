@@ -18,36 +18,38 @@ import edu.kit.ifv.mobitopp.visum.VisumNetwork;
 
 public interface SynthesisContext {
 
-	WrittenConfiguration configuration();
+    WrittenConfiguration configuration();
 
-	DynamicParameters experimentalParameters();
+    DynamicParameters experimentalParameters();
 
-	long seed();
+    long seed();
 
-  int maxIterations();
+    int maxIterations();
 
-  double maxGoodnessDelta();
+    double maxGoodnessDelta();
 
-	File carEngineFile();
+    File carEngineFile();
 
-	VisumNetwork network();
+    File opportunityFile();
 
-	SimpleRoadNetwork roadNetwork();
+    VisumNetwork network();
 
-	DemandZoneRepository zoneRepository();
+    SimpleRoadNetwork roadNetwork();
 
-	DataRepositoryForPopulationSynthesis dataRepository();
+    DemandZoneRepository zoneRepository();
 
-	ImpedanceIfc impedance();
+    DataRepositoryForPopulationSynthesis dataRepository();
 
-	Map<String, MobilityProviderCustomerModel> carSharing();
+    ImpedanceIfc impedance();
 
-	ResultWriter resultWriter();
+    Map<String, MobilityProviderCustomerModel> carSharing();
 
-	void printStartupInformationOn(PrintStream out);
+    ResultWriter resultWriter();
 
-  List<AttributeType> attributes(RegionalLevel level);
+    void printStartupInformationOn(PrintStream out);
 
-  PopulationSynthesisParser format();
+    List<AttributeType> attributes(RegionalLevel level);
+
+    PopulationSynthesisParser format();
 
 }

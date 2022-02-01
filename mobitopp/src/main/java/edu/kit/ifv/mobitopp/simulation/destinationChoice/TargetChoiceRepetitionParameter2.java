@@ -18,142 +18,139 @@ import lombok.extern.slf4j.Slf4j;
 class TargetChoiceRepetitionParameter2 {
 
 
-	private Map<ActivityType, Map<Integer, Map<Integer, Map<Integer,Float>>>> parameter
-                  = new HashMap<ActivityType, Map<Integer, Map<Integer, Map<Integer,Float>>>>();
+    private Map<ActivityType, Map<Integer, Map<Integer, Map<Integer, Float>>>> parameter
+            = new HashMap<ActivityType, Map<Integer, Map<Integer, Map<Integer, Float>>>>();
 
 
-
-	public TargetChoiceRepetitionParameter2(String filename) {
-		parseConfigFile(filename);
-	}
-
+    public TargetChoiceRepetitionParameter2(String filename) {
+        parseConfigFile(filename);
+    }
 
 
-	private void parseConfigFile(String fileName)
-	{
+    private void parseConfigFile(String fileName) {
 
-		File f = new File(fileName);
-		if (!f.exists()) {
-			log.error("FEHLER: Datei nicht da!  Aktuelles Verzeichnis " +
-					f.getAbsolutePath());
-		}
+        File f = new File(fileName);
+        if (!f.exists()) {
+            log.error("FEHLER: Datei nicht da!  Aktuelles Verzeichnis " +
+                    f.getAbsolutePath());
+        }
 
-		try {
-			String in = null;
-			try (BufferedReader inp = new BufferedReader(new FileReader(f))) {
-				while ((in = inp.readLine()) != null) {
-					parseParameterData(in);
-				}
-			} catch (FileNotFoundException e) {
-				warn(e, " Datei wurde nicht gefunden : " + fileName, log);
-			} catch (IOException e) {
-				warn(e, " Datei konnte nicht geöffnet werden :" + e, log);
-			}
+        try {
+            String in = null;
+            try (BufferedReader inp = new BufferedReader(new FileReader(f))) {
+                while ((in = inp.readLine()) != null) {
+                    parseParameterData(in);
+                }
+            } catch (FileNotFoundException e) {
+                warn(e, " Datei wurde nicht gefunden : " + fileName, log);
+            } catch (IOException e) {
+                warn(e, " Datei konnte nicht geöffnet werden :" + e, log);
+            }
 
-			printParameter(this.parameter);
+            printParameter(this.parameter);
 
-		} catch (Throwable t) {
-			warn(t, log);
-			System.exit(2);
-		}
+        } catch (Throwable t) {
+            warn(t, log);
+            System.exit(2);
+        }
 
-	}
+    }
 
-	private void parseParameterData(String line_) {
+    private void parseParameterData(String line_) {
 
-		if (line_.indexOf("#") >= 0) {
-			return;
-		}
+        if (line_.indexOf("#") >= 0) {
+            return;
+        }
 
-		StringTokenizer tokens = new StringTokenizer(line_, ";");
+        StringTokenizer tokens = new StringTokenizer(line_, ";");
 
-		if (tokens.countTokens() < 3) {
-			return;
-		}
+        if (tokens.countTokens() < 3) {
+            return;
+        }
 
-		try {
-			int activity = Integer.parseInt(tokens.nextToken().trim());
-			int previous = Integer.parseInt(tokens.nextToken().trim());
-			int community_type = Integer.parseInt(tokens.nextToken().trim());
+        try {
+            int activity = Integer.parseInt(tokens.nextToken().trim());
+            int previous = Integer.parseInt(tokens.nextToken().trim());
+            int community_type = Integer.parseInt(tokens.nextToken().trim());
 
-			ActivityType activityKey = ActivityType.getTypeFromInt(activity);
+            ActivityType activityKey = ActivityType.getTypeFromInt(activity);
 
-			Map<Integer,Float> map = new HashMap<Integer,Float>(5,1.0f);
-			int nr = tokens.countTokens();
+            Map<Integer, Float> map = new HashMap<Integer, Float>(5, 1.0f);
+            int nr = tokens.countTokens();
 
-			for (int i = 0; i < nr; i++) {
-				float val = Float.parseFloat(tokens.nextToken().trim());
-				map.put(new Integer(i+2),val);
-			}
+            for (int i = 0; i < nr; i++) {
+                float val = Float.parseFloat(tokens.nextToken().trim());
+                map.put(new Integer(i + 2), val);
+            }
 
-			if (!this.parameter.containsKey(activityKey)) {
+            if (!this.parameter.containsKey(activityKey)) {
 
-				this.parameter.put(activityKey, new HashMap<Integer, Map<Integer, Map<Integer,Float>>>(2,1.0f) );
-			}
-			if (!this.parameter.get(activityKey).containsKey(previous)) {
+                this.parameter.put(activityKey, new HashMap<Integer, Map<Integer, Map<Integer, Float>>>(2, 1.0f));
+            }
+            if (!this.parameter.get(activityKey).containsKey(previous)) {
 
-				this.parameter.get(activityKey).put(previous, new HashMap<Integer, Map<Integer,Float>>(3,1.0f) );
-			}
-			this.parameter.get(activityKey).get(previous).put(community_type,map);
+                this.parameter.get(activityKey).put(previous, new HashMap<Integer, Map<Integer, Float>>(3, 1.0f));
+            }
+            this.parameter.get(activityKey).get(previous).put(community_type, map);
 
-		} catch (NumberFormatException nex) {
-			warn(nex, "Probleme mit der Zeile " + line_ + "  " + nex, log);
-		}
-	}
+        } catch (NumberFormatException nex) {
+            warn(nex, "Probleme mit der Zeile " + line_ + "  " + nex, log);
+        }
+    }
 
-	private void printParameter(
-		Map<ActivityType, Map<Integer, Map<Integer, Map<Integer,Float>>>> parameter
-	) {
+    private void printParameter(
+            Map<ActivityType, Map<Integer, Map<Integer, Map<Integer, Float>>>> parameter
+    ) {
 
-		log.debug("Targetparameter");
+        log.debug("Targetparameter");
 
-		for (ActivityType activity : parameter.keySet()) {
+        for (ActivityType activity : parameter.keySet()) {
 
-			log.debug("Type: " + activity.getTypeAsInt() + " " + activity.getTypeAsString());
+            log.debug("Type: " + activity.getTypeAsInt() + " " + activity.getTypeAsString());
 
-			for (Integer before : parameter.get(activity).keySet()) {
+            for (Integer before : parameter.get(activity).keySet()) {
 
-				log.debug("    before: " + before + " " + (before==0 ? "FIXED" : "FLEXIBLE") );
+                log.debug("    before: " + before + " " + (before == 0 ? "FIXED" : "FLEXIBLE"));
 
-				for (Integer community_type : parameter.get(activity).get(before).keySet() ) {
+                for (Integer community_type : parameter.get(activity).get(before).keySet()) {
 
-					String msg = ("Community: " + community_type + "	");
+                    String msg = ("Community: " + community_type + "	");
 
-					for (Integer wnr : parameter.get(activity).get(before).get(community_type).keySet() ) {
-	
-						float val = parameter.get(activity).get(before).get(community_type).get(wnr);
+                    for (Integer wnr : parameter.get(activity).get(before).get(community_type).keySet()) {
 
-						msg += ("  " + wnr + ": " + val);
-					}
-					log.debug(msg);
-				}
-			}
-		}
-	}
+                        float val = parameter.get(activity).get(before).get(community_type).get(wnr);
 
-	public float getParameter(
-		ActivityType attType, 
-		Integer previousActivity, 
-		Integer wnr,
-		Integer community_type
-	) {
-		// Q&D Hack to make mobitopp work for MOP Data
-		if (!this.parameter.containsKey(attType)) {
-		
-			if (attType == ActivityType.SHOPPING) {
-				attType = ActivityType.SHOPPING_DAILY;
-			}
+                        msg += ("  " + wnr + ": " + val);
+                    }
+                    log.debug(msg);
+                }
+            }
+        }
+    }
 
-			if (attType == ActivityType.LEISURE) {
-				attType = ActivityType.LEISURE_INDOOR;
-			}
-		}
+    public float getParameter(
+            ActivityType attType,
+            Integer previousActivity,
+            Integer wnr,
+            Integer community_type
+    ) {
+        // Q&D Hack to make mobitopp work for MOP Data
+        if (!this.parameter.containsKey(attType)) {
 
-		assert this.parameter.containsKey(attType) : attType;
-		assert this.parameter.get(attType).containsKey(previousActivity) : previousActivity;
-		assert this.parameter.get(attType).get(previousActivity).containsKey(community_type);
+            if (attType == ActivityType.SHOPPING) {
+                attType = ActivityType.SHOPPING_DAILY;
+            }
 
-		return this.parameter.get(attType).get(previousActivity).get(community_type).get(Math.min(wnr,6));
-	}
+            if (attType == ActivityType.LEISURE) {
+                attType = ActivityType.LEISURE_INDOOR;
+            }
+        }
+
+        assert this.parameter.containsKey(attType) : attType;
+        assert this.parameter.get(attType).containsKey(previousActivity) : previousActivity;
+        assert this.parameter.get(attType).get(previousActivity).containsKey(community_type);
+
+        return this.parameter.get(attType).get(previousActivity).get(community_type).get(Math.min(wnr, 6));
+    }
 
 }

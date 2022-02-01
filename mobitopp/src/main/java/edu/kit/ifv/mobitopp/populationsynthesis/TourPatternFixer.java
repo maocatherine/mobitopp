@@ -10,52 +10,52 @@ import edu.kit.ifv.mobitopp.time.Time;
 
 public class TourPatternFixer implements PatternFixer {
 
-	private static final ActivityType home = ActivityType.HOME;
+    private static final ActivityType home = ActivityType.HOME;
 
-	@Override
-	public PatternActivityWeek ensureIsTour(PatternActivityWeek patternActivityWeek) {
-		PatternActivityWeek firstIsAtHome = ensureFirstIsAtHome(patternActivityWeek);
-		return ensureLastIsAtHome(firstIsAtHome);
-	}
+    @Override
+    public PatternActivityWeek ensureIsTour(PatternActivityWeek patternActivityWeek) {
+        PatternActivityWeek firstIsAtHome = ensureFirstIsAtHome(patternActivityWeek);
+        return ensureLastIsAtHome(firstIsAtHome);
+    }
 
-	private PatternActivityWeek ensureLastIsAtHome(PatternActivityWeek patternActivityWeek) {
-		PatternActivity last = patternActivityWeek.last();
-		if (isAtHome(last)) {
-			return patternActivityWeek;
-		}
-		List<PatternActivity> activities = new LinkedList<>();
-		activities.addAll(patternActivityWeek.getPatternActivities());
-		activities.add(newHomeActivityAfter(last));
-		return new PatternActivityWeek(activities);
-	}
+    private PatternActivityWeek ensureLastIsAtHome(PatternActivityWeek patternActivityWeek) {
+        PatternActivity last = patternActivityWeek.last();
+        if (isAtHome(last)) {
+            return patternActivityWeek;
+        }
+        List<PatternActivity> activities = new LinkedList<>();
+        activities.addAll(patternActivityWeek.getPatternActivities());
+        activities.add(newHomeActivityAfter(last));
+        return new PatternActivityWeek(activities);
+    }
 
-	private PatternActivityWeek ensureFirstIsAtHome(PatternActivityWeek patternActivityWeek) {
-		PatternActivity first = patternActivityWeek.first();
-		if (isAtHome(first)) {
-			return patternActivityWeek;
-		}
-		List<PatternActivity> activities = new LinkedList<>();
-		activities.add(newHomeActivityAtStart());
-		activities.addAll(patternActivityWeek.getPatternActivities());
+    private PatternActivityWeek ensureFirstIsAtHome(PatternActivityWeek patternActivityWeek) {
+        PatternActivity first = patternActivityWeek.first();
+        if (isAtHome(first)) {
+            return patternActivityWeek;
+        }
+        List<PatternActivity> activities = new LinkedList<>();
+        activities.add(newHomeActivityAtStart());
+        activities.addAll(patternActivityWeek.getPatternActivities());
 
-		return new PatternActivityWeek(activities);
-	}
+        return new PatternActivityWeek(activities);
+    }
 
-	private boolean isAtHome(PatternActivity first) {
-		return home.equals(first.getActivityType());
-	}
+    private boolean isAtHome(PatternActivity first) {
+        return home.equals(first.getActivityType());
+    }
 
-	private PatternActivity newHomeActivityAtStart() {
-		int tripDuration = 1;
-		Time startTime = Time.start;
-		int duration = 1;
-		return new PatternActivity(home, tripDuration, startTime, duration);
-	}
+    private PatternActivity newHomeActivityAtStart() {
+        int tripDuration = 1;
+        Time startTime = Time.start;
+        int duration = 1;
+        return new PatternActivity(home, tripDuration, startTime, duration);
+    }
 
-	private PatternActivity newHomeActivityAfter(PatternActivity last) {
-		int tripDuration = last.getObservedTripDuration();
-		Time startTime = last.startTime().plusMinutes(last.getDuration()).plusMinutes(tripDuration);
-		int duration = 1;
-		return new PatternActivity(home, tripDuration, startTime, duration);
-	}
+    private PatternActivity newHomeActivityAfter(PatternActivity last) {
+        int tripDuration = last.getObservedTripDuration();
+        Time startTime = last.startTime().plusMinutes(last.getDuration()).plusMinutes(tripDuration);
+        int duration = 1;
+        return new PatternActivity(home, tripDuration, startTime, duration);
+    }
 }

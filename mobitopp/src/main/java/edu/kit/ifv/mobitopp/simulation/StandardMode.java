@@ -8,90 +8,90 @@ import lombok.Getter;
 @Getter
 public enum StandardMode implements Mode {
 
-	UNDEFINED(-2),
-	UNKNOWN(-1),
-	BIKE(0),
-	CAR(1),
-	PASSENGER(2),
-	PEDESTRIAN(3),
-	PUBLICTRANSPORT(4),
-	TRUCK(5),
-	PARK_AND_RIDE(6),
-	TAXI(7),
-	CARSHARING_STATION(11),
-	CARSHARING_FREE(12),
-	E_SCOOTER(15),
-	PEDELEC(16),
-	BIKESHARING(17),
-	RIDE_POOLING(21),
-	RIDE_HAILING(22),
-	PREMIUM_RIDE_HAILING(23),
-	;
+    UNDEFINED(-2),
+    UNKNOWN(-1),
+    BIKE(0),
+    CAR(1),
+    PASSENGER(2),
+    PEDESTRIAN(3),
+    PUBLICTRANSPORT(4),
+    TRUCK(5),
+    PARK_AND_RIDE(6),
+    TAXI(7),
+    CARSHARING_STATION(11),
+    CARSHARING_FREE(12),
+    E_SCOOTER(15),
+    PEDELEC(16),
+    BIKESHARING(17),
+    RIDE_POOLING(21),
+    RIDE_HAILING(22),
+    PREMIUM_RIDE_HAILING(23),
+    ;
 
-	private final int code;
+    private final int code;
 
-	private StandardMode(int mode_numeric) {
-		this.code = mode_numeric;
-	}
+    private StandardMode(int mode_numeric) {
+        this.code = mode_numeric;
+    }
 
-	@Override
-	public boolean isFlexible() {
+    @Override
+    public boolean isFlexible() {
 
-		switch(this) {
-			case PASSENGER:
-			case PEDESTRIAN:
-			case PUBLICTRANSPORT:
-			case CARSHARING_FREE:
-			case BIKESHARING:
-			case RIDE_POOLING:
-			case RIDE_HAILING:
-			case PREMIUM_RIDE_HAILING:
-			case TAXI:
-			case TRUCK:
-			case PARK_AND_RIDE:
-				return true;
-			case BIKE:
-			case CAR:
-			case CARSHARING_STATION:
-			case PEDELEC:
-				return false;
-			default:
-				throw new AssertionError("invalid mode: " + this);
-		}
-	}
+        switch (this) {
+            case PASSENGER:
+            case PEDESTRIAN:
+            case PUBLICTRANSPORT:
+            case CARSHARING_FREE:
+            case BIKESHARING:
+            case RIDE_POOLING:
+            case RIDE_HAILING:
+            case PREMIUM_RIDE_HAILING:
+            case TAXI:
+            case TRUCK:
+            case PARK_AND_RIDE:
+                return true;
+            case BIKE:
+            case CAR:
+            case CARSHARING_STATION:
+            case PEDELEC:
+                return false;
+            default:
+                throw new AssertionError("invalid mode: " + this);
+        }
+    }
 
-	@Override
-	public boolean isDefined() {
-			return this.code >= 0;
-	}
+    @Override
+    public boolean isDefined() {
+        return this.code >= 0;
+    }
 
-	@Override
-	public boolean usesCarAsDriver() {
-		return this == CAR || this == CARSHARING_STATION || this == CARSHARING_FREE;
-	}
-	
-	@Override
-	public String forLogging() {
-		return Objects.toString(code);
-	}
-	
-	@Override
-	public StandardMode mainMode() {
-		return this;
-	}
-	
-	@Override
-	public StandardMode legMode() {
-		return this;
-	}
+    @Override
+    public boolean usesCarAsDriver() {
+        return this == CAR || this == CARSHARING_STATION || this == CARSHARING_FREE;
+    }
 
-	public static Mode getTypeFromInt(int code) {
-		for (StandardMode mode : EnumSet.allOf(StandardMode.class)) {
+    @Override
+    public String forLogging() {
+        return Objects.toString(code);
+    }
 
-			if (mode.code == code) {
-				return mode;
-			}
-		}
-		return StandardMode.UNKNOWN;
-	}
+    @Override
+    public StandardMode mainMode() {
+        return this;
+    }
+
+    @Override
+    public StandardMode legMode() {
+        return this;
+    }
+
+    public static Mode getTypeFromInt(int code) {
+        for (StandardMode mode : EnumSet.allOf(StandardMode.class)) {
+
+            if (mode.code == code) {
+                return mode;
+            }
+        }
+        return StandardMode.UNKNOWN;
+    }
 }
