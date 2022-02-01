@@ -26,9 +26,9 @@ import edu.kit.ifv.mobitopp.simulation.publictransport.model.VisumZoneBuilder;
 public class Example {
 
   public static VisumNetwork createVisumNetwork() {
-    VisumTransportSystem bus = new VisumTransportSystem("B", "Bus", "OV");
-    VisumTransportSystem walk = new VisumTransportSystem("F", "Fuss", "OVFuss");
-    VisumTransportSystem car = new VisumTransportSystem("P", "PKW", "IV");
+    VisumTransportSystem bus = new VisumTransportSystem("BUS", "Bus", "PuT");
+    VisumTransportSystem walk = new VisumTransportSystem("PUTW", "PuT", "PuTWalk");
+    VisumTransportSystem car = new VisumTransportSystem("CAR", "Car", "PrT");
     VisumTransportSystemSet systems = getTransportSystemsFor(bus);
     VisumTransportSystemSet turnSystems = getTransportSystemsFor(bus, car);
     VisumTransportSystemSet connectorSystems = getTransportSystemsFor(walk, car);
