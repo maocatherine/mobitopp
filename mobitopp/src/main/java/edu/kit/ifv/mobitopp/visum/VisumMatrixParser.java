@@ -21,233 +21,233 @@ import edu.kit.ifv.mobitopp.util.file.StreamContent;
 
 public class VisumMatrixParser implements MatrixParser {
 
-	private final BufferedReader reader;
-	private final List<ZoneId> zoneIds;
-	private final List<Float> data;
-	private String currentLine;
-	
-	private VisumMatrixParser(InputStream input) {
-		super();
-		reader = new BufferedReader(new InputStreamReader(input));
-		zoneIds = new ArrayList<>();
-		data = new ArrayList<>();
-		currentLine = "";
-	}
-	
-	private static InputStream asStream(File inputFile) throws IOException {
-		return StreamContent.of(inputFile);
-	}
+    private final BufferedReader reader;
+    private final List<ZoneId> zoneIds;
+    private final List<Float> data;
+    private String currentLine;
 
-	public static CostMatrix parse(InputStream inputStream) throws IOException {
-		return new VisumMatrixParser(inputStream).parseCostMatrix();
-	}
+    private VisumMatrixParser(InputStream input) {
+        super();
+        reader = new BufferedReader(new InputStreamReader(input));
+        zoneIds = new ArrayList<>();
+        data = new ArrayList<>();
+        currentLine = "";
+    }
 
-	public static VisumMatrixParser load(File file) throws IOException {
-		return new VisumMatrixParser(asStream(file));
-	}
+    private static InputStream asStream(File inputFile) throws IOException {
+        return StreamContent.of(inputFile);
+    }
 
-	public static String serialize(FloatMatrix matrix) {
-		return header() + zones(matrix) + values(matrix) + zoneNames(matrix);
-	}
+    public static CostMatrix parse(InputStream inputStream) throws IOException {
+        return new VisumMatrixParser(inputStream).parseCostMatrix();
+    }
 
-	private static String zoneNames(FloatMatrix matrix) {
-		StringBuilder names = new StringBuilder();
-		names.append("* Netzobjektnamen");
-		names.append(System.lineSeparator()); 
-		names.append("$NAMES"); 
-		names.append(System.lineSeparator());
-		for (ZoneId id : matrix.ids()) {
-      names.append(id.getExternalId());
-			names.append(" \"");
-      names.append(id.getMatrixColumn());
-			names.append("\""); 
-			names.append(System.lineSeparator()); 
-		}
-		names.append(" ");;
-		return names.toString();
-	}
+    public static VisumMatrixParser load(File file) throws IOException {
+        return new VisumMatrixParser(asStream(file));
+    }
 
-	private static String values(FloatMatrix matrix) {
-		StringBuilder values = new StringBuilder();
-		for (ZoneId zone : matrix.ids()) {
-			values.append("* Obj ");
-			values.append(zone.getMatrixColumn());
-			values.append(" Summe = ");
-			values.append(rowSumOf(zone, matrix));
-			values.append(System.lineSeparator());
-			values.append(columnValuesOf(zone, matrix));
-			values.append(System.lineSeparator());
-		}
-		return values.toString();
-	}
+    public static String serialize(FloatMatrix matrix) {
+        return header() + zones(matrix) + values(matrix) + zoneNames(matrix);
+    }
 
-	private static String columnValuesOf(ZoneId zone, FloatMatrix matrix) {
-		StringBuilder values = new StringBuilder();
-		int serializedZones = 0;
-		for (ZoneId column : matrix.ids()) {
-			if (0 == serializedZones % 10 && 0 != serializedZones) {
-				values.append(System.lineSeparator());
-			}
-			values.append(" ");
-			values.append(matrix.get(zone, column));
-			serializedZones++;
-		}
-		return values.toString();
-	}
+    private static String zoneNames(FloatMatrix matrix) {
+        StringBuilder names = new StringBuilder();
+        names.append("* Netzobjektnamen");
+        names.append(System.lineSeparator());
+        names.append("$NAMES");
+        names.append(System.lineSeparator());
+        for (ZoneId id : matrix.ids()) {
+            names.append(id.getExternalId());
+            names.append(" \"");
+            names.append(id.getMatrixColumn());
+            names.append("\"");
+            names.append(System.lineSeparator());
+        }
+        names.append(" ");
+        return names.toString();
+    }
 
-	private static String rowSumOf(ZoneId zone, FloatMatrix matrix) {
-		double sum = 0.0;
-		for (ZoneId column : matrix.ids()) {
-			sum += matrix.get(zone, column);
-		}
-		return String.valueOf(sum);
-	}
+    private static String values(FloatMatrix matrix) {
+        StringBuilder values = new StringBuilder();
+        for (ZoneId zone : matrix.ids()) {
+            values.append("* Obj ");
+            values.append(zone.getMatrixColumn());
+            values.append(" Summe = ");
+            values.append(rowSumOf(zone, matrix));
+            values.append(System.lineSeparator());
+            values.append(columnValuesOf(zone, matrix));
+            values.append(System.lineSeparator());
+        }
+        return values.toString();
+    }
 
-	private static String zones(FloatMatrix matrix) {
-		List<ZoneId> oids = matrix.ids();
-		StringBuilder serializedIds = new StringBuilder();
-		int serializedZones = 0;
-		for (ZoneId id : oids) {
-			if (0 == serializedZones % 10 && 0 != serializedZones) {
-				serializedIds.append(System.lineSeparator());
-			}
-			serializedIds.append(" ");
-			serializedIds.append(id.getExternalId());
-			serializedZones++;
-		}
-		serializedIds.append(System.lineSeparator());
-		return "* Anzahl Netzobjekte" + System.lineSeparator() + 
-				oids.size() + System.lineSeparator() + 
-				"* Netzobjekt-Nummern" + System.lineSeparator() + 
-				serializedIds.toString() + 
-				"*" + System.lineSeparator();
-	}
+    private static String columnValuesOf(ZoneId zone, FloatMatrix matrix) {
+        StringBuilder values = new StringBuilder();
+        int serializedZones = 0;
+        for (ZoneId column : matrix.ids()) {
+            if (0 == serializedZones % 10 && 0 != serializedZones) {
+                values.append(System.lineSeparator());
+            }
+            values.append(" ");
+            values.append(matrix.get(zone, column));
+            serializedZones++;
+        }
+        return values.toString();
+    }
 
-	private static String header() {
-		return "$V;D3" + System.lineSeparator() + 
-				"* Von  Bis" + System.lineSeparator() + 
-				"0.00 0.00" + System.lineSeparator() + 
-				"* Faktor" + System.lineSeparator() + 
-				"1.00" + System.lineSeparator() + 
-				"*  " + System.lineSeparator() + 
-				"* KIT Karlsruher Institut für Technologie Fakultät Bau, Geo + Umwelt Karlsruhe" + System.lineSeparator() + 
-				"* 17.03.17" + System.lineSeparator();
-	}
-	
-	@Override
-	public FloatMatrix parseMatrix() throws IOException {
-		return parse(FloatMatrix::new);
-	}
-	
-	@Override
-	public CostMatrix parseCostMatrix() throws IOException {
-		return parse(CostMatrix::new);
-	}
-	
-	@Override
-	public FixedDistributionMatrix parseFixedDistributionMatrix() throws IOException {
-		return parse(FixedDistributionMatrix::new);
-	}
-	
-	@Override
-	public TravelTimeMatrix parseTravelTimeMatrix() throws IOException {
-		return parse(TravelTimeMatrix::new);
-	}
+    private static String rowSumOf(ZoneId zone, FloatMatrix matrix) {
+        double sum = 0.0;
+        for (ZoneId column : matrix.ids()) {
+            sum += matrix.get(zone, column);
+        }
+        return String.valueOf(sum);
+    }
 
-	private <T extends FloatMatrix> T parse(Function<List<ZoneId>, T> creator)
-			throws IOException {
-		skipHeader();
-		readZones();
-		readCellValues();
-		return build(creator);
-	}
+    private static String zones(FloatMatrix matrix) {
+        List<ZoneId> oids = matrix.ids();
+        StringBuilder serializedIds = new StringBuilder();
+        int serializedZones = 0;
+        for (ZoneId id : oids) {
+            if (0 == serializedZones % 10 && 0 != serializedZones) {
+                serializedIds.append(System.lineSeparator());
+            }
+            serializedIds.append(" ");
+            serializedIds.append(id.getExternalId());
+            serializedZones++;
+        }
+        serializedIds.append(System.lineSeparator());
+        return "* Anzahl Netzobjekte" + System.lineSeparator() +
+                oids.size() + System.lineSeparator() +
+                "* Netzobjekt-Nummern" + System.lineSeparator() +
+                serializedIds.toString() +
+                "*" + System.lineSeparator();
+    }
 
-	private void skipHeader() throws IOException {
-		while (isReady() && !startOfCellSection()) {
-			readLine();
-		}
-	}
+    private static String header() {
+        return "$V;D3" + System.lineSeparator() +
+                "* Von  Bis" + System.lineSeparator() +
+                "0.00 0.00" + System.lineSeparator() +
+                "* Faktor" + System.lineSeparator() +
+                "1.00" + System.lineSeparator() +
+                "*  " + System.lineSeparator() +
+                "* KIT Karlsruher Institut für Technologie Fakultät Bau, Geo + Umwelt Karlsruhe" + System.lineSeparator() +
+                "* 17.03.17" + System.lineSeparator();
+    }
 
-	private void readZones() throws IOException {
-		if (startOfCellSection()) {
-			readLine();
-			int numberOfZones = Integer.valueOf(currentLine);
-			readLine();
-			while (zoneIds.size() < numberOfZones) {
-				readLine();
-				parseCurrentZones();
-			}
-		}
-	}
+    @Override
+    public FloatMatrix parseMatrix() throws IOException {
+        return parse(FloatMatrix::new);
+    }
 
-	private <T extends FloatMatrix> T build(Function<List<ZoneId>, T> creator) {
-		T matrix = createMatrix(creator);
-		for (int index = 0; index < data.size(); index++) {
-			int size = zoneIds.size();
-			int row = index / size;
-			int column = index % size;
-			float value = data.get(index);
-			matrix.set(row, column, value);
-		}
-		return matrix;
-	}
+    @Override
+    public CostMatrix parseCostMatrix() throws IOException {
+        return parse(CostMatrix::new);
+    }
 
-  private <T extends FloatMatrix> T createMatrix(Function<List<ZoneId>, T> creator) {
-    return creator.apply(zoneIds);
-  }
+    @Override
+    public FixedDistributionMatrix parseFixedDistributionMatrix() throws IOException {
+        return parse(FixedDistributionMatrix::new);
+    }
 
-	private boolean isReady() throws IOException {
-		return reader.ready();
-	}
+    @Override
+    public TravelTimeMatrix parseTravelTimeMatrix() throws IOException {
+        return parse(TravelTimeMatrix::new);
+    }
 
-	private boolean startOfCellSection() {
-		return currentLine.equals("* Anzahl Netzobjekte");
-	}
+    private <T extends FloatMatrix> T parse(Function<List<ZoneId>, T> creator)
+            throws IOException {
+        skipHeader();
+        readZones();
+        readCellValues();
+        return build(creator);
+    }
 
-	private void readCellValues() throws IOException {
-		while (isReady() && isNotFooter()) {
-			readLine();
-			if (lineContainsData()) {
-				parseCurrentValues();
-			}
-		}
-	}
+    private void skipHeader() throws IOException {
+        while (isReady() && !startOfCellSection()) {
+            readLine();
+        }
+    }
 
-	private void parseCurrentValues() {
-		for (String token : parseLine()) {
-			data.add(valueOf(token));
-		}
-	}
+    private void readZones() throws IOException {
+        if (startOfCellSection()) {
+            readLine();
+            int numberOfZones = Integer.valueOf(currentLine);
+            readLine();
+            while (zoneIds.size() < numberOfZones) {
+                readLine();
+                parseCurrentZones();
+            }
+        }
+    }
 
-	private float valueOf(String token) {
-		return Float.parseFloat(token);
-	}
+    private <T extends FloatMatrix> T build(Function<List<ZoneId>, T> creator) {
+        T matrix = createMatrix(creator);
+        for (int index = 0; index < data.size(); index++) {
+            int size = zoneIds.size();
+            int row = index / size;
+            int column = index % size;
+            float value = data.get(index);
+            matrix.set(row, column, value);
+        }
+        return matrix;
+    }
 
-	private boolean lineContainsData() {
-		return !currentLine.startsWith("*") && !currentLine.isEmpty();
-	}
+    private <T extends FloatMatrix> T createMatrix(Function<List<ZoneId>, T> creator) {
+        return creator.apply(zoneIds);
+    }
 
-	private boolean isNotFooter() {
-		return !currentLine.startsWith("* Netzobjektnamen");
-	}
+    private boolean isReady() throws IOException {
+        return reader.ready();
+    }
 
-	private void readLine() throws IOException {
-		currentLine = reader.readLine();
-	}
+    private boolean startOfCellSection() {
+        return currentLine.equals("* Anzahl Netzobjekte");
+    }
 
-	private void parseCurrentZones() {
-		for (String token : parseLine()) {
-			zoneIds.add(newZoneId(token));
-		}
-	}
+    private void readCellValues() throws IOException {
+        while (isReady() && isNotFooter()) {
+            readLine();
+            if (lineContainsData()) {
+                parseCurrentValues();
+            }
+        }
+    }
 
-	private ZoneId newZoneId(String token) {
-    return new ZoneId(token, zoneIds.size());
-  }
+    private void parseCurrentValues() {
+        for (String token : parseLine()) {
+            data.add(valueOf(token));
+        }
+    }
 
-  private List<String> parseLine() {
-		String[] tokens = currentLine.trim().split("\\s+");
-		return asList(tokens);
-	}
+    private float valueOf(String token) {
+        return Float.parseFloat(token);
+    }
+
+    private boolean lineContainsData() {
+        return !currentLine.startsWith("*") && !currentLine.isEmpty();
+    }
+
+    private boolean isNotFooter() {
+        return !currentLine.startsWith("* Netzobjektnamen");
+    }
+
+    private void readLine() throws IOException {
+        currentLine = reader.readLine();
+    }
+
+    private void parseCurrentZones() {
+        for (String token : parseLine()) {
+            zoneIds.add(newZoneId(token));
+        }
+    }
+
+    private ZoneId newZoneId(String token) {
+        return new ZoneId(token, zoneIds.size());
+    }
+
+    private List<String> parseLine() {
+        String[] tokens = currentLine.trim().split("\\s+");
+        return asList(tokens);
+    }
 
 }
