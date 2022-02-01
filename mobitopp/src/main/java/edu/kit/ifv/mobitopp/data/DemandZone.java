@@ -11,91 +11,91 @@ import edu.kit.ifv.mobitopp.simulation.opportunities.OpportunityDataForZone;
 
 public class DemandZone implements DemandRegion {
 
-  private final Zone zone;
-  private final Demography nominalDemography;
-  private final boolean generatePopulation;
-  private final Demography actualDemography;
-  private final PopulationForSetup population;
+    private final Zone zone;
+    private final Demography nominalDemography;
+    private final boolean generatePopulation;
+    private final Demography actualDemography;
+    private final PopulationForSetup population;
 
-  public DemandZone(final Zone zone, final Demography nominalDemand, final boolean generatePopulation) {
-    super();
-    this.zone = zone;
-    this.nominalDemography = nominalDemand;
-		this.generatePopulation = generatePopulation;
-    actualDemography = nominalDemand.createEmpty();
-    this.population = new PopulationForSetup();
-  }
-  
-  public DemandZone(final Zone zone, final Demography nominalDemand) {
-    this(zone, nominalDemand, true);
-  }
-  
-  @Override
-  public RegionalLevel regionalLevel() {
-  	return RegionalLevel.zone;
-  }
-  
-  @Override
-  public String getExternalId() {
-  	return getId().getExternalId();
-  }
+    public DemandZone(final Zone zone, final Demography nominalDemand, final boolean generatePopulation) {
+        super();
+        this.zone = zone;
+        this.nominalDemography = nominalDemand;
+        this.generatePopulation = generatePopulation;
+        actualDemography = nominalDemand.createEmpty();
+        this.population = new PopulationForSetup();
+    }
 
-  public ZoneId getId() {
-    return zone.getId();
-  }
+    public DemandZone(final Zone zone, final Demography nominalDemand) {
+        this(zone, nominalDemand, true);
+    }
 
-  public Zone zone() {
-    return zone;
-  }
-  
-  public boolean shouldGeneratePopulation() {
-  	return generatePopulation;
-  }
+    @Override
+    public RegionalLevel regionalLevel() {
+        return RegionalLevel.zone;
+    }
 
-  public PopulationForSetup getPopulation() {
-    return population;
-  }
+    @Override
+    public String getExternalId() {
+        return getId().getExternalId();
+    }
 
-  public OpportunityDataForZone opportunities() {
-    return zone.getDemandData().opportunities();
-  }
+    public ZoneId getId() {
+        return zone.getId();
+    }
 
-  public DataForZone getDemandData() {
-    return zone.getDemandData();
-  }
-  
-  @Override
-  public List<DemandRegion> parts() {
-  	return List.of();
-  }
-  
-  @Override
-  public boolean contains(ZoneId id) {
-  	return false;
-  }
-  
-  @Override
-  public Stream<DemandZone> zones() {
-  	return Stream.of(this);
-  }
+    public Zone zone() {
+        return zone;
+    }
 
-  @Override
-	public Demography nominalDemography() {
-    return nominalDemography;
-  }
+    public boolean shouldGeneratePopulation() {
+        return generatePopulation;
+    }
 
-  @Override
-	public Demography actualDemography() {
-    return actualDemography;
-  }
+    public PopulationForSetup getPopulation() {
+        return population;
+    }
 
-  public AreaType getAreaType() {
-    return zone.getAreaType();
-  }
+    public OpportunityDataForZone opportunities() {
+        return zone.getDemandData().opportunities();
+    }
 
-	@Override
-	public String toString() {
-		return "DemandZone [zone=" + zone + "]";
-	}
+    public DataForZone getDemandData() {
+        return zone.getDemandData();
+    }
+
+    @Override
+    public List<DemandRegion> parts() {
+        return List.of();
+    }
+
+    @Override
+    public boolean contains(ZoneId id) {
+        return false;
+    }
+
+    @Override
+    public Stream<DemandZone> zones() {
+        return Stream.of(this);
+    }
+
+    @Override
+    public Demography nominalDemography() {
+        return nominalDemography;
+    }
+
+    @Override
+    public Demography actualDemography() {
+        return actualDemography;
+    }
+
+    public AreaType getAreaType() {
+        return zone.getAreaType();
+    }
+
+    @Override
+    public String toString() {
+        return "DemandZone [zone=" + zone + "]";
+    }
 
 }
