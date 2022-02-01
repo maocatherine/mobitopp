@@ -6,11 +6,14 @@ import edu.kit.ifv.mobitopp.simulation.person.SimulationPerson;
 import edu.kit.ifv.mobitopp.time.Time;
 
 public interface DemandSimulationEventIfc {
-  
-	SimulationPerson getPerson();
-  OccupationIfc getOccupation();
-  Time getSimulationDate();
 
-	int getPriority();
-	void writeRemaining(PersonListener listener);
+    SimulationPerson getPerson();
+
+    OccupationIfc getOccupation();
+
+    Time getSimulationDate();
+
+    int getPriority();
+
+    void writeRemaining(PersonListener listener);
 }
