@@ -9,37 +9,36 @@ import edu.kit.ifv.mobitopp.simulation.Person;
 import edu.kit.ifv.mobitopp.time.Time;
 
 public interface ReachableZonesFilter {
-	
-Set<Zone> filter(
-			Set<Zone> zones,
-			Person person,
-			Zone currentZone,
-			Zone nextFixedZone,
-			Set<Mode> availableModes,
-			Time date, int maxTravelTimeInMinutes
-		);
+
+    Set<Zone> filter(
+            Set<Zone> zones,
+            Person person,
+            Zone currentZone,
+            Zone nextFixedZone,
+            Set<Mode> availableModes,
+            Time date, double maxTravelDistanceInKm
+    );
 
 
-default Set<Zone> filterAvailableZones(
-		Set<Zone> zones,
-		Zone currentZone
-	) {
-			LinkedHashSet<Zone> available_zones = new LinkedHashSet<Zone>(zones);
-			
-			for (Zone zone : zones) {
+    default Set<Zone> filterAvailableZones(
+            Set<Zone> zones,
+            Zone currentZone
+    ) {
+        LinkedHashSet<Zone> available_zones = new LinkedHashSet<Zone>(zones);
 
-				if (zone.hasDemandData()) {
-						available_zones.add(zone);
-				}
-			}
+        for (Zone zone : zones) {
 
-		if (available_zones.isEmpty()) {
-			available_zones.add(currentZone);
-		}
+            if (zone.hasDemandData()) {
+                available_zones.add(zone);
+            }
+        }
 
-		return available_zones;
-	}
+        if (available_zones.isEmpty()) {
+            available_zones.add(currentZone);
+        }
 
+        return available_zones;
+    }
 
 
 }
