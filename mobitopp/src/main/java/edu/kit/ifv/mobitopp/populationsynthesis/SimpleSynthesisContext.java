@@ -23,115 +23,123 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SimpleSynthesisContext implements SynthesisContext {
 
-  private final WrittenConfiguration configuration;
-  private final DynamicParameters experimentalParameters;
-  private final VisumNetwork visumNetwork;
-  private final SimpleRoadNetwork roadNetwork;
-  private final DataRepositoryForPopulationSynthesis dataRepository;
-  private final ResultWriter resultWriter;
-  private final Map<String, MobilityProviderCustomerModel> carSharing;
-  private final PopulationSynthesisParser format;
-  private final File carEngineFile;
-	private final Map<RegionalLevel, List<AttributeType>> attributes;
+    private final WrittenConfiguration configuration;
+    private final DynamicParameters experimentalParameters;
+    private final VisumNetwork visumNetwork;
+    private final SimpleRoadNetwork roadNetwork;
+    private final DataRepositoryForPopulationSynthesis dataRepository;
+    private final ResultWriter resultWriter;
+    private final Map<String, MobilityProviderCustomerModel> carSharing;
+    private final PopulationSynthesisParser format;
+    private final File carEngineFile;
+    private final File opportunityFile;
+    private final Map<RegionalLevel, List<AttributeType>> attributes;
 
-	SimpleSynthesisContext(
-			final WrittenConfiguration configuration, final DynamicParameters experimentalParameters,
-			final VisumNetwork visumNetwork, final SimpleRoadNetwork roadNetwork,
-			final DataRepositoryForPopulationSynthesis dataRepository,
-			final Map<String, MobilityProviderCustomerModel> carSharing, final File carEngineFile,
-			final Map<RegionalLevel, List<AttributeType>> attributes,
-			final PopulationSynthesisParser format, final ResultWriter resultWriter) {
-		super();
-    this.configuration = configuration;
-    this.experimentalParameters = experimentalParameters;
-    this.visumNetwork = visumNetwork;
-    this.roadNetwork = roadNetwork;
-    this.dataRepository = dataRepository;
-    this.carSharing = carSharing;
-    this.carEngineFile = carEngineFile;
-    this.attributes = attributes;
-    this.format = format;
-    this.resultWriter = resultWriter;
-  }
+    SimpleSynthesisContext(
+            final WrittenConfiguration configuration, final DynamicParameters experimentalParameters,
+            final VisumNetwork visumNetwork, final SimpleRoadNetwork roadNetwork,
+            final DataRepositoryForPopulationSynthesis dataRepository,
+            final Map<String, MobilityProviderCustomerModel> carSharing, final File carEngineFile,
+            final File opportunityFile,
+            final Map<RegionalLevel, List<AttributeType>> attributes,
+            final PopulationSynthesisParser format, final ResultWriter resultWriter) {
+        super();
+        this.configuration = configuration;
+        this.experimentalParameters = experimentalParameters;
+        this.visumNetwork = visumNetwork;
+        this.roadNetwork = roadNetwork;
+        this.dataRepository = dataRepository;
+        this.carSharing = carSharing;
+        this.carEngineFile = carEngineFile;
+        this.opportunityFile = opportunityFile;
+        this.attributes = attributes;
+        this.format = format;
+        this.resultWriter = resultWriter;
+    }
 
-  @Override
-  public SimpleRoadNetwork roadNetwork() {
-    return roadNetwork;
-  }
+    @Override
+    public SimpleRoadNetwork roadNetwork() {
+        return roadNetwork;
+    }
 
-  @Override
-  public long seed() {
-    return configuration().getSeed();
-  }
+    @Override
+    public long seed() {
+        return configuration().getSeed();
+    }
 
-  @Override
-  public int maxIterations() {
-    return configuration().getMaxIterations();
-  }
+    @Override
+    public int maxIterations() {
+        return configuration().getMaxIterations();
+    }
 
-  @Override
-  public double maxGoodnessDelta() {
-    return configuration().getMaxGoodnessDelta();
-  }
+    @Override
+    public double maxGoodnessDelta() {
+        return configuration().getMaxGoodnessDelta();
+    }
 
-  @Override
-  public VisumNetwork network() {
-    return visumNetwork;
-  }
+    @Override
+    public VisumNetwork network() {
+        return visumNetwork;
+    }
 
-  @Override
-  public File carEngineFile() {
-    return carEngineFile;
-  }
+    @Override
+    public File carEngineFile() {
+        return carEngineFile;
+    }
 
-  @Override
-  public ResultWriter resultWriter() {
-    return resultWriter;
-  }
+    @Override
+    public File opportunityFile() {
+        return opportunityFile;
+    }
 
-  @Override
-  public DataRepositoryForPopulationSynthesis dataRepository() {
-    return dataRepository;
-  }
+    @Override
+    public ResultWriter resultWriter() {
+        return resultWriter;
+    }
 
-  @Override
-  public ImpedanceIfc impedance() {
-    return dataRepository.impedance();
-  }
+    @Override
+    public DataRepositoryForPopulationSynthesis dataRepository() {
+        return dataRepository;
+    }
 
-  @Override
-  public Map<String, MobilityProviderCustomerModel> carSharing() {
-    return carSharing;
-  }
+    @Override
+    public ImpedanceIfc impedance() {
+        return dataRepository.impedance();
+    }
 
-  @Override
-  public DemandZoneRepository zoneRepository() {
-    return dataRepository.zoneRepository();
-  }
+    @Override
+    public Map<String, MobilityProviderCustomerModel> carSharing() {
+        return carSharing;
+    }
 
-  @Override
-  public List<AttributeType> attributes(RegionalLevel level) {
-    return attributes.getOrDefault(level, warn(level, "attributes", emptyList(), log));
-  }
+    @Override
+    public DemandZoneRepository zoneRepository() {
+        return dataRepository.zoneRepository();
+    }
 
-  @Override
-  public WrittenConfiguration configuration() {
-    return configuration;
-  }
+    @Override
+    public List<AttributeType> attributes(RegionalLevel level) {
+        return attributes.getOrDefault(level, warn(level, "attributes", emptyList(), log));
+    }
 
-  @Override
-  public DynamicParameters experimentalParameters() {
-    return experimentalParameters;
-  }
-  
-  @Override
-  public PopulationSynthesisParser format() {
-    return format;
-  }
+    @Override
+    public WrittenConfiguration configuration() {
+        return configuration;
+    }
 
-  @Override
-  public void printStartupInformationOn(PrintStream out) {
-    out.println("Configuration:");
-    out.print(format.serialise(configuration));
-  }
+    @Override
+    public DynamicParameters experimentalParameters() {
+        return experimentalParameters;
+    }
+
+    @Override
+    public PopulationSynthesisParser format() {
+        return format;
+    }
+
+    @Override
+    public void printStartupInformationOn(PrintStream out) {
+        out.println("Configuration:");
+        out.print(format.serialise(configuration));
+    }
 }
