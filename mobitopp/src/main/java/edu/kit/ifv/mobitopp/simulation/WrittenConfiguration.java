@@ -43,6 +43,8 @@ public class WrittenConfiguration {
 	public WrittenConfiguration() {
 		super();
 		numberOfZones = unlimited;
+
+		//Here defines no public transport is simulated.
 		publicTransport = new NoPublicTransport();
 		resultFolder = defaultResultFolder;
 		timeStepLength = defaultTimeStepLength;
