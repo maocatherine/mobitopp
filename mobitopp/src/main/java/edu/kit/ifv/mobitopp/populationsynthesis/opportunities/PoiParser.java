@@ -49,7 +49,9 @@ public class PoiParser {
 	}
 
 	private int attractivityOf(Row row) {
-		return row.valueAsInteger(attractivity);
+		float attractivityFloat = row.valueAsFloat(attractivity);
+		int attractivityInt = Math.round(attractivityFloat);
+		return attractivityInt;
 	}
 
 }
