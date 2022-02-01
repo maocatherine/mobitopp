@@ -37,109 +37,109 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class SimulationExample extends Simulation {
-	
-	public SimulationExample(SimulationContext context) {
-		super(context);
-	}
 
-	@Override
-	protected DemandSimulator simulator() {
-		ModeAvailabilityModel modeAvailabilityModel = new ModeAvailabilityModelAddingCarsharing(
-				impedance());
-		DestinationChoiceModel targetSelector = destinationChoiceModel(impedance(), modeAvailabilityModel);
-		ModeChoiceModel modeSelector = modeChoiceModel(impedance(), modeAvailabilityModel);
-		ZoneBasedRouteChoice routeChoice = new NoRouteChoice();
-		ReschedulingStrategy rescheduling = new ReschedulingSkipTillHome(context().simulationDays());
-		TripFactory tripFactory = new DefaultTripFactory();
-		Set<Mode> choiceSet = 	Collections
-				.unmodifiableSet(EnumSet
-						.of(StandardMode.CAR, StandardMode.PASSENGER, StandardMode.BIKE, StandardMode.PEDESTRIAN,
-								StandardMode.PUBLICTRANSPORT));
-    context().personResults().addListener(createMatrixListener(choiceSet));
-		log.info("Initializing simulator...");
-		return new DemandSimulatorPassenger(targetSelector,
-				new TourBasedModeChoiceModelDummy(modeSelector), routeChoice,
-				new LeisureWalkActivityPeriodFixer(),
-				new DefaultActivityDurationRandomizer(context().seed()), tripFactory, rescheduling,
-				PersonStateSimple.UNINITIALIZED, context());
-	}
-
-	private ModeChoiceModel modeChoiceModel(
-			ImpedanceIfc impedance, ModeAvailabilityModel modeAvailabilityModel) {
-		ModeChoiceModel modeSelectorFirst = new ModeChoiceStuttgart(impedance,
-				new ModeSelectorParameterFirstTrip());
-		ModeChoiceModel modeSelectorOther = new ModeChoiceStuttgart(impedance,
-				new ModeSelectorParameterOtherTrip());
-		return new ModeSelectorFirstOther(modeAvailabilityModel, modeSelectorFirst, modeSelectorOther);
-	}
-
-	private DestinationChoiceModel destinationChoiceModel(
-			ImpedanceIfc impedance, ModeAvailabilityModel modeAvailabilityModel) {
-		Map<String, String> destinationChoiceFiles = context().configuration().getDestinationChoice();
-
-		return new DestinationChoiceWithFixedLocations(
-				zoneRepository().zones(),
-				new SimpleRepeatedDestinationChoice(
-						zoneRepository().zones(),
-						new DestinationChoiceForFlexibleActivity(
-								modeAvailabilityModel, 
-								new CarRangeReachableZonesFilter(impedance),
-								new AttractivityCalculatorCostNextPole(zoneRepository().zones(),
-										impedance, destinationChoiceFiles.get("cost"), 0.5f)),
-						destinationChoiceFiles.get("repetition")));
-	}
-
-  private PersonListener createMatrixListener(Set<Mode> choiceSet ) {
-  	Set<OutputHandler> outputhandlers = new HashSet<>();
-    List<ZoneId> ids = Collections
-        .unmodifiableList(
-            context().dataRepository().zoneRepository().getZoneIds());
-  	for (Mode mode : choiceSet) {		
-  		outputhandlers.add(createOutputHandler(mode, 0, 5, ids, "_100p", (int)(1/context().fractionOfPopulation())));
-  		outputhandlers.add(createOutputHandler(mode, 6, 8, ids, "_100p", (int)(1/context().fractionOfPopulation())));
-  		outputhandlers.add(createOutputHandler(mode, 9, 14, ids, "_100p", (int)(1/context().fractionOfPopulation())));
-  		outputhandlers.add(createOutputHandler(mode, 15, 17, ids, "_100p",(int)(1/context().fractionOfPopulation())));
-  		outputhandlers.add(createOutputHandler(mode, 18, 23, ids,"_100p", (int)(1/context().fractionOfPopulation())));
+    public SimulationExample(SimulationContext context) {
+        super(context);
     }
-    
-    return new AggregateDemandPerMode(outputhandlers);
-  }
 
-  private OutputHandler createOutputHandler(Mode mode, int from, int to, List<ZoneId> ids, String suffix, int scalingfactor) {
-    IntegerMatrix matrix = new IntegerMatrix(ids);
-    return new OutputHandler(createMatrixWriter(mode, from, to, suffix), matrix, mode,
-        from, to, scalingfactor);
-  }
+    @Override
+    protected DemandSimulator simulator() {
+        ModeAvailabilityModel modeAvailabilityModel = new ModeAvailabilityModelAddingCarsharing(
+                impedance());
+        DestinationChoiceModel targetSelector = destinationChoiceModel(impedance(), modeAvailabilityModel);
+        ModeChoiceModel modeSelector = modeChoiceModel(impedance(), modeAvailabilityModel);
+        ZoneBasedRouteChoice routeChoice = new NoRouteChoice();
+        ReschedulingStrategy rescheduling = new ReschedulingSkipTillHome(context().simulationDays());
+        TripFactory tripFactory = new DefaultTripFactory();
+        Set<Mode> choiceSet = Collections
+                .unmodifiableSet(EnumSet
+                        .of(StandardMode.CAR, StandardMode.PASSENGER, StandardMode.BIKE, StandardMode.PEDESTRIAN,
+                                StandardMode.PUBLICTRANSPORT));
+        context().personResults().addListener(createMatrixListener(choiceSet));
+        log.info("Initializing simulator...");
+        return new DemandSimulatorPassenger(targetSelector,
+                new TourBasedModeChoiceModelDummy(modeSelector), routeChoice,
+                new LeisureWalkActivityPeriodFixer(),
+                new DefaultActivityDurationRandomizer(context().seed()), tripFactory, rescheduling,
+                PersonStateSimple.UNINITIALIZED, context());
+    }
 
-  private Consumer<IntegerMatrix> createMatrixWriter(Mode mode, int from, int to, String suffix) {
-    MatrixPrinter printer = new MatrixPrinter();
-    String filenamemodedescriptor = mode.toString();
-    File toOutputFile = new File(context().configuration().getResultFolder(), filenamemodedescriptor + "_" + from + "_" + to + suffix + "_demand.mtx");
-    return matrix -> {
-      printer.writeMatrixToFile(matrix, Integer.toString(from), Integer.toString(to), toOutputFile);
-    };
-  }
+    private ModeChoiceModel modeChoiceModel(
+            ImpedanceIfc impedance, ModeAvailabilityModel modeAvailabilityModel) {
+        ModeChoiceModel modeSelectorFirst = new ModeChoiceStuttgart(impedance,
+                new ModeSelectorParameterFirstTrip());
+        ModeChoiceModel modeSelectorOther = new ModeChoiceStuttgart(impedance,
+                new ModeSelectorParameterOtherTrip());
+        return new ModeSelectorFirstOther(modeAvailabilityModel, modeSelectorFirst, modeSelectorOther);
+    }
 
-	public static void main(String... args) throws IOException {
-		if (1 > args.length) {
-			log.error("Usage: ... <configuration file>");
-			System.exit(-1);
-		}
+    private DestinationChoiceModel destinationChoiceModel(
+            ImpedanceIfc impedance, ModeAvailabilityModel modeAvailabilityModel) {
+        Map<String, String> destinationChoiceFiles = context().configuration().getDestinationChoice();
 
-		File configurationFile = new File(args[0]);
-		LocalDateTime start = LocalDateTime.now();
-		startSimulation(configurationFile);
-		LocalDateTime end = LocalDateTime.now();
-		Duration runtime = Duration.between(start, end);
-		log.info("Simulation took " + runtime);
-	}
+        return new DestinationChoiceWithFixedLocations(
+                zoneRepository().zones(),
+                new SimpleRepeatedDestinationChoice(
+                        zoneRepository().zones(),
+                        new DestinationChoiceForFlexibleActivity(
+                                modeAvailabilityModel,
+                                new CarRangeReachableZonesFilter(impedance),
+                                new AttractivityCalculatorCostNextPole(zoneRepository().zones(),
+                                        impedance, destinationChoiceFiles.get("cost"), 0.5f)),
+                        destinationChoiceFiles.get("repetition")));
+    }
 
-	public static void startSimulation(File configurationFile) throws IOException {
-		SimulationContext context = new ContextBuilder().buildFrom(configurationFile);
-		startSimulation(context);
-	}
-		
-	public static void startSimulation(SimulationContext context) {
-		new SimulationExample(context).simulate();
-	}
+    private PersonListener createMatrixListener(Set<Mode> choiceSet) {
+        Set<OutputHandler> outputhandlers = new HashSet<>();
+        List<ZoneId> ids = Collections
+                .unmodifiableList(
+                        context().dataRepository().zoneRepository().getZoneIds());
+        for (Mode mode : choiceSet) {
+            outputhandlers.add(createOutputHandler(mode, 0, 5, ids, "_100p", (int) (1 / context().fractionOfPopulation())));
+            outputhandlers.add(createOutputHandler(mode, 6, 8, ids, "_100p", (int) (1 / context().fractionOfPopulation())));
+            outputhandlers.add(createOutputHandler(mode, 9, 14, ids, "_100p", (int) (1 / context().fractionOfPopulation())));
+            outputhandlers.add(createOutputHandler(mode, 15, 17, ids, "_100p", (int) (1 / context().fractionOfPopulation())));
+            outputhandlers.add(createOutputHandler(mode, 18, 23, ids, "_100p", (int) (1 / context().fractionOfPopulation())));
+        }
+
+        return new AggregateDemandPerMode(outputhandlers);
+    }
+
+    private OutputHandler createOutputHandler(Mode mode, int from, int to, List<ZoneId> ids, String suffix, int scalingfactor) {
+        IntegerMatrix matrix = new IntegerMatrix(ids);
+        return new OutputHandler(createMatrixWriter(mode, from, to, suffix), matrix, mode,
+                from, to, scalingfactor);
+    }
+
+    private Consumer<IntegerMatrix> createMatrixWriter(Mode mode, int from, int to, String suffix) {
+        MatrixPrinter printer = new MatrixPrinter();
+        String filenamemodedescriptor = mode.toString();
+        File toOutputFile = new File(context().configuration().getResultFolder(), filenamemodedescriptor + "_" + from + "_" + to + suffix + "_demand.mtx");
+        return matrix -> {
+            printer.writeMatrixToFile(matrix, Integer.toString(from), Integer.toString(to), toOutputFile);
+        };
+    }
+
+    public static void main(String... args) throws IOException {
+        if (1 > args.length) {
+            log.error("Usage: ... <configuration file>");
+            System.exit(-1);
+        }
+
+        File configurationFile = new File(args[0]);
+        LocalDateTime start = LocalDateTime.now();
+        startSimulation(configurationFile);
+        LocalDateTime end = LocalDateTime.now();
+        Duration runtime = Duration.between(start, end);
+        log.info("Simulation took " + runtime);
+    }
+
+    public static void startSimulation(File configurationFile) throws IOException {
+        SimulationContext context = new ContextBuilder().buildFrom(configurationFile);
+        startSimulation(context);
+    }
+
+    public static void startSimulation(SimulationContext context) {
+        new SimulationExample(context).simulate();
+    }
 }
