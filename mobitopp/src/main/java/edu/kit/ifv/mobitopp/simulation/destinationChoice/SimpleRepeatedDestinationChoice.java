@@ -17,118 +17,116 @@ import edu.kit.ifv.mobitopp.simulation.Person;
 import edu.kit.ifv.mobitopp.simulation.activityschedule.ActivityIfc;
 
 public class SimpleRepeatedDestinationChoice
-	implements DestinationChoiceModelChoiceSet 
-{
+        implements DestinationChoiceModelChoiceSet {
 
-	protected TargetChoiceRepetitionParameter2 targetParameter;
-	protected DestinationChoiceModelChoiceSet destinationChoiceModel;
-	protected final Map<ZoneId, Zone> zones;
-	private final CommunityTypeMapping typeMapping;
+    protected TargetChoiceRepetitionParameter2 targetParameter;
+    protected DestinationChoiceModelChoiceSet destinationChoiceModel;
+    protected final Map<ZoneId, Zone> zones;
+    private final CommunityTypeMapping typeMapping;
 
-	public SimpleRepeatedDestinationChoice(
-		Map<ZoneId, Zone> zones,
-		DestinationChoiceModelChoiceSet destinationChoiceModel,
-		String parameterFile 
-	) {
+    public SimpleRepeatedDestinationChoice(
+            Map<ZoneId, Zone> zones,
+            DestinationChoiceModelChoiceSet destinationChoiceModel,
+            String parameterFile
+    ) {
 
-		this.targetParameter = new TargetChoiceRepetitionParameter2(parameterFile);
-		this.destinationChoiceModel = destinationChoiceModel;
+        this.targetParameter = new TargetChoiceRepetitionParameter2(parameterFile);
+        this.destinationChoiceModel = destinationChoiceModel;
 
-		this.zones = Collections.unmodifiableMap(zones);
-		typeMapping = new CommunityTypeMapping();
-	}
-
+        this.zones = Collections.unmodifiableMap(zones);
+        typeMapping = new CommunityTypeMapping();
+    }
 
 
+    private Set<Zone> zonesFromIds(Collection<ZoneId> ids) {
+        Set<Zone> result = new LinkedHashSet<Zone>();
 
-	private Set<Zone> zonesFromIds(Collection<ZoneId> ids) {
-		Set<Zone> result = new LinkedHashSet<Zone>();
+        for (ZoneId id : ids) {
+            result.add(this.zones.get(id));
+        }
 
-		for(ZoneId id : ids) {
-			result.add(this.zones.get(id));
-		}
-
-		return result;
-	}
-
-
-	public Zone selectDestination(
-		Person person,
-		Optional<Mode> tourMode, 
-		ActivityIfc previousActivity,
-		ActivityIfc nextActivity,
-		Set<Zone> choiceSet, double randomNumber
-	) {
-		assert person != null;
-		assert previousActivity != null;
-		assert nextActivity != null;
-		assert !nextActivity.activityType().isFixedActivity();
-		assert !nextActivity.activityType().isHomeActivity();
+        return result;
+    }
 
 
-		boolean selectNewDestination = selectNewDestination(person,previousActivity,nextActivity, randomNumber);
+    public Zone selectDestination(
+            Person person,
+            Optional<Mode> tourMode,
+            ActivityIfc previousActivity,
+            ActivityIfc nextActivity,
+            Set<Zone> choiceSet, double randomNumber
+    ) {
+        assert person != null;
+        assert previousActivity != null;
+        assert nextActivity != null;
+        assert !nextActivity.activityType().isFixedActivity();
+        assert !nextActivity.activityType().isHomeActivity();
 
-		Zone zone;
+        boolean selectNewDestination = selectNewDestination(person, previousActivity, nextActivity, randomNumber);
 
-		Set<ZoneId> visitedZonesOids = person.activitySchedule().alreadyVisitedZonesByActivityType(nextActivity);
-		Set<Zone> visitedZones = zonesFromIds(visitedZonesOids);
+        Zone zone;
 
-		if (selectNewDestination) {
+        Set<ZoneId> visitedZonesOids = person.activitySchedule().alreadyVisitedZonesByActivityType(nextActivity);
+        Set<Zone> visitedZones = zonesFromIds(visitedZonesOids);
 
-			Set<Zone> zones = new LinkedHashSet<Zone>(choiceSet);
-			zones.removeAll(visitedZones);
+        if (selectNewDestination) {
 
-			zone = destinationChoiceModel.selectDestination(
-																															person, 
-																															tourMode, 
-																															previousActivity,
-																													 		nextActivity,
-																															zones, randomNumber
-																														);
-		} else {
+            Set<Zone> zones = new LinkedHashSet<Zone>(choiceSet);
+            //zones.removeAll(visitedZones); //remove visited zones.
 
-			zone = destinationChoiceModel.selectDestination(
-																															person, 
-																															tourMode, 
-																															previousActivity,
-																													 		nextActivity,
-																															visitedZones, randomNumber
-																														);
-		}
+            zone = destinationChoiceModel.selectDestination(
+                    person,
+                    tourMode,
+                    previousActivity,
+                    nextActivity,
+                    zones, randomNumber
+            );
+        } else {
 
-		return zone;
-	}
+            zone = destinationChoiceModel.selectDestination(
+                    person,
+                    tourMode,
+                    previousActivity,
+                    nextActivity,
+                    visitedZones, randomNumber
+            );
+        }
+
+        return zone;
+    }
 
 
-	private boolean selectNewDestination(
-		Person person, 
-		ActivityIfc previousActivity,
-		ActivityIfc nextActivity,
-		double randomNumber
-	) {
+    private boolean selectNewDestination(
+            Person person,
+            ActivityIfc previousActivity,
+            ActivityIfc nextActivity,
+            double randomNumber
+    ) {
 
-		Integer activityNumber = person.activitySchedule().activityNrByType(nextActivity);
+        Integer activityNumber = person.activitySchedule().activityNrByType(nextActivity);
 
-		if (activityNumber < 2) { return true; }
+        if (activityNumber < 2) {
+            return true;
+        }
 
-		ActivityType activityType = nextActivity.activityType();
+        ActivityType activityType = nextActivity.activityType();
 
-		Integer sourceIsFixedActivity = previousActivity.activityType().isFixedActivity() ? 1 : 0;
+        Integer sourceIsFixedActivity = previousActivity.activityType().isFixedActivity() ? 1 : 0;
 
-		Household hh = person.household();
-		Zone zone = hh.homeZone();
-		AreaType areaType = zone.getAreaType();
+        Household hh = person.household();
+        Zone zone = hh.homeZone();
+        AreaType areaType = zone.getAreaType();
 
-		int community_type = communityTypeFor(areaType);
+        int community_type = communityTypeFor(areaType);
 
-		float p = this.targetParameter.getParameter(activityType,
-				sourceIsFixedActivity, activityNumber, community_type);
+        float p = this.targetParameter.getParameter(activityType,
+                sourceIsFixedActivity, activityNumber, community_type);
 
-		return randomNumber < p;
-	}
+        return randomNumber < p;
+    }
 
-	int communityTypeFor(AreaType areaType) {
-		return typeMapping.getCommunityTypeFor(areaType);
-	}
+    int communityTypeFor(AreaType areaType) {
+        return typeMapping.getCommunityTypeFor(areaType);
+    }
 
 }
