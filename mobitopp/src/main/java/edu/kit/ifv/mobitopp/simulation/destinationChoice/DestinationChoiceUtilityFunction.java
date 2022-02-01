@@ -13,43 +13,43 @@ import edu.kit.ifv.mobitopp.simulation.activityschedule.ActivityIfc;
 public interface DestinationChoiceUtilityFunction {
 
 
-	public double calculateUtility(
-		Person person,
-		ActivityIfc nextActivity,
-		Zone sourceZone, 
-		Zone targetZone,
-		ActivityType activityType,
-		Set<Mode> choiceSetForModes 
-	);
+    public double calculateUtility(
+            Person person,
+            ActivityIfc nextActivity,
+            Zone sourceZone,
+            Zone targetZone,
+            ActivityType activityType,
+            Set<Mode> choiceSetForModes
+    );
 
-	default Map<Zone, Double> calculateUtilities(
-		Person person, 
-		ActivityIfc nextActivity, 
-		Zone sourceZone, 
-		Map<Zone,Set<Mode>> possibleTargetZonesWithModes, 
-		ActivityType activityType
-	) {
-		Map<Zone, Double> result = new LinkedHashMap<Zone, Double>();
-	
-		for (Zone zone : possibleTargetZonesWithModes.keySet()) {
-			
-			Set<Mode> availableModes = possibleTargetZonesWithModes.get(zone);
-	
-			Double utility = calculateUtility( 
-																						person,
-																						nextActivity,
-																						sourceZone, 
-																						zone, 
-																						activityType, 
-																						availableModes
-																					);
-	
-			result.put(zone, utility);
-	
-		}
-	
-		return result;
-	}
+    default Map<Zone, Double> calculateUtilities(
+            Person person,
+            ActivityIfc nextActivity,
+            Zone sourceZone,
+            Map<Zone, Set<Mode>> possibleTargetZonesWithModes,
+            ActivityType activityType
+    ) {
+        Map<Zone, Double> result = new LinkedHashMap<Zone, Double>();
+
+        for (Zone zone : possibleTargetZonesWithModes.keySet()) {
+
+            Set<Mode> availableModes = possibleTargetZonesWithModes.get(zone);
+
+            Double utility = calculateUtility(
+                    person,
+                    nextActivity,
+                    sourceZone,
+                    zone,
+                    activityType,
+                    availableModes
+            );
+
+            result.put(zone, utility);
+
+        }
+
+        return result;
+    }
 
 
 }
