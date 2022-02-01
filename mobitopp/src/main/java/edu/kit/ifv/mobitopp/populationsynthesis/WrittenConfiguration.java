@@ -38,7 +38,7 @@ public class WrittenConfiguration {
   public WrittenConfiguration() {
     super();
     numberOfZones = unlimited;
-    demandRegionMapping = Map.of();
+    demandRegionMapping = Map.of(); //create an empty map.
     activityScheduleAssigner = ActivityScheduleAssignerType.standard;
     mobilityProviders = Map.of();
     resultFolder = defaultResultFolder;
