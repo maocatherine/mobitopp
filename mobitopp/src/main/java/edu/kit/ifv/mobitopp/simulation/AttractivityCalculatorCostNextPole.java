@@ -11,75 +11,72 @@ import edu.kit.ifv.mobitopp.time.DayOfWeek;
 import edu.kit.ifv.mobitopp.time.Time;
 
 public class AttractivityCalculatorCostNextPole
-	extends AttractivityCalculatorCost
-	implements AttractivityCalculatorIfc
-{
+        extends AttractivityCalculatorCost
+        implements AttractivityCalculatorIfc {
 
-	float poleSensitivity;
+    float poleSensitivity;
 
 
-	public AttractivityCalculatorCostNextPole(
-		Map<ZoneId, Zone> zones,
-		ImpedanceIfc impedance,
-		String filename, 
-		float poleSensitivity
-	) {
-  	super(zones, impedance, filename);
+    public AttractivityCalculatorCostNextPole(
+            Map<ZoneId, Zone> zones,
+            ImpedanceIfc impedance,
+            String filename,
+            float poleSensitivity
+    ) {
+        super(zones, impedance, filename);
 
-		this.poleSensitivity = poleSensitivity;
-	}
+        this.poleSensitivity = poleSensitivity;
+    }
 
-	protected float calculateImpedance(
-		Person person,
-		ActivityIfc nextActivity,
-		ZoneId origin, 
-		ZoneId destination,
-		Set<Mode> choiceSetForModes
-	) {
-		ActivityIfc previousActivity  = person.activitySchedule().prevActivity(nextActivity);
+    protected float calculateImpedance(
+            Person person,
+            ActivityIfc nextActivity,
+            ZoneId origin,
+            ZoneId destination,
+            Set<Mode> choiceSetForModes
+    ) {
+        ActivityIfc previousActivity = person.activitySchedule().prevActivity(nextActivity);
 
-		ActivityType activityType = nextActivity.activityType();
-		DayOfWeek weekday = nextActivity.startDate().weekDay();
-		ZoneId nextFixedDestination = person.nextFixedActivityZone(nextActivity).getId();
+        ActivityType activityType = nextActivity.activityType();
+        DayOfWeek weekday = nextActivity.startDate().weekDay();
+        ZoneId nextFixedDestination = person.nextFixedActivityZone(nextActivity).getId();
 
-		Time startDate = previousActivity.calculatePlannedEndDate();
+        Time startDate = previousActivity.calculatePlannedEndDate();
 
-		boolean commutationTicket = person.hasCommuterTicket();
+        boolean commutationTicket = person.hasCommuterTicket();
 
-		TreeSet<Float> impedances = new TreeSet<>();
+        TreeSet<Float> impedances = new TreeSet<>();
 
-		for (Mode mode : choiceSetForModes) {
+        for (Mode mode : choiceSetForModes) {
 
-			float time_coeff = getParameterTime(activityType, weekday);
-			float cost_coeff = getParameterCost(activityType, weekday);
+            float time_coeff = getParameterTime(activityType, weekday);
+            float cost_coeff = getParameterCost(activityType, weekday);
 
-			float time_next = getTravelTime(mode,origin, destination, startDate);
-			float cost_next = getTravelCost(mode,origin, destination, startDate, commutationTicket)
-												+ getParkingCost(mode, destination, startDate, nextActivity.duration());
+            float time_next = getTravelTime(mode, origin, destination, startDate);
+            float cost_next = getTravelCost(mode, origin, destination, startDate, commutationTicket)
+                    + getParkingCost(mode, destination, startDate, nextActivity.duration());
 
-			float time_pole = getTravelTime(mode, destination, nextFixedDestination, startDate);
-			float cost_pole = getTravelCost(mode, destination, nextFixedDestination, startDate, commutationTicket);
+            float time_pole = getTravelTime(mode, destination, nextFixedDestination, startDate);
+            float cost_pole = getTravelCost(mode, destination, nextFixedDestination, startDate, commutationTicket);
 
-			float income = person.getIncome();
+            float income = person.getIncome();
 
-			assert income > 0.0;
+            assert income > 0.0;
 
-			float cost = 2.0f*((1.0f-this.poleSensitivity)*cost_next + this.poleSensitivity*cost_pole);
-			float time = 2.0f*((1.0f-this.poleSensitivity)*time_next + this.poleSensitivity*time_pole);
+            float cost = 2.0f * ((1.0f - this.poleSensitivity) * cost_next + this.poleSensitivity * cost_pole);
+            float time = 2.0f * ((1.0f - this.poleSensitivity) * time_next + this.poleSensitivity * time_pole);
 
-		
-			double sum = 
-										+ time_coeff * time
-										+ cost_coeff * 1000/income*cost;
-	
-	
-			float impedance = (float) Math.exp(sum);
 
-			impedances.add(impedance);
-		}
+            double sum = +time_coeff * time + cost_coeff * 1000 / income * cost;
 
-		return impedances.first();
-	}
+
+            float impedance = (float) Math.exp(sum);
+
+            impedances.add(impedance);
+        }
+
+        return impedances.first();
+    }
 
 
 }

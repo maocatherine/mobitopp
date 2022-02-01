@@ -8,93 +8,101 @@ public interface Car {
 
 	public static enum Segment { SMALL, MIDSIZE, LARGE};
 
-	int id();
+    int id();
 
-	Segment carSegment();
+    Segment carSegment();
 
-	float currentMileage();
+    float currentMileage();
 
-	/**
-	 * Fuel level between 0.0d and 1.0d
-	 * 
-	 * @return fuel level
-	 */
-	float currentFuelLevel();
-	
-	/**
-	 * Battery level between 0.0d and 1.0d
-	 * 
-	 * @return battery level
-	 */
-	float currentBatteryLevel();
+    /**
+     * Fuel level between 0.0d and 1.0d
+     *
+     * @return fuel level
+     */
+    float currentFuelLevel();
 
-	/**
-	 * 
-	 * @return remaining range in km
-	 */
-	float remainingRange();
-	
-	/**
-	 * 
-	 * @return maximum range in km
-	 */
-	float maxRange();
-	
-	/**
-	 * 
-	 * @return effective range in km
-	 */
-	float effectiveRange();
+    /**
+     * Battery level between 0.0d and 1.0d
+     *
+     * @return battery level
+     */
+    float currentBatteryLevel();
 
-	/**
-	 * Should throw an {@link IllegalArgumentException} when {@link #remainingRange()} is smaller than
-	 * {@code distanceKm}. Currently only a warning is print on standard out.
-	 * 
-	 * @param distanceKm
-	 * @throws IllegalArgumentException
-	 */
-	void driveDistance(float distanceKm) throws IllegalArgumentException;
+    /**
+     * @return remaining range in km
+     */
+    float remainingRange();
 
-	void refuel(float aimedFuelLevel) throws IllegalArgumentException;
+    /**
+     * @return maximum range in km
+     */
+    float maxRange();
 
-	String getType();
+    /**
+     * @return effective range in km
+     */
+    float effectiveRange();
 
-	void use(Person person, Time currentTime);
-	void release(Person person, Time currentTime);
-	Person driver();
-	boolean isUsed();
-  void returnCar(Zone zone);
+    /**
+     * Should throw an {@link IllegalArgumentException} when {@link #remainingRange()} is smaller than
+     * {@code distanceKm}. Currently only a warning is print on standard out.
+     *
+     * @param distanceKm
+     * @throws IllegalArgumentException
+     */
+    void driveDistance(float distanceKm) throws IllegalArgumentException;
 
-	Time startOfLastUsage();
-	Time endOfLastUsage();
-	
-	boolean canCarryPassengers();
-	void useAsPassenger(Person person);
-	void leave(Person person);
+    void refuel(float aimedFuelLevel) throws IllegalArgumentException;
 
-	int capacity();
-	int remainingCapacity();
+    String getType();
 
-	String passengersAsString();
+    void use(Person person, Time currentTime);
+
+    void release(Person person, Time currentTime);
+
+    Person driver();
+
+    boolean isUsed();
+
+    void returnCar(Zone zone);
+
+    Time startOfLastUsage();
+
+    Time endOfLastUsage();
+
+    boolean canCarryPassengers();
+
+    void useAsPassenger(Person person);
+
+    void leave(Person person);
+
+    int capacity();
+
+    int remainingCapacity();
+
+    String passengersAsString();
 
 
-	void start(Time currentTime);
-	void stop(Time currentTime, CarPosition position);
+    void start(Time currentTime);
 
-	CarPosition position();
+    void stop(Time currentTime, CarPosition position);
 
-	boolean isStarted();
-	boolean isStopped();
+    CarPosition position();
 
-	public String forLogging(); 
-	public String statusForLogging(); 
+    boolean isStarted();
 
-	public boolean isElectric();
+    boolean isStopped();
 
-  boolean hasCapacity();
+    public String forLogging();
 
-  boolean hasDriver();
+    public String statusForLogging();
 
-	Car copy(int id);
+    public boolean isElectric();
+
+    boolean hasCapacity();
+
+    boolean hasDriver();
+
+    Car copy(int id);
 
 }

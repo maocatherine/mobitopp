@@ -19,46 +19,46 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class CachedVisumReader extends VisumFileReader {
 
-  private final Map<String, TableDescription> descriptions;
-  private File file;
-  private byte[] storedInput;
+    private final Map<String, TableDescription> descriptions;
+    private File file;
+    private byte[] storedInput;
 
-  public CachedVisumReader(String attributeSeparator, Charset charset) {
-    super(attributeSeparator, charset);
-    this.descriptions = new HashMap<>();
-  }
-
-  public CachedVisumReader() {
-    super();
-    this.descriptions = new HashMap<>();
-  }
-
-  protected BufferedReader createReader(File file, Charset charset) throws IOException {
-    if (null == this.file || !this.file.equals(file)) {
-      storedInput = StreamContent.readBytes(file);
-      this.file = file;
-      this.descriptions.clear();
+    public CachedVisumReader(String attributeSeparator, Charset charset) {
+        super(attributeSeparator, charset);
+        this.descriptions = new HashMap<>();
     }
-    return new BufferedReader(
-        new InputStreamReader(new ByteArrayInputStream(storedInput), charset));
-  }
 
-  @Override
-  protected TableDescription getTableDescription(File file, Charset charset, String tableName)
-      throws IOException {
-    buildUpDescriptionCache(file, charset);
-    return descriptions.getOrDefault(tableName, warn(tableName, "table description", emptyDescription, log));
-  }
-
-  private void buildUpDescriptionCache(File file, Charset charset) throws IOException {
-    if (null == descriptions || descriptions.isEmpty()) {
-      cacheDescriptionsFrom(file, charset);
+    public CachedVisumReader() {
+        super();
+        this.descriptions = new HashMap<>();
     }
-  }
 
-  private void cacheDescriptionsFrom(File file, Charset charset) throws IOException {
-    descriptions
-        .putAll(new TableDescriptionReader(attributeSeparator)
-            .readTables(createReader(file, charset)));
-  }
+    protected BufferedReader createReader(File file, Charset charset) throws IOException {
+        if (null == this.file || !this.file.equals(file)) {
+            storedInput = StreamContent.readBytes(file);
+            this.file = file;
+            this.descriptions.clear();
+        }
+        return new BufferedReader(
+                new InputStreamReader(new ByteArrayInputStream(storedInput), charset));
+    }
+
+    @Override
+    protected TableDescription getTableDescription(File file, Charset charset, String tableName)
+            throws IOException {
+        buildUpDescriptionCache(file, charset);
+        return descriptions.getOrDefault(tableName, warn(tableName, "table description", emptyDescription, log));
+    }
+
+    private void buildUpDescriptionCache(File file, Charset charset) throws IOException {
+        if (null == descriptions || descriptions.isEmpty()) {
+            cacheDescriptionsFrom(file, charset);
+        }
+    }
+
+    private void cacheDescriptionsFrom(File file, Charset charset) throws IOException {
+        descriptions
+                .putAll(new TableDescriptionReader(attributeSeparator)
+                        .readTables(createReader(file, charset)));
+    }
 }
