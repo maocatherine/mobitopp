@@ -14,7 +14,7 @@ public class NodeFromVisumZoneTest {
 	public void useExternalInRouteSearch() {
 		VisumZone zone = visumZone().withId(1).external().build();
 		
-		Node node = NodeFromVisumZone.useExternalInRouteSeach(zone);
+		Node node = NodeFromVisumZone.useExternalInRouteSearch(zone);
 		
 		assertFalse(node.isSink());
 	}
@@ -23,7 +23,7 @@ public class NodeFromVisumZoneTest {
 	public void doNotUseInternalInRouteSearch() {
 		VisumZone zone = visumZone().withId(1).internal().build();
 		
-		Node node = NodeFromVisumZone.useExternalInRouteSeach(zone);
+		Node node = NodeFromVisumZone.useExternalInRouteSearch(zone);
 		
 		assertTrue(node.isSink());
 	}
