@@ -30,7 +30,7 @@ public class SimpleGraph
 	private VisumTransportSystem car;
 	
 	public SimpleGraph(VisumTransportSystems transportSystems) {
-		this(transportSystems.getBy("P"));
+		this(transportSystems.getBy("CAR"));
 	}
 
 	public SimpleGraph(VisumTransportSystem car) {
