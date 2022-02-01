@@ -38,7 +38,7 @@ public class PersonOfPanelData implements Comparable<PersonOfPanelData> {
 	@Getter(AccessLevel.NONE)
 	private final boolean commuterTicket;
 	@Getter(AccessLevel.NONE)
-	private final boolean licence;
+	private final boolean license;
 	@Getter(AccessLevel.NONE)
 	private final boolean bicycle;
 	@Getter(AccessLevel.NONE)
@@ -62,7 +62,7 @@ public class PersonOfPanelData implements Comparable<PersonOfPanelData> {
 		float distance_work,
 		float distance_education,
 		boolean commuterTicket,
-		boolean licence,
+		boolean license,
 		boolean bicycle,
 		boolean personalCar,
 		boolean carAvailable,
@@ -88,7 +88,7 @@ public class PersonOfPanelData implements Comparable<PersonOfPanelData> {
 		this.distanceEducation = distance_education;
 
 		this.commuterTicket = commuterTicket;
-		this.licence = licence;
+		this.license = license;
 		this.bicycle = bicycle;
 		this.personalCar = personalCar;
 		this.carAvailable = carAvailable;
@@ -171,8 +171,8 @@ public class PersonOfPanelData implements Comparable<PersonOfPanelData> {
 		return getAge();
 	}
 
-	public boolean hasLicence() {
-		return this.licence;
+	public boolean hasLicense() {
+		return this.license;
 	}
 
 	public int compareTo(PersonOfPanelData o) {
