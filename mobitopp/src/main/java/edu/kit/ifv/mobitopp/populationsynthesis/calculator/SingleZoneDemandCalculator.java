@@ -30,6 +30,8 @@ public class SingleZoneDemandCalculator implements DemandDataCalculator {
 		Predicate<DemandZone> zonesWithPopulation = DemandZone::shouldGeneratePopulation;
 		Predicate<DemandZone> zonesWithoutPopulation = zonesWithPopulation.negate();
 		calculateDemandFor(zonesWithPopulation);
+
+		//Need to double check.
 		saveZoneAttributesOf(zonesWithoutPopulation);
 	}
 
@@ -44,6 +46,7 @@ public class SingleZoneDemandCalculator implements DemandDataCalculator {
 	}
 
 	private void calculateAndSave(DemandZone zone) {
+		//Call the method in DemandDataForZoneCalculatorStuttgart.java.
 		calculator.calculateDemandData(zone, impedance);
 		calculator.saveDemandData(zone);
 	}
