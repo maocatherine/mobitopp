@@ -12,7 +12,6 @@ class CommutationTicketNullModel
 		HouseholdOfPanelData household,
 		Zone zone
 	) {
-
 		return person.hasCommuterTicket();
 	}
 	
