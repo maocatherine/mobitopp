@@ -2,6 +2,8 @@
 [mobiTopp](http://mobitopp.ifv.kit.edu/) is an agent-based travel demand model developed at the [Institute for transport studies at the Karlsruhe Institute of Technology](http://www.ifv.kit.edu/english/index.php). Publications about mobiTopp can be found on the [project site](http://mobitopp.ifv.kit.edu/28.php).
 
 ## Execution
+**Please click the mobitopp-matsim-coupling folder and read the instruction there. You need to load this parent repository and also another seperate repository to run the coupling. I am still learning the submodule control so need a bit of time to make them perfect. Follow the instruction there.**
+
 ### Using gradle
 The example project comes shipped with gradle tasks to run it directly from source. A population can be generated with the `runPopulationSynthesis` task and travel demand can be simulated using the `runSimulation` task. 
 
