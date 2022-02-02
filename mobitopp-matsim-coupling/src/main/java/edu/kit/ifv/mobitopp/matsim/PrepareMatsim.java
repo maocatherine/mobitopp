@@ -29,7 +29,7 @@ public class PrepareMatsim {
 	public PrepareMatsim(MatsimContext context) {
 		this.context = context;
 	}
-	
+
 	public static Matsim from(MatsimContext context) {
 		return from(context, new CarOnly());
 	}
@@ -55,6 +55,7 @@ public class PrepareMatsim {
 		return ScenarioUtils.createScenario(fromConfig());
 	}
 
+	//Some more alternation in Matsim.java.
 	private Config fromConfig() {
 		float fractionOfPopulation = context.fractionOfPopulation();
 		String matsimConfig = context.experimentalParameters().value("matsimConfig");
@@ -70,7 +71,7 @@ public class PrepareMatsim {
 				.setOverwriteFileSetting(
 						OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
-		AccessibilityConfigGroup accConfig = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class ) ;
+		AccessibilityConfigGroup accConfig = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
 		accConfig.setComputingAccessibilityForMode(Modes4Accessibility.car, true);
 
 		updateResultFolder(config);

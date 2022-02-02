@@ -23,7 +23,7 @@ import edu.kit.ifv.mobitopp.visum.VisumTransportSystem;
 
 public class ValidateLinks {
 
-	private static final double minimumRequired = 1 - 5e-2;
+	private static final double minimumRequired = 1 - 5e-3;
 
 	public VisumRoadNetwork of(VisumRoadNetwork network) {
 		GraphFromVisumNetwork graph = new GraphFromVisumNetwork(network, NodeFromVisumZone::useExternalInRouteSearch);
@@ -77,7 +77,7 @@ public class ValidateLinks {
 	}
 
 	private Map<Integer, List<VisumConnector>> reachableConnectors(VisumRoadNetwork network) {
-		VisumTransportSystem carSystem = network.getTransportSystem("P");
+		VisumTransportSystem carSystem = network.getTransportSystem("CAR");
 		HashMap<Integer, List<VisumConnector>> connectors = new HashMap<>();
 		for (Entry<Integer, List<VisumConnector>> entry : network.connectors.entrySet()) {
 			connectors.put(entry.getKey(), new ArrayList<>());

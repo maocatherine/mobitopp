@@ -15,10 +15,11 @@ import edu.kit.ifv.mobitopp.visum.VisumZone;
 public class MatsimZoneLinkCreator extends BaseLinkCreator {
 
 	private static final float ZONE_CAPACITY = 100000;
-	private static final float ZONE_FREESPEED = 30.0f;	// km/h
+	private static final float ZONE_FREESPEED = 30.0f;    // km/h
 	private static final float ZONE_LENGTH = 1; // km
 	private static final int ZONE_LANES = 2;
 	private static final Set<String> ZONE_MODES;
+
 	static {
 		Set<String> tmp = new HashSet<String>();
 		tmp.add("car");
@@ -42,59 +43,59 @@ public class MatsimZoneLinkCreator extends BaseLinkCreator {
 		for (VisumZone zone : visum.zones.values()) {
 			String id1 = "Z" + zone.id + ":1";
 			Node matsimNode1 = createNode.from(id1, zone.coord.x, zone.coord.y);
-
 			zones.put(id1, matsimNode1);
-			String id1Inflow = "Z" + zone.id + ":1-INFLOW";
-			Node matsimNode1Inflow = createNode.from(id1Inflow, zone.coord.x, zone.coord.y);
-			
-			zones.put(id1Inflow, matsimNode1Inflow);
-			String inflowLink = "Z" + zone.id + "-INFLOW";
-			makeLink(inflowLink, 
-					matsimNode1Inflow, 
-					matsimNode1, 
-					ZONE_LENGTH, 
-					MatsimConnectorCreator.CONNECTOR_CAPACITY, 
-					MatsimConnectorCreator.CONNECTOR_FREESPEED, 
-					MatsimConnectorCreator.CONNECTOR_LANES, 
-					ZONE_MODES);
-			
-			String id2 = "Z" + zone.id + ":2";
-			Node matsimNode2 = createNode.from(id2, zone.coord.x, zone.coord.y);
 
-			zones.put(id2, matsimNode2);
-			String id2Outflow = "Z" + zone.id + ":2-OUTFLOW";
-			Node matsimNode2Outflow = createNode.from(id2Outflow, zone.coord.x, zone.coord.y);
-			
-			zones.put(id2Outflow, matsimNode2Outflow);
-			String outflowLink = "Z" + zone.id + "-OUTFLOW";
-			makeLink(outflowLink, 
-					matsimNode2, 
-					matsimNode2Outflow, 
-					ZONE_LENGTH, 
-					MatsimConnectorCreator.CONNECTOR_CAPACITY, 
-					MatsimConnectorCreator.CONNECTOR_FREESPEED, 
-					MatsimConnectorCreator.CONNECTOR_LANES, 
-					ZONE_MODES);
-			
-			if (isExternal(zone)) {
-				makeLink("Z" + zone.id + ":12", 
-						matsimNode1, 
-						matsimNode2, 
-						ZONE_LENGTH, 
-						ZONE_CAPACITY,
-						ZONE_FREESPEED, 
-						ZONE_LANES, 
-						ZONE_MODES);
+            /*String id1Inflow = "Z" + zone.id + ":1-INFLOW";
+            Node matsimNode1Inflow = createNode.from(id1Inflow, zone.coord.x, zone.coord.y);
 
-				makeLink("Z" + zone.id + ":21", 
-						matsimNode2, 
-						matsimNode1, 
-						ZONE_LENGTH, 
-						ZONE_CAPACITY,
-						ZONE_FREESPEED, 
-						ZONE_LANES, 
-						ZONE_MODES);
-			}
+            zones.put(id1Inflow, matsimNode1Inflow);
+            String inflowLink = "Z" + zone.id + "-INFLOW";
+            makeLink(inflowLink,
+                    matsimNode1Inflow,
+                    matsimNode1,
+                    ZONE_LENGTH,
+                    MatsimConnectorCreator.CONNECTOR_CAPACITY,
+                    MatsimConnectorCreator.CONNECTOR_FREESPEED,
+                    MatsimConnectorCreator.CONNECTOR_LANES,
+                    ZONE_MODES);*/
+
+            /*String id2 = "Z" + zone.id + ":2";
+            Node matsimNode2 = createNode.from(id2, zone.coord.x, zone.coord.y);
+            zones.put(id2, matsimNode2);
+
+            String id2Outflow = "Z" + zone.id + ":2-OUTFLOW";
+            Node matsimNode2Outflow = createNode.from(id2Outflow, zone.coord.x, zone.coord.y);
+
+            zones.put(id2Outflow, matsimNode2Outflow);
+            String outflowLink = "Z" + zone.id + "-OUTFLOW";
+            makeLink(outflowLink,
+                    matsimNode2,
+                    matsimNode2Outflow,
+                    ZONE_LENGTH,
+                    MatsimConnectorCreator.CONNECTOR_CAPACITY,
+                    MatsimConnectorCreator.CONNECTOR_FREESPEED,
+                    MatsimConnectorCreator.CONNECTOR_LANES,
+                    ZONE_MODES);
+
+            if (isExternal(zone)) {
+                makeLink("Z" + zone.id + ":12",
+                        matsimNode1,
+                        matsimNode2,
+                        ZONE_LENGTH,
+                        ZONE_CAPACITY,
+                        ZONE_FREESPEED,
+                        ZONE_LANES,
+                        ZONE_MODES);
+
+                makeLink("Z" + zone.id + ":21",
+                        matsimNode2,
+                        matsimNode1,
+                        ZONE_LENGTH,
+                        ZONE_CAPACITY,
+                        ZONE_FREESPEED,
+                        ZONE_LANES,
+                        ZONE_MODES);
+            }*/
 		}
 		return zones;
 	}

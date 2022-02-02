@@ -27,29 +27,29 @@ public class MatsimModeConverter {
 		if (isPublicTransport(transport)) {
 			result.add("pt");
 		}
-		if (containsTransportSystem(transport, "Rad")) {
+		if (containsTransportSystem(transport, "BIKE")) {
 			result.add("bike");
 		}
-		if (containsTransportSystem(transport, "Fuss")) {
+		if (containsTransportSystem(transport, "PED")) {
 			result.add("walk");
 		}
-		if (containsTransportSystem(transport, "F")) {
+		if (containsTransportSystem(transport, "PUTW")) {
 			result.add("transit_walk");
 		}
 		return result;
 	}
 
 	public boolean isCar(Set<VisumTransportSystem> transport) {
-		return containsTransportSystem(transport, "P")
-				||	containsTransportSystem(transport, "Lkw");
+		return containsTransportSystem(transport, "CAR")
+				||	containsTransportSystem(transport, "HGV");
 	}
 
 	private boolean isPublicTransport(Set<VisumTransportSystem> transport) {
-		return containsTransportSystem(transport, "I")
-				|| containsTransportSystem(transport, "NVBW")
-				|| containsTransportSystem(transport, "R")
-				|| containsTransportSystem(transport, "S")
-				|| containsTransportSystem(transport, "U");
+		return containsTransportSystem(transport, "BUS")
+				|| containsTransportSystem(transport, "RAIL")
+				|| containsTransportSystem(transport, "SUB")
+				|| containsTransportSystem(transport, "TRAM")
+				|| containsTransportSystem(transport, "LR");
 	}
 
 	private boolean containsTransportSystem(Set<VisumTransportSystem> transport, String code) {

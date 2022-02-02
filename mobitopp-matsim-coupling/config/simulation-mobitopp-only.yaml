@@ -1,25 +1,28 @@
 dataSource: !file
   demandDataFolder: output/demand-data
-  matrixConfigurationFile: data/leopoldshafen/matrices/matrix-configuration.yaml
-  attractivityDataFile: data/leopoldshafen/zoneproperties/attractivities.csv
-  zonePropertiesDataFile: data/leopoldshafen/zoneproperties/attractivities.csv
-  parkingFacilitiesDataFile: data/leopoldshafen/zoneproperties/parkingFacilities.csv
-  bikeSharingPropertiesDataFile: data/leopoldshafen/zoneproperties/bikesharing-properties.csv
-  carSharingPropertiesDataFile: data/leopoldshafen/zoneproperties/carsharing-properties.csv
-  carSharingStationsDataFile: data/leopoldshafen/zoneproperties/carsharing-stations.csv
-  carSharingFreeFloatingDataFile: data/leopoldshafen/zoneproperties/carsharing-free-floating.csv
+  matrixConfigurationFile: data_clayton/matrices/matrix-configuration.yaml
+  attractivityDataFile: data_clayton/zone_properties/attractivities.csv
+  zonePropertiesDataFile: data_clayton/zone_properties/zone-properties.csv
+  parkingFacilitiesDataFile: data_clayton/zone_properties/parking-facilities.csv
+  bikeSharingPropertiesDataFile: data_clayton/zone_properties/bikesharing-properties.csv
+  carSharingPropertiesDataFile: data_clayton/zone_properties/carsharing-properties.csv
+  carSharingStationsDataFile: data_clayton/zone_properties/carsharing-stations.csv
+  carSharingFreeFloatingDataFile: data_clayton/zone_properties/carsharing-free-floating.csv
   #charging: unlimited
-  defaultChargingPower: config/leopoldshafen/parameters/ChargingPower.txt
+  defaultChargingPower: data_clayton/parameters/ChargingPower.txt
   zoneRepositoryFolder: output/zone-repository/
-days: 7
+days: 1
+modeChoice:
+  firstTrip: data_clayton/parameters/ModeSelectorParameterFirstTrip.txt
+  otherTrip: data_clayton/parameters/ModeSelectorParameterOtherTrip.txt
 destinationChoice:
-  repetition: config/leopoldshafen/parameters/TargetParameterRepetition.csv
-  cost: config/leopoldshafen/parameters/TargetParameterCost.txt
-fractionOfPopulation: 0.10
+  repetition: data_clayton/parameters/TargetParameterRepetition.csv
+  cost: data_clayton/parameters/TargetParameterCost.txt
+fractionOfPopulation: 1
 #numberOfZones: 1174
 resultFolder: results/simulation
 seed: 1234
-visumFile: data/leopoldshafen/leopoldshafen.net
+visumFile: data_clayton/clayton/Clayton12km.net
 #experimental:
 #  parameter1: 1
 #  parameter2: 2
