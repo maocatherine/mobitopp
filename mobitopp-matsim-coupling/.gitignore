@@ -1,0 +1,9 @@
+/.gradle/
+/build/
+/bin/
+/data/matrices/
+/output/
+/data/*.csv
+/data/*.net.bz2
+/results/
+*.visum_serialized

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE facilities SYSTEM "http://www.matsim.org/files/dtd/facilities_v1.dtd">
+<facilities>
+
+<!-- ====================================================================== -->
+
+	<facility id="1" x="8.3924397450" y="49.0984720187">
+		<activity type="food">
+		</activity>
+	</facility>
+
+<!-- ====================================================================== -->
+
+	<facility id="2" x="8.4014559503" y="49.0940507387">
+		<activity type="work">
+		</activity>
+	</facility>
+
+</facilities>

@@ -1,0 +1,128 @@
+
+car_const    =  0.0
+foot_const   =  1.5
+pass_const   =  0.206
+bike_const   = -0.143
+
+time         =  0.103
+cost_km      =  0.361
+
+
+car_last_car   = 1.52
+car_last_foot  = -0.71
+car_last_pass  = -1.23
+car_last_bike  = -1.62
+
+foot_last_car  = -0.0773
+foot_last_foot = 1.88
+foot_last_pass = -0.00754
+foot_last_bike = -0.246
+
+pass_last_car  = -0.475
+pass_last_foot = -0.439
+pass_last_pass = 2.13
+pass_last_bike = -1.09
+
+bike_last_car  = -1.42
+bike_last_foot = -0.782
+bike_last_pass = -1.22
+bike_last_bike = 2.95
+
+
+foot_caravailable_true = -0.629
+foot_caravailable_no   =  0.505
+foot_caravailable_part =  1.59
+
+pass_caravailable_true =  -1.36
+pass_caravailable_no   =  -0.147
+pass_caravailable_part =  1.74
+
+bike_caravailable_true =  -1.37
+bike_caravailable_no   =  0.324
+bike_caravailable_part =  0.74
+
+
+
+foot_activity_private_business   =   -0.65
+foot_activity_work               =   -0.278
+foot_activity_education          =   -0.568
+foot_activity_shopping           =   -0.701
+foot_activity_leisure            =   1.79
+foot_activity_home               =  -0.67
+foot_activity_walk               =   2.64
+foot_activity_service            =  -0.124
+
+pass_activity_private_business   =   0.157
+pass_activity_work               =  -0.609
+pass_activity_education          =  -0.534
+pass_activity_shopping           =  -0.0367
+pass_activity_leisure            =   1.02
+pass_activity_home               =  -0.327
+pass_activity_walk               =   0.8
+pass_activity_service            =  -0.26
+
+bike_activity_private_business   =   -1.14
+bike_activity_work               =   -0.128
+bike_activity_education          =   -0.667
+bike_activity_shopping           =   -1.02
+bike_activity_leisure            =   1.1
+bike_activity_home               =   -0.145
+bike_activity_walk               =   2.07
+bike_activity_service            =  -0.608
+
+
+foot_weekday_workday           =   0.0267
+
+pass_weekday_workday           =   -0.424
+
+bike_weekday_workday           =   -0.066
+
+
+foot_hhtype_other              =   0.434
+foot_hhtype_2adults            =   0.546
+foot_hhtype_1adult             =   0.437
+foot_hhtype_kids               =   0.0151
+
+pass_hhtype_other              =   0.189
+pass_hhtype_2adults            =   0.319
+pass_hhtype_1adult             =  -0.474
+pass_hhtype_kids               =  0.171
+
+bike_hhtype_other              =   -0.344
+bike_hhtype_2adults            =   0.00857
+bike_hhtype_1adult             =   -0.0782
+bike_hhtype_kids               =   -0.235
+
+
+foot_employment_student_tertiary   =   0.351
+foot_employment_education          =   1.15
+foot_employment_work_from41        =   0.0498
+foot_employment_work_to40          =   0.266
+foot_employment_unemployed         =   -0.0529
+foot_employment_retired            =   -0.328
+
+pass_employment_student_tertiary   =   -0.183
+pass_employment_education          =   1.12
+pass_employment_work_from41        =  -0.408
+pass_employment_work_to40          =  -0.294
+pass_employment_unemployed         =   0.0678
+pass_employment_retired            =  -0.0988
+
+bike_employment_student_tertiary   =    0.22
+bike_employment_education          =    0.942
+bike_employment_work_from41        =   -0.271
+bike_employment_work_to40          =    0.0456
+bike_employment_unemployed         =   -0.594
+bike_employment_retired            =   -1.02
+
+
+car_distance                     =   0.622
+foot_distance                    =  -1.54
+pass_distance                    =   0.666
+bike_distance                    =   0.25
+
+
+car_shorttrip            =   -0.103
+foot_shorttrip           =   -1.54
+pass_shorttrip           =    0.666
+bike_shorttrip           =    0.0743

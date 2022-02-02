@@ -1,0 +1,25 @@
+dataSource: !file
+  demandDataFolder: output/demand-data
+  matrixConfigurationFile: data/matrices/matrix-configuration.yaml
+  attractivityDataFile: data/Strukturdaten_Stuttgart_2009_Attractivities.csv
+  #charging: unlimited
+  defaultChargingPower: data/parameters/ChargingPower.txt
+  zoneRepositoryFolder: output/zone-repsitory
+days: 1
+destinationChoice:
+  repetition: data/parameters/TargetParameterRepetition.csv
+  cost: data/parameters/TargetParameterCost.txt
+modeChoice:
+  choice: data/parameters/ModeChoiceParameterSimple.txt
+  firstTrip: data/parameters/ModeSelectorParameterFirstTrip.txt
+  otherTrip: data/parameters/ModeSelectorParameterOtherTrip.txt
+fractionOfPopulation: 0.001
+#numberOfZones: 1174
+resultFolder: results/simulation
+seed: 1234
+visumFile: data/stuttgart_2009_everkehrsraum_nutzung.net.bz2
+experimental:
+  matsimConfig: data/matsim-config-test.xml
+  externalTrafficW: data/matrices/external/102_pkw_w.mtx
+  externalTrafficEx: data/matrices/external/104_pkw_ex.mtx
+  travelTimeMatrixFolderName: travelTime

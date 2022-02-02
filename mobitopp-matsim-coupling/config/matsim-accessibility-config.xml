@@ -1,0 +1,117 @@
+<?xml version="1.0" ?>
+<!DOCTYPE config SYSTEM "http://www.matsim.org/files/dtd/config_v2.dtd">
+<config>
+
+	<module name="accessibility" >
+		<!-- if only a sample of destinations should be used (reduces accuracy  not recommended except when necessary for computational speed reasons) -->
+		<!-- <param name="accessibilityDestinationSamplingRate" value="null" /> -->
+		<!-- defines type of measure for accessibility computation. -->
+		<param name="accessibilityMeasureType" value="logSum" />
+		<!-- method to determine the area for which the accessibility will be computed; possible values: fromNetwork fromBoundingBox fromShapeFile fromFile  -->
+		<param name="areaOfAccessibilityComputation" value="fromFacilitiesFile" />
+
+		<!-- custom bounding box parameters for accessibility computation (if enabled) -->
+		<param name="boundingBoxBottom" value="0.0" />
+		<param name="boundingBoxLeft" value="0.0" />
+		<param name="boundingBoxRight" value="15000.0" />
+		<param name="boundingBoxTop" value="15000.0" />
+		<!--param name="cellSizeForCellBasedAccessibility" value="100" /-->
+		<param name="tileSize_m" value="100" />
+		<param name="extentOfAccessibilityComputationShapeFile" value="null" />
+		<!-- if the accessibility is computed using the `fromFile` option, the this must be the file containing the measuring points' coordinates.  -->
+		<param name="measuringPointsFile" value="data/measure-points-origin.xml" />
+		<param name="outputCRS" value="null" />
+		<!-- time of day at which trips for accessibility computations are assumed to start -->
+		<param name="timeOfDay" value="28800.0" />
+		<param name="useOpportunityWeights" value="false" />
+		<param name="weightExponent" value="1.0" />
+	</module>
+
+	<module name="controler">
+		<param name="outputDirectory" value="results/matsim" />
+		<param name="firstIteration" value="0" />
+		<param name="lastIteration" value="50" />
+		<param name="eventsFileFormat" value="xml" />
+		<param name="writeEventsInterval" value="5" />
+<!--
+		<param name="snapshotFormat" value="otfvis,googleearth" />
+-->
+		<param name="snapshotFormat" value="otfvis" />
+		<param name="writeSnapshotsInterval" value="0" />
+
+		<param name="mobsim" value="qsim" />
+	</module>
+
+	<module name="planCalcScore" >
+		<parameterset type="activityParams" >
+			<param name="activityType" value="HOME" />
+			<param name="typicalDuration" value="12:00:00" />
+		</parameterset>
+		<parameterset type="activityParams" >
+			<param name="activityType" value="WORK" />
+			<param name="typicalDuration" value="08:00:00" />
+		</parameterset>
+		<parameterset type="activityParams" >
+			<param name="activityType" value="BUSINESS" />
+			<param name="typicalDuration" value="04:00:00" />
+		</parameterset>
+		<parameterset type="activityParams" >
+			<param name="activityType" value="EDUCATION" />
+			<param name="typicalDuration" value="06:00:00" />
+		</parameterset>
+		<parameterset type="activityParams" >
+			<param name="activityType" value="SHOPPING" />
+			<param name="typicalDuration" value="01:00:00" />
+		</parameterset>
+		<parameterset type="activityParams" >
+			<param name="activityType" value="LEISURE" />
+			<param name="typicalDuration" value="02:00:00" />
+		</parameterset>
+		<parameterset type="activityParams" >
+			<param name="activityType" value="SERVICE" />
+			<param name="typicalDuration" value="00:30:00" />
+		</parameterset>
+		<parameterset type="activityParams" >
+			<param name="activityType" value="PRIVATE_BUSINESS" />
+			<param name="typicalDuration" value="01:00:00" />
+		</parameterset>
+		<parameterset type="activityParams" >
+			<param name="activityType" value="UNKNOWN" />
+			<param name="typicalDuration" value="01:00:00" />
+		</parameterset>
+		<parameterset type="activityParams" >
+			<param name="activityType" value="INFLOW" />
+			<param name="typicalDuration" value="4:00:00" />
+		</parameterset>
+		<parameterset type="activityParams" >
+			<param name="activityType" value="OUTFLOW" />
+			<param name="typicalDuration" value="4:00:00" />
+		</parameterset>
+	</module>
+
+<!--
+	<module name="planscalcroute">
+		<param name="routingRandomness" value="0"/>
+	</module>
+-->
+
+	<module name="strategy">
+		<param name="maxAgentPlanMemorySize" value="5" /> <!-- 0 means unlimited -->
+
+		<param name="ModuleProbability_1" value="0.8" />
+		<param name="Module_1" value="ChangeExpBeta" />
+
+		<param name="ModuleProbability_2" value="0.2" />
+		<param name="Module_2" value="ReRoute" />
+<!--
+		<param name="ModuleProbability_3" value="0.1" />
+		<param name="Module_3" value="TimeAllocationMutator" />
+-->
+	</module>
+
+	<module name="qsim">
+		<param name="snapshotperiod" value="00:01:00" />
+	</module>
+
+
+</config>

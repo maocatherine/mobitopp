@@ -1,0 +1,107 @@
+
+car_const   =  0.0
+foot_const  =  2.21
+pass_const  =  0.732
+bike_const  =  0.0195
+
+time        = 0.145
+cost_km     = 0.347
+
+
+foot_caravailable_true  = -1.61
+foot_caravailable_no    =  1.47
+foot_caravailable_part  =  2.36
+
+pass_caravailable_true  = -2.32
+pass_caravailable_no    =  0.254
+pass_caravailable_part  =  2.76
+
+bike_caravailable_true  = -2.18
+bike_caravailable_no    =  0.82
+bike_caravailable_part  =  1.28
+
+
+// First trip is (per definition) never heads to home location
+foot_activity_private_business  =   -0.88
+foot_activity_work              =  -0.398
+foot_activity_education         =   -0.917
+foot_activity_shopping          =  -0.619
+foot_activity_leisure           =   1.08
+foot_activity_walk              =   2.58
+foot_activity_service           =   1.37
+
+pass_activity_private_business  =   0.319
+pass_activity_work              =  -1.05
+pass_activity_education         =  -0.399
+pass_activity_shopping          =   0.122
+pass_activity_leisure           =   0.459
+pass_activity_walk              =   0.761
+pass_activity_service           =   0.522
+
+bike_activity_private_business  =   -1.24
+bike_activity_work              =   0.595
+bike_activity_education         =   -0.627
+bike_activity_shopping          =   -0.951
+bike_activity_leisure           =   0.754
+bike_activity_walk              =   1.73
+bike_activity_service           =  -0.507
+
+
+foot_weekday_workday            =   -0.0367
+
+pass_weekday_workday          =   -0.557
+
+bike_weekday_workday          =   0.169
+
+
+
+foot_hhtype_other             =   0.579
+foot_hhtype_2adults           =   0.832
+foot_hhtype_1adult            =   0.564
+foot_hhtype_kids              =   0.24
+
+pass_hhtype_other             =   0.446
+pass_hhtype_2adults           =   0.569
+pass_hhtype_1adult            =  -0.764
+pass_hhtype_kids              =   0.481
+
+bike_hhtype_other             =   -0.254
+bike_hhtype_2adults           =   0.332
+bike_hhtype_1adult            =   -0.172
+bike_hhtype_kids              =   -0.112
+
+
+foot_employment_student_tertiary  =   0.749
+foot_employment_education         =   1.61
+foot_employment_work_from41       =   -0.0981
+foot_employment_work_to40         =    0.0695
+foot_employment_notemployed       =   -0.00989
+foot_employment_retired           =   -0.102
+
+
+pass_employment_student_tertiary  =   -0.179
+pass_employment_education         =   1.75
+pass_employment_work_from41       =   -0.677
+pass_employment_work_to40         =   -0.35
+pass_employment_notemployed       =   0.133
+pass_employment_retired           =   0.0399
+
+
+bike_employment_student_tertiary  =   0.295
+bike_employment_education         =  1.87
+bike_employment_work_from41       =  -0.432
+bike_employment_work_to40         =  -0.0525
+bike_employment_notemployed       =  -0.989
+bike_employment_retired           =  -0.926
+
+
+car_distance                    =   0.834
+foot_distance                   =  -1.97
+pass_distance                   =   0.878
+bike_distance                   =   0.261
+
+
+car_shorttrip             =   -0.0224
+foot_shorttrip            =   0.231
+pass_shorttrip            =  -0.202
+bike_shorttrip            =   -0.0546

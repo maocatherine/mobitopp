@@ -1,0 +1,32 @@
+dataSource: !file
+  demandDataFolder: output/demand-data
+  matrixConfigurationFile: data/matrices/matrix-configuration.yaml
+  attractivityDataFile: data/zoneproperties/attractivities.csv
+  zonePropertiesDataFile: data/zoneproperties/zone-properties.csv
+  parkingFacilitiesDataFile: data/zoneproperties/parkingFacilities.csv
+  bikeSharingPropertiesDataFile: data/zoneproperties/bikesharing-properties.csv
+  carSharingPropertiesDataFile: data/zoneproperties/carsharing-properties.csv
+  carSharingStationsDataFile: data/zoneproperties/carsharing-stations.csv
+  carSharingFreeFloatingDataFile: data/zoneproperties/carsharing-free-floating.csv
+  #charging: unlimited
+  defaultChargingPower: data/parameters/ChargingPower.txt
+  zoneRepositoryFolder: output/zone-repository/
+days: 1
+destinationChoice:
+  repetition: data/parameters/TargetParameterRepetition.csv
+  cost: data/parameters/TargetParameterCost.txt
+modeChoice:
+  firstTrip: data/parameters/ModeSelectorParameterFirstTrip.txt
+  otherTrip: data/parameters/ModeSelectorParameterOtherTrip.txt
+fractionOfPopulation: 0.001
+#numberOfZones: 6
+resultFolder: results/simulation
+seed: 1234
+visumFile: data/leopoldshafen.net
+experimental:
+  iterations: 2
+  matsimConfig: data/matsim-accessibility-config.xml
+  facilities: facilities.xml
+  externalTrafficW: data/matrices/external/102_pkw_w.mtx
+  externalTrafficEx: data/matrices/external/104_pkw_ex.mtx
+  travelTimeMatrixFolderName: travelTime
