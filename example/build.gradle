@@ -1,5 +1,5 @@
 dependencies {
-    //implementation project(':mobitopp')
+    implementation project(':mobitopp')
     
     annotationProcessor libraries.lombok
     testAnnotationProcessor libraries.lombok
