@@ -1,0 +1,3 @@
+[submodule "mobitopp-matsim-coupling"]
+	path = mobitopp-matsim-coupling
+	url = https://github.com/maocatherine/mobitopp-matsim-coupling.git
