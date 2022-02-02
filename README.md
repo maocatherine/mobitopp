@@ -6,8 +6,9 @@
 The example project comes shipped with gradle tasks to run it directly from source. A population can be generated with the `runPopulationSynthesis` task and travel demand can be simulated using the `runSimulation` task. 
 
 ```
-./gradlew runPopulationSynthesis runSimulation
+./gradlew runPopulationSynthesis runSimulationMatsim or runMobitoppOnly
 ```
+If you are using Intellij you can execute directly from the verticle Gradle shortcut button.
 
 ### Using eclipse
 The example project contains preconfigured launch configurations to create a population and simulate the travel demand. Eclipse automatically detects them and you can run them from the toolbar as every other launch configuration.
